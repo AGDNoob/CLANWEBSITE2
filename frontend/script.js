@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // GLOBALE VARIABLEN & HILFSFUNKTIONEN
     // ======================================================
     // WICHTIG: Ersetze DEIN-USERNAME durch deinen echten PythonAnywhere Benutzernamen
-    const API_BASE_URL = 'https://DEIN-USERNAME.pythonanywhere.com';
+    const API_BASE_URL = 'https://magicdragons.vercel.app';
     let currentMemberList = [];
     let currentWarData = null;
     let cwlAllRoundsData = [];
@@ -611,4 +611,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeWarCenter();
     fetchCapitalRaids();
     fetchCWLGroup();
+
 });
