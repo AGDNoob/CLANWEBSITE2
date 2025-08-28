@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dein Clan Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js Bibliothek für Diagramme -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- Header nur für die mobile Ansicht -->
+    <header class="mobile-header">
+        <button id="mobile-nav-toggle" aria-label="Menü öffnen">☰</button>
+        <h3>Clan Dashboard</h3>
+    </header>
+
+    <div class="app-container">
+        <!-- SEITENLEISTE -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h3>Clan Dashboard</h3>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="#" class="nav-link active" data-target="page-home">🏠 Startseite</a></li>
+                <li><a href="#" class="nav-link" data-target="page-clan-info">🛡️ Clan-Infos</a></li>
+                <li><a href="#" class="nav-link" data-target="page-war-center">⚔️ Kriegszentrale</a></li>
+                <li><a href="#" class="nav-link" data-target="page-capital">🏔️ Clan-Hauptstadt</a></li>
+                <li><a href="#" class="nav-link" data-target="page-cwl">🏆 CWL-Zentrale</a></li>
+                <li><a href="#" class="nav-link" data-target="page-credits">❤️ Credits</a></li>
+            </ul>
+        </nav>
+
+        <!-- HAUPTINHALT -->
+        <main class="main-content">
+            
+            <section id="page-home" class="page active">
+                <h1>Willkommen auf dem Clan Dashboard!</h1>
+                <p>Wähle links ein Werkzeug aus, um die Live-Daten zu sehen.</p>
+                <p>Alle Daten werden direkt von der offiziellen Clash of Clans API geladen.</p>
+            </section>
+
+            <section id="page-clan-info" class="page">
+                <div id="clan-info-master-view">
+                    <header id="clan-header">
+                        <h1 id="clan-name">Lädt...</h1>
+                        <p id="clan-description">Clantag wird geladen...</p>
+                        <div id="clan-stats"></div>
+                    </header>
+                    <h2>Mitgliederliste</h2>
+                    <div id="member-list-container" class="card-container">
+                        <p>Mitglieder werden geladen...</p>
+                    </div>
+                </div>
+                <div id="player-profile-view" class="hidden">
+                    <button id="profile-back-button">&larr; Zurück zur Liste</button>
+                    <div class="profile-card-detailed">
+                        <div class="profile-header">
+                            <img id="profile-league-icon" src="" alt="Liga-Icon">
+                            <div>
+                                <h1 id="profile-player-name">Spielername</h1>
+                                <span id="profile-player-tag">#TAG</span>
+                            </div>
+                        </div>
+                        <div class="profile-stats-detailed">
+                            <div class="stat-item"><span>Level</span><span id="profile-level">0</span></div>
+                            <div class="stat-item"><span>Rolle im Clan</span><span id="profile-role">Mitglied</span></div>
+                            <div class="stat-item"><span>Rathaus-Level</span><span id="profile-th-level">0</span></div>
+                            <div class="stat-item"><span>Trophäen</span><span id="profile-trophies">0</span></div>
+                            <div class="stat-item"><span>Gespendet</span><span id="profile-donations">0</span></div>
+                            <div class="stat-item"><span>Erhalten</span><span id="profile-donations-received">0</span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="page-war-center" class="page">
+                <div id="war-master-view">
+                    <h1>Kriegszentrale</h1>
+                    <div class="dashboard-box" id="current-war-box">
+                        <h2>Aktueller Clankrieg</h2>
+                        <p id="not-in-war-message" class="hidden">Wir sind aktuell in keinem Clankrieg.</p>
+                        <div id="current-war-dashboard"></div>
+                    </div>
+                    <div class="dashboard-box accordion">
+                        <div class="accordion-header">
+                            <h2>Kriegsprotokoll</h2>
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <div id="warlog-container">
+                                <p>Kriegsprotokoll wird geladen...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="war-detail-view" class="hidden">
+                    <button id="war-back-button">&larr; Zurück zur Übersicht</button>
+                    <h1 id="war-detail-title">Kriegs-Dashboard</h1>
+                    <div class="war-tables-container">
+                        <div id="clan-war-table"></div>
+                        <div id="opponent-war-table"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="page-capital" class="page">
+                <h1>Hauptstadt-Raids</h1>
+                <div class="dashboard-box">
+                    <h2>Beuteverlauf</h2>
+                    <div class="chart-container">
+                        <canvas id="capital-loot-chart"></canvas>
+                    </div>
+                </div>
+                <h2>Letzte Raids</h2>
+                <div id="capital-raids-container" class="card-container">
+                    <p>Daten der Hauptstadt-Raids werden geladen...</p>
+                </div>
+            </section>
+
+            <section id="page-cwl" class="page">
+                <h1>CWL-Zentrale</h1>
+                <div id="cwl-content">
+                    <p id="not-in-cwl-message" class="hidden">Aktuell findet keine Clankriegsliga statt.</p>
+                    <div id="cwl-group-overview"></div>
+                    <div id="cwl-analysis-container" class="hidden">
+                        <div class="dashboard-box">
+                            <h2>Runden-Übersicht</h2>
+                            <div id="cwl-rounds-summary"></div>
+                        </div>
+                        <div class="cwl-stats-layout">
+                            <div id="cwl-mvp-box" class="dashboard-box">
+                                <h2>Bester Angreifer</h2>
+                                <div id="cwl-mvp-content"></div>
+                            </div>
+                            <div id="cwl-player-stats-box" class="dashboard-box">
+                                <h2>Spieler-Statistiken</h2>
+                                <div id="cwl-player-stats-content"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="cwl-rounds-container" class="dashboard-box hidden">
+                        <h2>Kriegstage im Detail</h2>
+                        <div id="cwl-day-selector" class="day-selector"></div>
+                        <div id="cwl-war-detail-view" class="war-tables-container"></div>
+                    </div>
+                    <div id="cwl-bonus-calculator" class="dashboard-box hidden">
+                        <h2>Interaktiver Bonus-Rechner</h2>
+                        <div id="cwl-bonus-settings" class="accordion">
+                            <div class="accordion-header">
+                                <h3>⚙️ Punktesystem anpassen</h3>
+                                <span class="accordion-icon">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="settings-grid">
+                                    <div class="settings-category">
+                                        <h4>Punkte für RH-Differenz (ELL)</h4>
+                                        <div class="setting-item"><label for="ell_rh_p2">RH+2</label><input type="number" id="ell_rh_p2" value="3"></div>
+                                        <div class="setting-item"><label for="ell_rh_p1">RH+1</label><input type="number" id="ell_rh_p1" value="2"></div>
+                                        <div class="setting-item"><label for="ell_rh_0">RH=0</label><input type="number" id="ell_rh_0" value="1"></div>
+                                        <div class="setting-item"><label for="ell_rh_m1">RH-1</label><input type="number" id="ell_rh_m1" value="0"></div>
+                                        <div class="setting-item"><label for="ell_rh_m2">RH-2</label><input type="number" id="ell_rh_m2" value="-1"></div>
+                                    </div>
+                                    <div class="settings-category">
+                                        <h4>Punkte für 3 Sterne</h4>
+                                        <div class="setting-item"><label for="atk_3s_vs_rh_p2">3⭐ vs RH+2</label><input type="number" id="atk_3s_vs_rh_p2" value="6"></div>
+                                        <div class="setting-item"><label for="atk_3s_vs_rh_0">3⭐ vs RH=0</label><input type="number" id="atk_3s_vs_rh_0" value="4"></div>
+                                        <div class="setting-item"><label for="atk_3s_vs_rh_m2">3⭐ vs RH-2</label><input type="number" id="atk_3s_vs_rh_m2" value="2"></div>
+                                    </div>
+                                    <div class="settings-category">
+                                        <h4>Punkte für 2 Sterne</h4>
+                                        <div class="setting-item"><label for="atk_2s_90">2⭐ (90%+)</label><input type="number" id="atk_2s_90" value="4"></div>
+                                        <div class="setting-item"><label for="atk_2s_80_89">2⭐ (80-89%)</label><input type="number" id="atk_2s_80_89" value="3"></div>
+                                        <div class="setting-item"><label for="atk_2s_50_79">2⭐ (50-79%)</label><input type="number" id="atk_2s_50_79" value="2"></div>
+                                    </div>
+                                    <div class="settings-category">
+                                        <h4>Punkte für 1 Stern</h4>
+                                        <div class="setting-item"><label for="atk_1s_90_99">1⭐ (90-99%)</label><input type="number" id="atk_1s_90_99" value="2"></div>
+                                        <div class="setting-item"><label for="atk_1s_50_89">1⭐ (50-89%)</label><input type="number" id="atk_1s_50_89" value="1"></div>
+                                    </div>
+                                    <div class="settings-category">
+                                        <h4>Bonuspunkte</h4>
+                                        <div class="setting-item"><label for="bonus_aktiv">Aktivität</label><input type="number" id="bonus_aktiv" value="1"></div>
+                                        <div class="setting-item"><label for="bonus_100">100% Bonus</label><input type="number" id="bonus_100" value="1"></div>
+                                        <div class="setting-item"><label for="bonus_mut">Mutbonus (RH+3)</label><input type="number" id="bonus_mut" value="1"></div>
+                                        <div class="setting-item"><label for="bonus_mut_extra">Extra Mut (30-49%)</label><input type="number" id="bonus_mut_extra" value="2"></div>
+                                        <div class="setting-item"><label for="bonus_alle_7">Alle Angriffe</label><input type="number" id="bonus_alle_7" value="2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="calculate-bonus-button" class="cta-button">Punkte berechnen!</button>
+                        <div id="bonus-results-container" class="hidden">
+                            <h3>🏆 Finale Bonus-Rangliste</h3>
+                            <div class="bonus-results-layout">
+                                <div id="bonus-results-table"></div>
+                                <div class="chart-container bonus-chart">
+                                    <canvas id="bonus-results-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="page-credits" class="page">
+                <div class="credits-container">
+                    <h1>Credits</h1>
+                    <p class="made-by">Code & Website von AGDNoob <3</p>
+                    <p>Dieses riesige Projekt wurde mit Python, Flask, JavaScript und der offiziellen Clash of Clans API umgesetzt.</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+    
+    <!-- Overlay für den Hintergrund, wenn das Menü offen ist -->
+    <div id="overlay" class="hidden"></div>
+
+</body>
+</html>
