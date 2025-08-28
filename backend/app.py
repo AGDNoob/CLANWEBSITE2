@@ -5,6 +5,9 @@ from flask_cors import CORS
 
 # --- Konfiguration ---
 # Der API-Key wird jetzt sicher aus den Umgebungsvariablen des Servers geladen
+# WICHTIG: Für lokales Testen kannst du die nächste Zeile wieder einkommentieren
+# und deinen Key eintragen. Für den Live-Server muss sie auskommentiert bleiben!
+# COC_API_KEY = "DEIN_API_KEY_HIER" 
 COC_API_KEY = os.environ.get('COC_API_KEY')
 CLAN_TAG = "#2GJY8YPUP"
 
@@ -14,13 +17,16 @@ CORS(app)
 
 # --- Hilfsfunktion für CLAN-API-Anfragen ---
 def make_clan_api_request(endpoint):
-    """Macht eine Anfrage an einen Clan-spezifischen Endpunkt der CoC API."""
+    """Macht eine Anfrage an einen Clan-spezifischen Endpunkt der CoC API über den Proxy."""
     if not COC_API_KEY:
         return jsonify({"error": "API Key nicht auf dem Server konfiguriert."}), 500
         
     formatted_clan_tag = CLAN_TAG.replace('#', '%23')
-    coc_api_url = f"https://api.clashofclans.com/v1/clans/{formatted_clan_tag}{endpoint}"
+    # KORREKTUR: Die URL wurde auf den richtigen CoC-Proxy geändert
+    coc_api_url = f"https://cocproxy.royaleapi.dev/v1/clans/{formatted_clan_tag}{endpoint}"
+    
     headers = { 'Authorization': f'Bearer {COC_API_KEY}' }
+    print(f"Sende Anfrage an: {coc_api_url}")
     
     try:
         response = requests.get(coc_api_url, headers=headers)
@@ -57,14 +63,17 @@ def get_clan_cwl_group():
 
 @app.route('/api/cwl/war/<war_tag>')
 def get_cwl_war_info(war_tag):
-    """Holt die Daten für einen spezifischen CWL-Krieg anhand des War-Tags."""
+    """Holt die Daten für einen spezifischen CWL-Krieg anhand des War-Tags über den Proxy."""
     if not COC_API_KEY:
         return jsonify({"error": "API Key nicht auf dem Server konfiguriert."}), 500
         
     formatted_war_tag = war_tag.replace('#', '%23')
-    coc_api_url = f"https://api.clashofclans.com/v1/clanwarleagues/wars/{formatted_war_tag}"
-    headers = { 'Authorization': f'Bearer {COC_API_KEY}' }
+    # KORREKTUR: Die URL wurde auf den richtigen CoC-Proxy geändert
+    coc_api_url = f"https://cocproxy.royaleapi.dev/v1/clanwarleagues/wars/{formatted_war_tag}"
     
+    headers = { 'Authorization': f'Bearer {COC_API_KEY}' }
+    print(f"Sende Anfrage an: {coc_api_url}")
+
     try:
         response = requests.get(coc_api_url, headers=headers)
         if response.status_code == 200:
@@ -74,3 +83,7 @@ def get_cwl_war_info(war_tag):
             return jsonify(error_message), response.status_code
     except requests.exceptions.RequestException as e:
         return jsonify({ "error": "Netzwerkfehler", "details": str(e) }), 500
+
+# --- Startpunkt ---
+if __name__ == '__main__':
+    app.run(debug=True)
