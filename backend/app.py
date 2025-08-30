@@ -1,89 +1,76 @@
 import os
 from flask import Flask, jsonify
-import requests
 from flask_cors import CORS
+import requests
 
 # --- Konfiguration ---
-# Der API-Key wird jetzt sicher aus den Umgebungsvariablen des Servers geladen
-# WICHTIG: Für lokales Testen kannst du die nächste Zeile wieder einkommentieren
-# und deinen Key eintragen. Für den Live-Server muss sie auskommentiert bleiben!
+# Für lokales Testen (hier deinen Key eintragen, wenn du lokal testest):
 # COC_API_KEY = "DEIN_API_KEY_HIER" 
+
+# Für den Live-Server (Vercel etc.):
 COC_API_KEY = os.environ.get('COC_API_KEY')
 CLAN_TAG = "#2GJY8YPUP"
+# Wir benutzen den offiziellen Proxy von RoyaleAPI, wie du richtig angemerkt hast.
+# Das löst das Problem, dass wir eine feste IP-Adresse für die API bräuchten.
+PROXY_BASE_URL = "https://cocproxy.royaleapi.dev/v1"
 
 # --- Flask-App initialisieren ---
 app = Flask(__name__)
 CORS(app)
 
-# --- Hilfsfunktion für CLAN-API-Anfragen ---
-def make_clan_api_request(endpoint):
-    """Macht eine Anfrage an einen Clan-spezifischen Endpunkt der CoC API über den Proxy."""
-    if not COC_API_KEY:
-        return jsonify({"error": "API Key nicht auf dem Server konfiguriert."}), 500
-        
-    formatted_clan_tag = CLAN_TAG.replace('#', '%23')
-    # KORREKTUR: Die URL wurde auf den richtigen CoC-Proxy geändert
-    coc_api_url = f"https://cocproxy.royaleapi.dev/v1/clans/{formatted_clan_tag}{endpoint}"
+# --- Hilfsfunktion für API-Anfragen ---
+def make_coc_api_request(endpoint):
+    """Macht eine Anfrage an einen bestimmten Endpunkt der CoC API über den Proxy."""
+    # Der Proxy leitet unsere Anfrage mit einem eigenen, festen IP-Pool weiter.
+    # Wir müssen nur unseren eigenen API-Key zur Authentifizierung mitschicken.
+    url = f"{PROXY_BASE_URL}{endpoint}"
+    headers = {'Authorization': f'Bearer {COC_API_KEY}'}
     
-    headers = { 'Authorization': f'Bearer {COC_API_KEY}' }
-    print(f"Sende Anfrage an: {coc_api_url}")
-    
+    print(f"Sende Anfrage an: {url}")
+
     try:
-        response = requests.get(coc_api_url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         if response.status_code == 200:
             return jsonify(response.json()), 200
         else:
-            if response.status_code == 404:
-                 return jsonify({"reason": "notFound"}), 404
-            error_message = { "error": "API Fehler", "status_code": response.status_code, "response_text": response.text }
-            return jsonify(error_message), response.status_code
+            # Gib die Antwort der API direkt weiter, damit das Frontend den Fehler kennt
+            return response.text, response.status_code
     except requests.exceptions.RequestException as e:
-        return jsonify({ "error": "Netzwerkfehler", "details": str(e) }), 500
+        network_error = {"error": "Ein Netzwerkfehler ist aufgetreten.", "details": str(e)}
+        return jsonify(network_error), 500
 
 # --- API-Routen ---
 @app.route('/api/clan/info')
 def get_clan_info():
-    return make_clan_api_request('')
+    return make_coc_api_request(f"/clans/{CLAN_TAG.replace('#', '%23')}")
 
 @app.route('/api/clan/warlog')
 def get_clan_warlog():
-    return make_clan_api_request('/warlog')
+    return make_coc_api_request(f"/clans/{CLAN_TAG.replace('#', '%23')}/warlog")
 
 @app.route('/api/clan/currentwar')
 def get_clan_currentwar():
-    return make_clan_api_request('/currentwar')
+    return make_coc_api_request(f"/clans/{CLAN_TAG.replace('#', '%23')}/currentwar")
 
 @app.route('/api/clan/capitalraidseasons')
 def get_clan_capitalraids():
-    return make_clan_api_request('/capitalraidseasons')
+    return make_coc_api_request(f"/clans/{CLAN_TAG.replace('#', '%23')}/capitalraidseasons")
 
 @app.route('/api/clan/cwl')
-def get_clan_cwl_group():
-    return make_clan_api_request('/currentwar/leaguegroup')
+def get_cwl_group():
+    return make_coc_api_request(f"/clans/{CLAN_TAG.replace('#', '%23')}/currentwar/leaguegroup")
 
-@app.route('/api/cwl/war/<war_tag>')
-def get_cwl_war_info(war_tag):
-    """Holt die Daten für einen spezifischen CWL-Krieg anhand des War-Tags über den Proxy."""
-    if not COC_API_KEY:
-        return jsonify({"error": "API Key nicht auf dem Server konfiguriert."}), 500
-        
-    formatted_war_tag = war_tag.replace('#', '%23')
-    # KORREKTUR: Die URL wurde auf den richtigen CoC-Proxy geändert
-    coc_api_url = f"https://cocproxy.royaleapi.dev/v1/clanwarleagues/wars/{formatted_war_tag}"
-    
-    headers = { 'Authorization': f'Bearer {COC_API_KEY}' }
-    print(f"Sende Anfrage an: {coc_api_url}")
+@app.route('/api/clan/cwl/war/<war_tag>')
+def get_cwl_war(war_tag):
+    return make_coc_api_request(f"/clanwarleagues/wars/{war_tag.replace('#', '%23')}")
 
-    try:
-        response = requests.get(coc_api_url, headers=headers)
-        if response.status_code == 200:
-            return jsonify(response.json()), 200
-        else:
-            error_message = { "error": "API Fehler", "status_code": response.status_code, "response_text": response.text }
-            return jsonify(error_message), response.status_code
-    except requests.exceptions.RequestException as e:
-        return jsonify({ "error": "Netzwerkfehler", "details": str(e) }), 500
+# +++ Route für den Labor-Spion (KORRIGIERT) +++
+@app.route('/api/player/<player_tag>')
+def get_player_info(player_tag):
+    """Ruft detaillierte Informationen für einen einzelnen Spieler ab."""
+    # KORREKTUR: Wir fügen das %23 manuell hinzu, da der Tag vom Frontend ohne # ankommt.
+    return make_coc_api_request(f"/players/%23{player_tag}")
 
-# --- Startpunkt ---
+# --- Startpunkt für lokales Testen ---
 if __name__ == '__main__':
     app.run(debug=True)
