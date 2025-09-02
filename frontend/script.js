@@ -296,52 +296,51 @@ async function fetchCWLGroup() {
     }
 
     // Zusammengelegte, robuste Ladefunktion für Helden & Tiere
-    async function fetchPlayerDataForLab() {
-        const loadingContainer = document.getElementById('lab-loading-state');
-        const contentContainer = document.getElementById('lab-content-container');
-        if (!loadingContainer || !contentContainer) return;
+   async function fetchPlayerDataForLab() {
+    const loadingContainer = document.getElementById('lab-loading-state');
+    const contentContainer = document.getElementById('lab-content-container');
+    if (!loadingContainer || !contentContainer) return;
 
-        loadingContainer.classList.remove('hidden');
-        contentContainer.classList.add('hidden');
-        labDataLoaded = true;
+    loadingContainer.classList.remove('hidden');
+    contentContainer.classList.add('hidden');
+    labDataLoaded = true;
 
-        let membersToFetch = [...currentMemberList];
-        if (membersToFetch.length === 0) {
-            const success = await fetchClanInfo();
-            if (success) {
-                membersToFetch = [...currentMemberList];
-            }
-        }
-
-        if (membersToFetch.length === 0) {
-            loadingContainer.classList.remove('hidden');
+    // Wir brauchen die Mitgliederliste nur, um die Spieler-Tags zu bekommen
+    if (currentMemberList.length === 0) {
+        const success = await fetchClanInfo();
+        if (!success) {
             loadingContainer.innerHTML = '<p class="error-message">Die Clan-Mitgliederliste konnte nicht geladen werden. <button id="retry-lab">Erneut versuchen</button></p>';
             document.getElementById('retry-lab').addEventListener('click', () => { labDataLoaded = false; fetchPlayerDataForLab(); });
             return;
         }
-
-        try {
-            loadingContainer.innerHTML = '<div class="spinner"></div><p>Lade Spielerdaten...</p>';
-            const playerPromises = membersToFetch.map(member =>
-                fetch(`${API_BASE_URL}/api/player/${member.tag.replace('#', '')}`).then(res => res.ok ? res.json() : Promise.reject(`Fehler bei ${member.name}: ${res.statusText}`))
-            );
-            
-            const allPlayersData = await Promise.all(playerPromises);
-            
-            // Rendere beide Tabellen mit den gleichen Daten
-            renderHeroTable(allPlayersData);
-            renderPetTable(allPlayersData);
-            
-            loadingContainer.classList.add('hidden');
-            contentContainer.classList.remove('hidden');
-
-        } catch (error) {
-            console.error("Fehler beim Abrufen der Spielerdaten für das Labor:", error);
-            loadingContainer.classList.remove('hidden');
-            loadingContainer.innerHTML = `<p class="error-message">Einige Spielerdaten konnten nicht geladen werden. <button id="retry-lab">Erneut versuchen</button></p>`;
-            document.getElementById('retry-lab').addEventListener('click', () => { labDataLoaded = false; fetchPlayerDataForLab(); });
-        }
     }
+
+    try {
+        loadingContainer.innerHTML = '<div class="spinner"></div><p>Lade detaillierte Spielerdaten...</p>';
+        
+        // Hier holen wir die VOLLSTÄNDIGEN Daten für jeden Spieler
+        const playerPromises = currentMemberList.map(member =>
+            fetch(`${API_BASE_URL}/api/player/${member.tag.replace('#', '')}`)
+                .then(res => res.ok ? res.json() : Promise.reject(`Fehler bei ${member.name}: ${res.statusText}`))
+        );
+        
+        // HIER WAR DER FEHLER VERSTECKT. 'allPlayersData' ist die richtige Variable mit allen Details.
+        const allPlayersData = await Promise.all(playerPromises);
+        
+        // Wir übergeben die detaillierten Daten an BEIDE Tabellen-Funktionen
+        renderHeroTable(allPlayersData);
+        renderPetTable(allPlayersData); // KORRIGIERT
+        
+        loadingContainer.classList.add('hidden');
+        contentContainer.classList.remove('hidden');
+
+    } catch (error) {
+        console.error("Fehler beim Abrufen der Spielerdaten für das Labor:", error);
+        loadingContainer.classList.remove('hidden');
+        loadingContainer.innerHTML = `<p class="error-message">Einige Spielerdaten konnten nicht geladen werden. <button id="retry-lab">Erneut versuchen</button></p>`;
+        document.getElementById('retry-lab').addEventListener('click', () => { labDataLoaded = false; fetchPlayerDataForLab(); });
+    }
+}
 
     // ======================================================
     // RENDER-FUNKTIONEN
@@ -943,25 +942,20 @@ function renderCWLWarDetails(warData) {
     const container = document.getElementById('pet-table-container');
     if (!container) return;
 
-    // Die komplette Liste aller Haustiere im Spiel bleibt gleich.
     const PET_ORDER = ['L.A.S.S.I', 'Electro Owl', 'Mighty Yak', 'Unicorn', 'Frosty', 'Diggy', 'Poison Lizard', 'Phoenix', 'Spirit Fox', 'Angry Jelly'];
 
     let tableHtml = `<table class="lab-table"><thead><tr><th>Spieler</th>`;
     PET_ORDER.forEach(pet => tableHtml += `<th>${pet}</th>`);
     tableHtml += `</tr></thead><tbody>`;
 
-    // Wir sortieren die Spieler weiterhin nach Rathaus-Level.
     allPlayersData.sort((a, b) => b.townHallLevel - a.townHallLevel);
 
-    // JETZT KOMMT DIE ÄNDERUNG: Wir gehen JEDEN Spieler durch, ohne Filter!
     allPlayersData.forEach(player => {
-        // Der alte Filter (if player.townHallLevel < 13) wurde entfernt!
-        if (!player) return; // Nur eine grundlegende Sicherheitsprüfung bleibt.
+        if (!player) return; // Nur eine kleine Sicherheitsprüfung
         
         tableHtml += `<tr><td><div class="player-cell">${player.name}<span class="player-th-sublabel">RH${player.townHallLevel}</span></div></td>`;
         
-        // Erstellt eine Map der Haustiere des Spielers (oder eine leere Map, falls keine vorhanden sind).
-        // Diese Zeile ist sicher, auch wenn "player.pets" nicht existiert.
+        // Diese Zeile funktioniert jetzt, weil 'player.pets' in den Daten enthalten ist.
         const playerPets = new Map(player.pets ? player.pets.map(pet => [pet.name, pet]) : []);
 
         PET_ORDER.forEach(petName => {
@@ -970,8 +964,8 @@ function renderCWLWarDetails(warData) {
                 const isMaxed = pet.level === pet.maxLevel;
                 tableHtml += `<td class="${isMaxed ? 'is-maxed' : ''}">${pet.level}</td>`;
             } else {
-                // Zeigt eine '0' an, wenn der Spieler das Pet nicht hat.
-                tableHtml += `<td>0</td>`; 
+                // Zeigt 0 für Spieler, die das Pet nicht haben oder für die keine Daten da sind.
+                tableHtml += `<td>0</td>`;
             }
         });
         tableHtml += `</tr>`;
@@ -984,6 +978,7 @@ function renderCWLWarDetails(warData) {
     fetchAllData(); 
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 });
+
 
 
 
