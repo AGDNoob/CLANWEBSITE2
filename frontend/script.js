@@ -210,41 +210,78 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchWarlog();
     }
 
-    async function fetchCWLGroup() {
-        const noCwlMessage = document.getElementById('no-cwl-message');
-        const cwlContent = document.getElementById('cwl-content');
-        if(!noCwlMessage || !cwlContent) return;
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/clan/cwl`);
-            if (response.status === 404) {
-                noCwlMessage.classList.remove('hidden');
-                cwlContent.classList.add('hidden');
-            } else if (response.ok) {
-                const groupData = await response.json();
-                currentCWLData = groupData;
-                noCwlMessage.classList.add('hidden');
-                cwlContent.classList.remove('hidden');
-                renderCWLGroup(groupData);
-                renderCWLWarSelection(groupData.rounds);
-                initializeBonusCalculator(groupData.rounds);
-                const warPromises = groupData.rounds
-                    .filter(round => round.warTags.some(tag => tag !== '#0'))
-                    .map(round => fetchCWLWarDataByTag(round.warTags.find(tag => tag !== '#0')));
+async function fetchCWLGroup() {
+    const noCwlMessage = document.getElementById('no-cwl-message');
+    const cwlContent = document.getElementById('cwl-content');
+    if (!noCwlMessage || !cwlContent) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/clan/cwl`);
+        
+        // Wenn der Status 404 ist (API sagt "keine CWL"), zeige die Nachricht und brich ab.
+        if (response.status === 404) {
+            noCwlMessage.classList.remove('hidden');
+            cwlContent.classList.add('hidden');
+            return; // Wichtig: hier beenden
+        }
+        
+        // Wenn die Antwort nicht OK ist, aber auch nicht 404, werfe einen Fehler.
+        if (!response.ok) {
+            throw new Error(`Serverfehler: ${response.status}`);
+        }
+
+        const groupData = await response.json();
+        console.log("CWL Group Data empfangen:", groupData); // Hilfreiches Logging
+
+        // Verstecke die "Keine CWL"-Nachricht und zeige den Haupt-Container an.
+        noCwlMessage.classList.add('hidden');
+        cwlContent.classList.remove('hidden');
+        
+        // 1. Rendere die Gruppen-Tabelle, die sollte immer da sein.
+        // Die Funktion renderCWLGroup haben wir schon sicher gemacht.
+        if (groupData && Array.isArray(groupData.clans)) {
+            renderCWLGroup(groupData);
+        }
+
+        // 2. Prüfe, ob es überhaupt Runden-Daten gibt.
+        if (groupData && Array.isArray(groupData.rounds) && groupData.rounds.length > 0) {
+            // Initialisiere den Bonus-Rechner
+            initializeBonusCalculator(groupData.rounds);
+            
+            // Finde alle gültigen Kriegstags (die nicht '#0' sind)
+            const validWarTags = groupData.rounds
+                .map(round => round.warTags.find(tag => tag !== '#0'))
+                .filter(tag => tag); // Entfernt 'undefined' Ergebnisse
+
+            // 3. Nur wenn es tatsächlich Kriege gibt, zeige die Auswahl an und lade die Kriegsdaten.
+            if (validWarTags.length > 0) {
+                renderCWLWarSelection(groupData.rounds); // Zeigt die "Tag 1, Tag 2..." Buttons an
+
+                const warPromises = validWarTags.map(tag => fetchCWLWarDataByTag(tag));
                 const cwlRoundsData = await Promise.all(warPromises);
                 const validRounds = cwlRoundsData.filter(r => r !== null);
-                if(validRounds.length > 0){
+
+                if (validRounds.length > 0) {
+                    console.log("Gültige CWL-Runden für Statistiken:", validRounds);
                     const playerStats = calculateCWLPlayerStats(validRounds);
                     renderCWLStatistics(playerStats.stats, playerStats.bestAttacker);
                     renderCWLRoundOverview(validRounds);
+                } else {
+                    console.log("Keine gültigen Kriegsdaten für Statistiken gefunden, obwohl Tags vorhanden waren.");
                 }
-            } else { throw new Error(`Serverfehler: ${response.status}`); }
-        } catch (error) {
-            console.error("Fehler beim Abrufen der CWL-Daten:", error);
-            noCwlMessage.textContent = "CWL-Daten konnten nicht geladen werden.";
-            noCwlMessage.classList.remove('hidden');
-            cwlContent.classList.add('hidden');
+            } else {
+                 console.log("CWL ist aktiv, aber noch keine Kriege zum Abrufen verfügbar.");
+                 // Hier könntest du eine Nachricht anzeigen wie "Warte auf den Start des ersten Krieges..."
+            }
         }
+
+    } catch (error) {
+        console.error("Ein kritischer Fehler ist beim Abrufen der CWL-Daten aufgetreten:", error);
+        noCwlMessage.textContent = "CWL-Daten konnten nicht geladen werden. Fehler in der Konsole prüfen.";
+        noCwlMessage.classList.remove('hidden');
+        cwlContent.classList.add('hidden');
     }
+}
 
     async function fetchCWLWarDataByTag(warTag) {
         if (!warTag || warTag === '#0') return null;
@@ -927,5 +964,6 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAllData(); 
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 });
+
 
 
