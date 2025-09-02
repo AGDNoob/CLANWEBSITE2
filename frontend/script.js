@@ -939,47 +939,50 @@ function renderCWLWarDetails(warData) {
         container.innerHTML = tableHtml;
     }
 
-    function renderPetTable(allPlayersData) {
-        const container = document.getElementById('pet-table-container');
-        if (!container) return;
-    
-        const PET_ORDER = ['L.A.S.S.I', 'Electro Owl', 'Mighty Yak', 'Unicorn', 'Frosty', 'Diggy', 'Poison Lizard', 'Phoenix', 'Spirit Fox', 'Angry Jelly'];
-    
-        let tableHtml = `<table class="lab-table"><thead><tr><th>Spieler</th>`;
-        PET_ORDER.forEach(pet => tableHtml += `<th>${pet}</th>`);
-        tableHtml += `</tr></thead><tbody>`;
-    
-        allPlayersData.sort((a, b) => b.townHallLevel - a.townHallLevel);
-    
-        allPlayersData.forEach(player => {
-            // Nur Spieler anzeigen, die das Pet House freigeschaltet haben könnten (RH14+)
-            if (!player || !player.pets || player.townHallLevel < 14) return;
-            
-            tableHtml += `<tr><td><div class="player-cell">${player.name}<span class="player-th-sublabel">RH${player.townHallLevel}</span></div></td>`;
-            const playerPets = new Map(player.pets.map(pet => [pet.name, pet]));
-    
-            PET_ORDER.forEach(petName => {
-                const pet = playerPets.get(petName);
-                if (pet) {
-                    const isMaxed = pet.level === pet.maxLevel;
-                    tableHtml += `<td class="${isMaxed ? 'is-maxed' : ''}">${pet.level}</td>`;
-                } else {
-                    tableHtml += `<td>-</td>`;
-                }
-            });
-            tableHtml += `</tr>`;
-        });
-    
-        tableHtml += `</tbody></table>`;
-        container.innerHTML = tableHtml;
-    }
+   function renderPetTable(allPlayersData) {
+    const container = document.getElementById('pet-table-container');
+    if (!container) return;
 
-    // ======================================================
+    // Komplette Liste aller Haustiere im Spiel
+    const PET_ORDER = ['L.A.S.S.I', 'Electro Owl', 'Mighty Yak', 'Unicorn', 'Frosty', 'Diggy', 'Poison Lizard', 'Phoenix', 'Spirit Fox', 'Angry Jelly'];
+
+    let tableHtml = `<table class="lab-table"><thead><tr><th>Spieler</th>`;
+    PET_ORDER.forEach(pet => tableHtml += `<th>${pet}</th>`);
+    tableHtml += `</tr></thead><tbody>`;
+
+    allPlayersData.sort((a, b) => b.townHallLevel - a.townHallLevel);
+
+    allPlayersData.forEach(player => {
+        // NEU & BESSER: Wir zeigen alle Spieler ab RH13 an, da sie bald relevant für Pets werden.
+        if (!player || player.townHallLevel < 13) return; 
+        
+        tableHtml += `<tr><td><div class="player-cell">${player.name}<span class="player-th-sublabel">RH${player.townHallLevel}</span></div></td>`;
+        
+        // Erstelle eine Map der Haustiere des Spielers für einfachen Zugriff
+        const playerPets = new Map(player.pets ? player.pets.map(pet => [pet.name, pet]) : []);
+
+        PET_ORDER.forEach(petName => {
+            const pet = playerPets.get(petName);
+            if (pet) {
+                const isMaxed = pet.level === pet.maxLevel;
+                tableHtml += `<td class="${isMaxed ? 'is-maxed' : ''}">${pet.level}</td>`;
+            } else {
+                // Zeigt eine 0 an, wenn der Spieler das Pet noch nicht freigeschaltet hat
+                tableHtml += `<td>0</td>`; 
+            }
+        });
+        tableHtml += `</tr>`;
+    });
+
+    tableHtml += `</tbody></table>`;
+    container.innerHTML = tableHtml;
+}
+
     // STARTPUNKT DER ANWENDUNG
-    // ======================================================
     fetchAllData(); 
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 });
+
 
 
 
