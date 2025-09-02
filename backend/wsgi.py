@@ -1,6 +1,9 @@
-# Dieser Import sorgt dafür, dass die App gefunden wird.
-from app import app
+import sys
 
-# Diese Zeile ist wichtig, damit die App korrekt gestartet werden kann.
-if __name__ == "__main__":
-    app.run()
+# Pfad zu deinem Backend-Ordner
+path = '/home/DEINUSERNAME/CLANWEBSITE2/backend'
+if path not in sys.path:
+    sys.path.insert(0, path)
+
+# Importiere deine (jetzt temporäre) app
+from app import app as application
