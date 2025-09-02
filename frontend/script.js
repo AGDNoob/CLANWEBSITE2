@@ -661,27 +661,41 @@ function renderCWLWarDetails(warData) {
 
     container.innerHTML = `<div class="cwl-war-header"><h2>${translatedState}</h2></div><div class="detailed-war-clans">${ourClanHtml}${opponentClanHtml}</div>`;
 }
-    function calculateCWLPlayerStats(cwlRounds) {
-        const playerStats = {};
-        cwlRounds.forEach(round => {
-            if (!round || !round.clan || !round.clan.members) return;
-            round.clan.members.forEach(member => {
-                if (!playerStats[member.tag]) {
-                    playerStats[member.tag] = { name: member.name, attacks: 0, stars: 0, destruction: 0 };
-                }
-                if (member.attacks) {
-                    playerStats[member.tag].attacks += member.attacks.length;
-                    member.attacks.forEach(attack => {
-                        playerStats[member.tag].stars += attack.stars;
-                        playerStats[member.tag].destruction += attack.destructionPercentage;
-                    });
-                }
-            });
+   function calculateCWLPlayerStats(cwlRounds) {
+    const playerStats = {};
+    
+    // NEU: Wir loggen die Daten, die wir zur Verarbeitung bekommen
+    console.log("Verarbeite folgende Kriegsdaten für Statistiken:", cwlRounds);
+
+    cwlRounds.forEach((round, index) => {
+        // Sicherheitscheck: Hat diese Runde überhaupt Mitgliederdaten?
+        if (!round || !round.clan || !Array.isArray(round.clan.members) || round.clan.members.length === 0) {
+            console.warn(`Kriegstag ${index + 1} enthält keine Mitgliederdaten. Überspringe...`);
+            return; // Gehe zum nächsten Kriegstag
+        }
+
+        round.clan.members.forEach(member => {
+            if (!playerStats[member.tag]) {
+                playerStats[member.tag] = { name: member.name, attacks: 0, stars: 0, destruction: 0 };
+            }
+            if (member.attacks) {
+                playerStats[member.tag].attacks += member.attacks.length;
+                member.attacks.forEach(attack => {
+                    playerStats[member.tag].stars += attack.stars;
+                    playerStats[member.tag].destruction += attack.destructionPercentage;
+                });
+            }
         });
-        const statsArray = Object.values(playerStats).sort((a, b) => b.stars - a.stars || (b.destruction / b.attacks) - (a.destruction / a.attacks));
-        const bestAttacker = statsArray.length > 0 ? statsArray[0] : null;
-        return { stats: statsArray, bestAttacker };
-    }
+    });
+
+    const statsArray = Object.values(playerStats).sort((a, b) => b.stars - a.stars || (b.destruction / b.attacks) - (a.destruction / a.attacks));
+    const bestAttacker = statsArray.length > 0 ? statsArray[0] : null;
+
+    // NEU: Wir loggen das Ergebnis der Berechnung
+    console.log("Ergebnis der Statistik-Berechnung:", { stats: statsArray, bestAttacker });
+    
+    return { stats: statsArray, bestAttacker };
+}
 
     function renderCWLStatistics(playerStats, bestAttacker) {
         const statsContainer = document.getElementById('cwl-player-stats-body');
@@ -987,6 +1001,7 @@ function renderCWLWarDetails(warData) {
     fetchAllData(); 
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 });
+
 
 
 
