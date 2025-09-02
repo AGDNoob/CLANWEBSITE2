@@ -576,30 +576,48 @@ async function fetchCWLGroup() {
     }
     
     function renderCWLWarDetails(warData) {
-        const container = document.getElementById('cwl-war-detail-content');
-        if (!container) return;
-        const translatedState = warStateTranslations[warData.state] || warData.state;
-        let ourClanHtml = '<h3>Unser Clan</h3>';
-        let opponentClanHtml = `<h3>Gegner: ${warData.opponent.name}</h3>`;
-    
+    const container = document.getElementById('cwl-war-detail-content');
+    if (!container) return;
+
+    // NEU & SICHER: Überprüfe, ob die Kriegsdaten und der Gegner überhaupt existieren.
+    if (!warData || !warData.clan || !warData.opponent) {
+        container.innerHTML = `<p class="error-message">Die Daten für diesen Kriegstag sind noch nicht vollständig verfügbar. Bitte versuche es später noch einmal.</p>`;
+        return;
+    }
+
+    const translatedState = warStateTranslations[warData.state] || warData.state;
+    let ourClanHtml = '<h3>Unser Clan</h3>';
+    // Wir wissen jetzt, dass warData.opponent existiert, also ist das hier sicher.
+    let opponentClanHtml = `<h3>Gegner: ${warData.opponent.name}</h3>`;
+
+    // Prüfe, ob die Mitgliederliste existiert
+    if (Array.isArray(warData.clan.members)) {
         [...warData.clan.members].sort((a, b) => a.mapPosition - b.mapPosition).forEach(member => {
             let attacksHtml = '<div class="attack-info">Kein Angriff</div>';
-            if (member.attacks) {
+            // Prüfe auf Angriffe UND ob die Gegner-Mitgliederliste existiert
+            if (member.attacks && Array.isArray(warData.opponent.members)) {
                 attacksHtml = member.attacks.map(attack => {
                     const defender = warData.opponent.members.find(def => def.tag === attack.defenderTag);
-                    return `<div class="attack-info"><span>⚔️ vs ${defender.mapPosition}. ${defender.name}</span><span class="attack-result">${attack.stars}⭐ ${attack.destructionPercentage}%</span></div>`;
+                    // Zeige den Angriff nur an, wenn der Verteidiger gefunden wurde
+                    if (defender) {
+                       return `<div class="attack-info"><span>⚔️ vs ${defender.mapPosition}. ${defender.name}</span><span class="attack-result">${attack.stars}⭐ ${attack.destructionPercentage}%</span></div>`;
+                    }
+                    return '';
                 }).join('');
             }
-            ourClanHtml += `<div class="war-player-card"><div class="war-player-header"><span class="player-map-pos">${member.mapPosition}.</span><span class="player-name">${member.name}</span><span class="player-th">RH${member.townhallLevel}</span></div><div class="attacks-container">${attacksHtml}</div></div>`;
+            ourClanHtml += `<div class="war-player-card"><div class="war-player-header"><span class="player-map-pos">${member.mapPosition}.</span><span class="player-name">${member.name}</span><span class="player-th">RH${member.townhallLevel}</span></div><div class="attacks-container">${attacksHtml || '<div class="attack-info">Kein Angriff</div>'}</div></div>`;
         });
-    
+    }
+
+    // Prüfe, ob die Gegner-Mitgliederliste existiert
+    if (Array.isArray(warData.opponent.members)) {
         [...warData.opponent.members].sort((a, b) => a.mapPosition - b.mapPosition).forEach(member => {
              opponentClanHtml += `<div class="war-player-card opponent"><div class="war-player-header"><span class="player-map-pos">${member.mapPosition}.</span><span class="player-name">${member.name}</span><span class="player-th">RH${member.townhallLevel}</span></div></div>`;
         });
-    
-        container.innerHTML = `<div class="cwl-war-header"><h2>${translatedState}</h2></div><div class="detailed-war-clans">${ourClanHtml}${opponentClanHtml}</div>`;
     }
 
+    container.innerHTML = `<div class="cwl-war-header"><h2>${translatedState}</h2></div><div class="detailed-war-clans">${ourClanHtml}${opponentClanHtml}</div>`;
+}
     function calculateCWLPlayerStats(cwlRounds) {
         const playerStats = {};
         cwlRounds.forEach(round => {
@@ -964,6 +982,7 @@ async function fetchCWLGroup() {
     fetchAllData(); 
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 });
+
 
 
 
