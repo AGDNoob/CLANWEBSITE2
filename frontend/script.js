@@ -1001,21 +1001,3 @@ function renderCWLWarDetails(warData) {
     fetchAllData(); 
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
