@@ -458,7 +458,9 @@ document.addEventListener('DOMContentLoaded', () => {
         ourContainer.innerHTML = '<h3>Unser Clan</h3>';
         opponentContainer.innerHTML = `<h3>Gegner: ${war.opponent.name}</h3>`;
 
-        const sortedMembers = [...war.clan.members].sort((a, b) => a.mapPosition - b.mapPosition);
+        // Neue, sichere Zeilen:
+if (!Array.isArray(war.clan.members)) return; // Fügt eine Sicherheitsprüfung hinzu
+const sortedMembers = [...war.clan.members].sort((a, b) => a.mapPosition - b.mapPosition);
         
         sortedMembers.forEach(member => {
             const memberCard = document.createElement('div');
@@ -493,7 +495,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('cwl-group-table-body');
         if (!container) return;
         container.innerHTML = '';
-        const sortedClans = [...groupData.clans].sort((a, b) => a.clan.name.localeCompare(b.clan.name));
+        // Neue, sichere Zeile:
+const sortedClans = [...groupData.clans]
+    .filter(clanEntry => clanEntry.clan && clanEntry.clan.name) // Fügt eine Sicherheitsprüfung hinzu
+    .sort((a, b) => a.clan.name.localeCompare(b.clan.name));
 
         sortedClans.forEach(clanEntry => {
             const row = document.createElement('tr');
@@ -917,3 +922,4 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAllData(); 
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 });
+
