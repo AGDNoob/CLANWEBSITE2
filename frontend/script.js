@@ -938,34 +938,41 @@ function renderCWLWarDetails(warData) {
         container.innerHTML = tableHtml;
     }
 
-   function renderPetTable(allPlayersData) {
+  function renderPetTable(allPlayersData) {
     const container = document.getElementById('pet-table-container');
     if (!container) return;
 
+    // Die komplette Liste aller Haustiere im Spiel
     const PET_ORDER = ['L.A.S.S.I', 'Electro Owl', 'Mighty Yak', 'Unicorn', 'Frosty', 'Diggy', 'Poison Lizard', 'Phoenix', 'Spirit Fox', 'Angry Jelly'];
 
     let tableHtml = `<table class="lab-table"><thead><tr><th>Spieler</th>`;
     PET_ORDER.forEach(pet => tableHtml += `<th>${pet}</th>`);
     tableHtml += `</tr></thead><tbody>`;
 
+    // Sortiere alle Spieler nach Rathaus-Level
     allPlayersData.sort((a, b) => b.townHallLevel - a.townHallLevel);
 
+    // Wir gehen JEDEN Spieler durch
     allPlayersData.forEach(player => {
-        if (!player) return; // Nur eine kleine Sicherheitsprüfung
+        // HIER IST DIE KORREKTUR: Wir entfernen den alten, zu strengen Filter.
+        // Die alte Zeile war: if (!player || !player.pets || player.townHallLevel < 14) return;
+        if (!player) return; // Eine einfache Sicherheitsabfrage reicht.
         
         tableHtml += `<tr><td><div class="player-cell">${player.name}<span class="player-th-sublabel">RH${player.townHallLevel}</span></div></td>`;
         
-        // Diese Zeile funktioniert jetzt, weil 'player.pets' in den Daten enthalten ist.
+        // Wir erstellen eine Liste der Haustiere des Spielers.
+        // Das ist sicher, auch wenn der Spieler keine Haustiere hat (player.pets ist dann leer).
         const playerPets = new Map(player.pets ? player.pets.map(pet => [pet.name, pet]) : []);
 
         PET_ORDER.forEach(petName => {
             const pet = playerPets.get(petName);
             if (pet) {
+                // Wenn das Haustier existiert, zeige das Level
                 const isMaxed = pet.level === pet.maxLevel;
                 tableHtml += `<td class="${isMaxed ? 'is-maxed' : ''}">${pet.level}</td>`;
             } else {
-                // Zeigt 0 für Spieler, die das Pet nicht haben oder für die keine Daten da sind.
-                tableHtml += `<td>0</td>`;
+                // Wenn nicht, zeige eine '0'
+                tableHtml += `<td>0</td>`; 
             }
         });
         tableHtml += `</tr>`;
@@ -978,6 +985,7 @@ function renderCWLWarDetails(warData) {
     fetchAllData(); 
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 });
+
 
 
 
