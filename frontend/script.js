@@ -452,22 +452,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderDetailedWarView(war) {
-        const ourContainer = document.getElementById('detailed-war-our-clan');
-        const opponentContainer = document.getElementById('detailed-war-opponent-clan');
-        if (!ourContainer || !opponentContainer) return;
-        ourContainer.innerHTML = '<h3>Unser Clan</h3>';
-        opponentContainer.innerHTML = `<h3>Gegner: ${war.opponent.name}</h3>`;
+    const ourContainer = document.getElementById('detailed-war-our-clan');
+    const opponentContainer = document.getElementById('detailed-war-opponent-clan');
+    if (!ourContainer || !opponentContainer) return;
+    ourContainer.innerHTML = '<h3>Unser Clan</h3>';
+    opponentContainer.innerHTML = `<h3>Gegner: ${war.opponent.name}</h3>`;
 
-        // Neue, sichere Zeilen:
-if (!Array.isArray(war.clan.members)) return; // Fügt eine Sicherheitsprüfung hinzu
-const sortedMembers = [...war.clan.members].sort((a, b) => a.mapPosition - b.mapPosition);
+    // NEU & SICHER: Wir prüfen, ob die Mitgliederlisten überhaupt existieren, bevor wir sie nutzen.
+    if (Array.isArray(war.clan.members)) {
+        const sortedMembers = [...war.clan.members].sort((a, b) => a.mapPosition - b.mapPosition);
         
         sortedMembers.forEach(member => {
             const memberCard = document.createElement('div');
             memberCard.className = 'war-player-card';
 
             let attacksHtml = '<div class="attack-info">Kein Angriff</div>';
-            if (member.attacks) {
+            if (member.attacks && Array.isArray(war.opponent.members)) { // Zusätzliche Sicherheit
                 attacksHtml = member.attacks.map(attack => {
                     const defender = war.opponent.members.find(def => def.tag === attack.defenderTag);
                     const defenderName = defender ? `${defender.mapPosition}. ${defender.name}` : 'Unbekannt';
@@ -477,35 +477,40 @@ const sortedMembers = [...war.clan.members].sort((a, b) => a.mapPosition - b.map
             memberCard.innerHTML = `<div class="war-player-header"><span class="player-map-pos">${member.mapPosition}.</span><span class="player-name">${member.name}</span><span class="player-th">RH${member.townhallLevel}</span></div><div class="attacks-container">${attacksHtml}</div>`;
             ourContainer.appendChild(memberCard);
         });
+    }
 
+    if (Array.isArray(war.opponent.members)) {
         [...war.opponent.members].sort((a, b) => a.mapPosition - b.mapPosition).forEach(member => {
             const opponentCard = document.createElement('div');
             opponentCard.className = 'war-player-card opponent';
             let defenseHtml = `${member.defenseCount || 0} Verteidigung(en)`;
-            if (member.bestOpponentAttack) {
+            if (member.bestOpponentAttack && Array.isArray(war.clan.members)) { // Zusätzliche Sicherheit
                 const attacker = war.clan.members.find(att => att.tag === member.bestOpponentAttack.attackerTag);
-                defenseHtml = `Bester Angriff von ${attacker.name}: ${member.bestOpponentAttack.stars}⭐`;
+                if (attacker) { // Nur anzeigen, wenn Angreifer gefunden wird
+                    defenseHtml = `Bester Angriff von ${attacker.name}: ${member.bestOpponentAttack.stars}⭐`;
+                }
             }
             opponentCard.innerHTML = `<div class="war-player-header"><span class="player-map-pos">${member.mapPosition}.</span><span class="player-name">${member.name}</span><span class="player-th">RH${member.townhallLevel}</span></div><div class="defenses-container">${defenseHtml}</div>`;
             opponentContainer.appendChild(opponentCard);
         });
     }
-
+}
     function renderCWLGroup(groupData) {
-        const container = document.getElementById('cwl-group-table-body');
-        if (!container) return;
-        container.innerHTML = '';
-        // Neue, sichere Zeile:
-const sortedClans = [...groupData.clans]
-    .filter(clanEntry => clanEntry.clan && clanEntry.clan.name) // Fügt eine Sicherheitsprüfung hinzu
-    .sort((a, b) => a.clan.name.localeCompare(b.clan.name));
+    const container = document.getElementById('cwl-group-table-body');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    // NEU & SICHER: Wir filtern zuerst alle Clans raus, die keine gültigen Daten haben.
+    const sortedClans = [...groupData.clans]
+        .filter(clanEntry => clanEntry && clanEntry.clan && clanEntry.clan.name)
+        .sort((a, b) => a.clan.name.localeCompare(b.clan.name));
 
-        sortedClans.forEach(clanEntry => {
-            const row = document.createElement('tr');
-            row.innerHTML = `<td><img src="${clanEntry.clan.badgeUrls.small}" alt="Wappen" width="30"> ${clanEntry.clan.name}</td><td>${clanEntry.clan.clanLevel}</td><td>${clanEntry.wars.filter(w => w.result === 'win').length}</td><td>${clanEntry.wars.filter(w => w.result === 'lose').length}</td>`;
-            container.appendChild(row);
-        });
-    }
+    sortedClans.forEach(clanEntry => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td><img src="${clanEntry.clan.badgeUrls.small}" alt="Wappen" width="30"> ${clanEntry.clan.name}</td><td>${clanEntry.clan.clanLevel}</td><td>${clanEntry.wars.filter(w => w.result === 'win').length}</td><td>${clanEntry.wars.filter(w => w.result === 'lose').length}</td>`;
+        container.appendChild(row);
+    });
+}
     
     function renderCWLWarSelection(rounds) {
         const container = document.getElementById('cwl-war-selection');
@@ -922,4 +927,5 @@ const sortedClans = [...groupData.clans]
     fetchAllData(); 
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 });
+
 
