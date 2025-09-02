@@ -330,7 +330,6 @@ async function fetchCWLGroup() {
         
         // Wir übergeben die detaillierten Daten an BEIDE Tabellen-Funktionen
         renderHeroTable(allPlayersData);
-        renderPetTable(allPlayersData); // KORRIGIERT
         
         loadingContainer.classList.add('hidden');
         contentContainer.classList.remove('hidden');
@@ -983,6 +982,7 @@ function renderCWLWarDetails(warData) {
     fetchAllData(); 
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 });
+
 
 
 
