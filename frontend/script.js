@@ -534,6 +534,47 @@ async function fetchCWLGroup() {
         });
     }
 }
+    // ======================================================
+    // NEUE FUNKTION: KI-KRIEGSPLAN GENERATOR
+    // ======================================================
+    function generateAndRenderWarPlan(warData) {
+        const container = document.getElementById('war-plan-container');
+        // Sicherheitscheck, ob die Daten vollständig sind
+        if (!container || !warData || !Array.isArray(warData.clan.members) || !Array.isArray(warData.opponent.members)) {
+            container.innerHTML = '<p class="error-message">Daten für den Kriegsplan sind unvollständig oder es sind keine Mitglieder im Krieg.</p>';
+            return;
+        }
+
+        // 1. Beide Listen nach Kartenposition sortieren
+        const ourMembers = [...warData.clan.members].sort((a, b) => a.mapPosition - b.mapPosition);
+        const opponentMembers = [...warData.opponent.members].sort((a, b) => a.mapPosition - b.mapPosition);
+
+        let planHtml = '<div class="war-plan-grid">';
+
+        // 2. Durch unsere Mitglieder gehen und den "Spiegel"-Gegner zuweisen
+        ourMembers.forEach(player => {
+            const opponent = opponentMembers.find(opp => opp.mapPosition === player.mapPosition);
+            
+            if (opponent) {
+                planHtml += `
+                    <div class="war-plan-matchup">
+                        <div class="plan-player our">
+                            <span class="plan-pos">${player.mapPosition}.</span>
+                            <span class="plan-name">${player.name} (RH${player.townhallLevel})</span>
+                        </div>
+                        <div class="plan-vs">⚔️</div>
+                        <div class="plan-player opponent">
+                            <span class="plan-name">${opponent.name} (RH${opponent.townhallLevel})</span>
+                            <span class="plan-pos">${opponent.mapPosition}.</span>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        planHtml += '</div>';
+        container.innerHTML = planHtml;
+    }
     function renderCWLGroup(groupData) {
     const container = document.getElementById('cwl-group-table-body');
     if (!container) return;
@@ -944,6 +985,7 @@ function renderCWLWarDetails(warData) {
     fetchAllData(); 
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 });
+
 
 
 
