@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error("Fehler bei Hauptstadt-Raids:", error); }
     }
     
-    async function initializeWarCenter() {
+   async function initializeWarCenter() {
         const notInWarMessage = document.getElementById('not-in-war-message');
         const currentWarDashboard = document.getElementById('current-war-dashboard');
         if(!notInWarMessage || !currentWarDashboard) return;
@@ -197,11 +197,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(currentWarMasterView) currentWarMasterView.style.cursor = 'default';
             } else if (response.ok) {
                 const warData = await response.json();
+                currentWarData = warData; // NEU: Speichere die Kriegsdaten global
                 notInWarMessage.classList.add('hidden');
                 currentWarDashboard.classList.remove('hidden');
                 if(currentWarMasterView) currentWarMasterView.style.cursor = 'pointer';
                 renderCurrentWarDashboard(warData);
                 renderDetailedWarView(warData);
+                generateAndRenderWarPlan(warData); // NEU: Rufe den Kriegsplan-Generator auf
             } else { throw new Error(`Serverfehler: ${response.status}`); }
         } catch (error) {
             console.error("Fehler beim Abrufen des aktuellen Kriegs:", error);
@@ -211,7 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         fetchWarlog();
     }
-
 async function fetchCWLGroup() {
     const noCwlMessage = document.getElementById('no-cwl-message');
     const cwlContent = document.getElementById('cwl-content');
@@ -943,6 +944,7 @@ function renderCWLWarDetails(warData) {
     fetchAllData(); 
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 });
+
 
 
 
