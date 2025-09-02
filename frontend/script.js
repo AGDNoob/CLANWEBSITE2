@@ -575,30 +575,28 @@ async function fetchCWLGroup() {
         });
     }
     
-    function renderCWLWarDetails(warData) {
+function renderCWLWarDetails(warData) {
     const container = document.getElementById('cwl-war-detail-content');
     if (!container) return;
 
-    // NEU & SICHER: Überprüfe, ob die Kriegsdaten und der Gegner überhaupt existieren.
-    if (!warData || !warData.clan || !warData.opponent) {
-        container.innerHTML = `<p class="error-message">Die Daten für diesen Kriegstag sind noch nicht vollständig verfügbar. Bitte versuche es später noch einmal.</p>`;
+    // FINALE, PARANOIDE SICHERHEITSPRÜFUNG:
+    // Wir prüfen jetzt, ob der Gegner auch wirklich einen Namen hat.
+    if (!warData || !warData.clan || !warData.opponent || !warData.opponent.name) {
+        container.innerHTML = `<div class="dashboard-box"><p class="error-message">Die Daten für diesen Kriegstag sind noch nicht vollständig verfügbar. Der Gegner steht z.B. noch nicht fest. Bitte versuche es später noch einmal.</p></div>`;
         return;
     }
 
     const translatedState = warStateTranslations[warData.state] || warData.state;
     let ourClanHtml = '<h3>Unser Clan</h3>';
-    // Wir wissen jetzt, dass warData.opponent existiert, also ist das hier sicher.
     let opponentClanHtml = `<h3>Gegner: ${warData.opponent.name}</h3>`;
 
     // Prüfe, ob die Mitgliederliste existiert
     if (Array.isArray(warData.clan.members)) {
         [...warData.clan.members].sort((a, b) => a.mapPosition - b.mapPosition).forEach(member => {
             let attacksHtml = '<div class="attack-info">Kein Angriff</div>';
-            // Prüfe auf Angriffe UND ob die Gegner-Mitgliederliste existiert
             if (member.attacks && Array.isArray(warData.opponent.members)) {
                 attacksHtml = member.attacks.map(attack => {
                     const defender = warData.opponent.members.find(def => def.tag === attack.defenderTag);
-                    // Zeige den Angriff nur an, wenn der Verteidiger gefunden wurde
                     if (defender) {
                        return `<div class="attack-info"><span>⚔️ vs ${defender.mapPosition}. ${defender.name}</span><span class="attack-result">${attack.stars}⭐ ${attack.destructionPercentage}%</span></div>`;
                     }
@@ -982,6 +980,7 @@ async function fetchCWLGroup() {
     fetchAllData(); 
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 });
+
 
 
 
