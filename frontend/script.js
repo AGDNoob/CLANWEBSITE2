@@ -13,7 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let leagueChartInstance = null;
     let currentCWLData = null;
     let labDataLoaded = false; // Verhindert mehrfaches Laden der Daten
-
+    let currentCWLData = null;
+    let labDataLoaded = false; // Verhindert mehrfaches Laden der Daten
+    let currentWarData = null; // NEUE VARIABLE für die Kriegsdaten
     // --- ELEMENT REFERENZEN ---
     const navLinks = document.querySelectorAll('.nav-link');
     const pages = document.querySelectorAll('.page');
@@ -941,6 +943,7 @@ function renderCWLWarDetails(warData) {
     fetchAllData(); 
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 });
+
 
 
 
