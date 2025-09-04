@@ -698,9 +698,14 @@ function renderCWLWarDetails(warData) {
 }
 
     function renderCWLStatistics(playerStats, bestAttacker) {
-        const statsContainer = document.getElementById('cwl-player-stats-body');
-        if(statsContainer) {
-            statsContainer.innerHTML = '';
+    const statsContainer = document.getElementById('cwl-player-stats-body');
+    if(statsContainer) {
+        statsContainer.innerHTML = '';
+        
+        // NEU: Zeige eine Nachricht an, wenn keine Daten vorhanden sind
+        if (!playerStats || playerStats.length === 0) {
+            statsContainer.innerHTML = `<tr><td colspan="4"><p>Warte auf die ersten Angriffsdaten von der API...</p></td></tr>`;
+        } else {
             playerStats.forEach(player => {
                 const avgDestruction = player.attacks > 0 ? (player.destruction / player.attacks).toFixed(2) : 0;
                 const row = document.createElement('tr');
@@ -708,16 +713,19 @@ function renderCWLWarDetails(warData) {
                 statsContainer.appendChild(row);
             });
         }
-        const mvpContainer = document.getElementById('cwl-mvp-content');
-        if (mvpContainer) {
-            if (bestAttacker) {
-                const avgDestruction = bestAttacker.attacks > 0 ? (bestAttacker.destruction / bestAttacker.attacks).toFixed(2) : 0;
-                mvpContainer.innerHTML = `<h3>${bestAttacker.name}</h3><p>⭐ Gesamtsterne: ${bestAttacker.stars}</p><p>🎯 Angriffe genutzt: ${bestAttacker.attacks}</p><p>💥 Ø Zerstörung: ${avgDestruction}%</p>`;
-            } else {
-                mvpContainer.innerHTML = '<p>Keine Angriffsdaten für eine Auswertung vorhanden.</p>';
-            }
+    }
+    
+    const mvpContainer = document.getElementById('cwl-mvp-content');
+    if (mvpContainer) {
+        if (bestAttacker) {
+            const avgDestruction = bestAttacker.attacks > 0 ? (bestAttacker.destruction / bestAttacker.attacks).toFixed(2) : 0;
+            mvpContainer.innerHTML = `<h3>${bestAttacker.name}</h3><p>⭐ Gesamtsterne: ${bestAttacker.stars}</p><p>🎯 Angriffe genutzt: ${bestAttacker.attacks}</p><p>💥 Ø Zerstörung: ${avgDestruction}%</p>`;
+        } else {
+            // NEU: Auch hier eine klarere Nachricht
+            mvpContainer.innerHTML = '<p>Noch keine Angriffsdaten für eine Auswertung vorhanden.</p>';
         }
     }
+}
 
     function renderCWLRoundOverview(rounds) {
         const container = document.getElementById('cwl-round-overview-body');
@@ -1002,4 +1010,5 @@ function renderCWLWarDetails(warData) {
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 
 });
+
 
