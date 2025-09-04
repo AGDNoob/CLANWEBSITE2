@@ -676,9 +676,9 @@ function renderCWLWarDetails(warData) {
     if(statsContainer) {
         statsContainer.innerHTML = '';
         
-        // NEU: Zeige eine Nachricht an, wenn keine Daten vorhanden sind
+        // NEU: Zeige eine klare Nachricht an, wenn die API keine Daten liefert
         if (!playerStats || playerStats.length === 0) {
-            statsContainer.innerHTML = `<tr><td colspan="4"><p>Warte auf die ersten Angriffsdaten von der API...</p></td></tr>`;
+            statsContainer.innerHTML = `<tr><td colspan="4"><p>Warte auf die detaillierten Angriffsdaten von der API (diese kommen oft erst nach Ende des Kampftages).</p></td></tr>`;
         } else {
             playerStats.forEach(player => {
                 const avgDestruction = player.attacks > 0 ? (player.destruction / player.attacks).toFixed(2) : 0;
@@ -695,12 +695,10 @@ function renderCWLWarDetails(warData) {
             const avgDestruction = bestAttacker.attacks > 0 ? (bestAttacker.destruction / bestAttacker.attacks).toFixed(2) : 0;
             mvpContainer.innerHTML = `<h3>${bestAttacker.name}</h3><p>⭐ Gesamtsterne: ${bestAttacker.stars}</p><p>🎯 Angriffe genutzt: ${bestAttacker.attacks}</p><p>💥 Ø Zerstörung: ${avgDestruction}%</p>`;
         } else {
-            // NEU: Auch hier eine klarere Nachricht
             mvpContainer.innerHTML = '<p>Noch keine Angriffsdaten für eine Auswertung vorhanden.</p>';
         }
     }
 }
-
     function renderCWLRoundOverview(rounds) {
         const container = document.getElementById('cwl-round-overview-body');
         if(!container) return;
@@ -984,6 +982,7 @@ function renderCWLWarDetails(warData) {
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 
 });
+
 
 
 
