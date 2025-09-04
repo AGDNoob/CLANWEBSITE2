@@ -572,41 +572,6 @@ button:hover, .btn:hover {
     font-size: var(--font-size-sm);
     color: var(--color-comment);
 }
-
-/* ==========================================================================
-   9. SEITENSPEZIFISCHE STILE: CWL
-   ========================================================================== */
-.day-selector-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-sm);
-}
-.day-selector-btn {
-    flex-grow: 1;
-}
-.day-selector-btn.active {
-    background: var(--color-purple);
-    color: var(--color-background);
-    border-color: var(--color-purple);
-}
-
-.cwl-stats-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--spacing-lg);
-}
-
-#cwl-mvp-box {
-    background: linear-gradient(45deg, var(--color-purple), var(--color-pink));
-    color: var(--color-foreground);
-}
-#cwl-mvp-box h3 {
-    color: var(--color-yellow);
-}
-#cwl-mvp-content p {
-    color: var(--color-foreground);
-}
-
 /* Bonus Rechner */
 .bonus-rechner-grid {
     display: grid;
@@ -934,4 +899,5 @@ button:hover, .btn:hover {
     0% { transform: scale(1); }
     50% { transform: scale(1.2); }
     100% { transform: scale(1); }
+
 }
