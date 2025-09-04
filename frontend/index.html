@@ -140,39 +140,31 @@
                 </div>
             </section>
             
-            <section id="page-cwl" class="page">
-    <h1>CWL Bonus-Rechner</h1>
+<section id="page-cwl" class="page">
+    <h1>CWL Bonus-Rechner 2.0 (Manuell)</h1>
 
     <div class="dashboard-box">
-        <p><strong>Info zum Bonus-Rechner:</strong></p>
-        <p>Da die offizielle Spiel-API keine zuverlässigen Live-Daten liefert, wurde die automatische Zentrale entfernt. Dieser Rechner funktioniert jetzt über <strong>manuelle Eingabe</strong>.</p>
-        <p>Fügt einfach jeden Angriff hinzu, den ihr werten wollt, und klickt am Ende auf "Punkte berechnen"!</p>
+        <p><strong>So funktioniert's:</strong></p>
+        <ol style="margin-left: 1.5rem;">
+            <li>Füge für jeden Teilnehmer eine Spieler-Sektion hinzu.</li>
+            <li>Trage in der Sektion die Daten für die einzelnen Angriffe ein.</li>
+            <li>Wenn alle Angriffe erfasst sind, klicke ganz unten auf "Punkte berechnen".</li>
+        </ol>
     </div>
 
     <div id="cwl-content">
         <div class="dashboard-box">
-            <h2>Dateneingabe</h2>
-            <p>Füge hier für jeden Spieler alle 7 Angriffe hinzu.</p>
-            <div class="lab-table-container"> <table class="stats-table" id="manual-attacks-table">
-                    <thead>
-                        <tr>
-                            <th>Spielername</th>
-                            <th>Eigenes RH</th>
-                            <th>Gegner RH</th>
-                            <th>Sterne ⭐</th>
-                            <th>Zerstörung %</th>
-                            <th>Aktion</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        </tbody>
-                </table>
-            </div>
-            <div style="margin-top: 1rem; display: flex; gap: 1rem;">
-                <button id="add-attack-row-btn" class="cta-button">Angriff hinzufügen</button>
-                <button id="clear-attacks-btn">Eingaben löschen</button>
+            <h2>Neuen Spieler hinzufügen</h2>
+            <div class="add-player-form">
+                <input type="text" id="new-player-name" placeholder="Spielername">
+                <input type="number" id="new-player-th" placeholder="RH-Level">
+                <input type="number" id="new-player-attacks" placeholder="Anzahl Angriffe (z.B. 7)" min="1" max="7">
+                <button id="add-player-btn" class="cta-button">Spieler-Sektion erstellen</button>
             </div>
         </div>
+
+        <div id="player-accordion-container">
+            </div>
 
         <div class="dashboard-box" id="cwl-bonus-calculator-view">
             <h2>Einstellungen für die Punktevergabe</h2>
@@ -211,7 +203,10 @@
                     <div class="setting-item"><label>Alle 7 Angriffe</label><input type="number" id="p-bonus-alle-7" value="2"></div>
                 </div>
             </div>
-            <button id="calculate-bonus-btn" class="cta-button">Punkte aus manueller Eingabe berechnen!</button>
+            <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+                <button id="calculate-bonus-btn" class="cta-button">Punkte berechnen!</button>
+                <button id="clear-all-btn">Alles zurücksetzen</button>
+            </div>
         </div>
 
         <div class="dashboard-box hidden" id="cwl-bonus-results-view">
@@ -259,4 +254,5 @@
     </div>
 </body>
 </html>
+
 
