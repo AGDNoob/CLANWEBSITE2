@@ -38,14 +38,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // ======================================================
     // LIVE-UPDATE LOGIK (POLLING)
     // ======================================================
-    function fetchAllData() {
-        console.log("Rufe Live-Daten ab...", new Date().toLocaleTimeString());
-        fetchClanInfo();
-        initializeWarCenter();
-        fetchCapitalRaids();
-        fetchCWLGroup();
-    }
-
+   // NEU: Die Funktion wird "async", damit wir auf Ergebnisse warten können.
+async function fetchAllData() {
+    console.log("Rufe Live-Daten ab...", new Date().toLocaleTimeString());
+    
+    // Warte, bis die Clan-Infos geladen sind.
+    await fetchClanInfo(); 
+    
+    // Warte, bis der aktuelle Krieg (und damit die CWL-Tagesdaten) geladen ist.
+    await initializeWarCenter(); 
+    
+    // Lade den Rest.
+    await fetchCapitalRaids();
+    
+    // Diese Funktion wird jetzt als letztes aufgerufen und hat garantiert
+    // Zugriff auf die aktuellen Kriegsdaten.
+    await fetchCWLGroup(); 
+}
     // ======================================================
     // NAVIGATION & VIEW MANAGEMENT
     // ======================================================
@@ -975,6 +984,7 @@ function renderCWLWarDetails(warData) {
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 
 });
+
 
 
 
