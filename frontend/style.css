@@ -901,3 +901,101 @@ button:hover, .btn:hover {
     100% { transform: scale(1); }
 
 }
+/* ==========================================================================
+   14. STILE FÜR DEN MANUELLEN CWL-RECHNER V2.0
+   ========================================================================== */
+.add-player-form {
+    display: flex;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.add-player-form input {
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-current-line);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    border-radius: var(--border-radius-md);
+    flex-grow: 1;
+}
+
+.player-accordion-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+}
+
+.player-section {
+    background-color: var(--color-background-secondary);
+    border: 1px solid var(--color-current-line);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+}
+
+.player-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md);
+    cursor: pointer;
+    background-color: var(--color-current-line);
+}
+
+.player-header:hover {
+    background-color: var(--color-comment);
+}
+
+.player-header h4 {
+    margin: 0;
+    color: var(--color-foreground);
+}
+
+.player-header .toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+.player-section.closed .toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.attacks-wrapper {
+    max-height: 1000px; /* Genug Höhe für 7 Angriffe */
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+    padding: var(--spacing-md);
+}
+
+.player-section.closed .attacks-wrapper {
+    max-height: 0;
+    padding: 0 var(--spacing-md);
+}
+
+.attack-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: var(--spacing-md);
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--color-current-line);
+}
+.attack-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.attack-row label {
+    font-weight: bold;
+    color: var(--color-cyan);
+}
+.attack-row input {
+    width: 100%;
+    padding: var(--spacing-xs);
+    background-color: var(--color-background);
+    border: 1px solid var(--color-comment);
+    color: var(--color-foreground);
+    border-radius: var(--border-radius-sm);
+    text-align: center;
+}
