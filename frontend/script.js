@@ -542,7 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // ... (Rest des Skripts ist unverändert) ...
 });
-(Hier ist der vollständige Code, damit keine Fehler durch meine Vereinfachung entstehen)
+//(Hier ist der vollständige Code, damit keine Fehler durch meine Vereinfachung entstehen)
 
 JavaScript
 
@@ -1183,3 +1183,4 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
     setupManualBonusCalculator(); 
 });
+
