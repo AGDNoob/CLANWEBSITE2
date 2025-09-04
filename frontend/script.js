@@ -373,23 +373,136 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
+    
+    // ======================================================
+    // NEUER KI-KRIEGSPLANER
+    // ======================================================
     function generateAndRenderWarPlan(warData) {
         const container = document.getElementById('war-plan-container');
-        if (!container || !warData || !Array.isArray(warData.clan.members) || !Array.isArray(warData.opponent.members)) {
-            container.innerHTML = '<p class="error-message">Daten für den Kriegsplan sind unvollständig.</p>'; return;
+        if (!container || !warData || !Array.isArray(warData.clan.members) || !Array.isArray(warData.opponent.members) || warData.clan.members.length === 0) {
+            container.innerHTML = '<p class="error-message">Daten für den Kriegsplan sind unvollständig.</p>';
+            return;
         }
-        const ourMembers = [...warData.clan.members].sort((a, b) => a.mapPosition - b.mapPosition);
-        const opponentMembers = [...warData.opponent.members].sort((a, b) => a.mapPosition - b.mapPosition);
-        let planHtml = '<div class="war-plan-grid">';
-        ourMembers.forEach(player => {
-            const opponent = opponentMembers.find(opp => opp.mapPosition === player.mapPosition);
-            if (opponent) {
-                planHtml += `<div class="war-plan-matchup"><div class="plan-player our"><span class="plan-pos">${player.mapPosition}.</span><span class="plan-name">${player.name} (RH${player.townhallLevel})</span></div><div class="plan-vs">⚔️</div><div class="plan-player opponent"><span class="plan-name">${opponent.name} (RH${opponent.townhallLevel})</span><span class="plan-pos">${opponent.mapPosition}.</span></div></div>`;
+
+        // --- Phase 1: Daten & Profile erstellen ---
+        let attackers = warData.clan.members.map(m => ({
+            tag: m.tag,
+            name: m.name,
+            townhallLevel: m.townhallLevel,
+            mapPosition: m.mapPosition,
+            attacks: [], // Wird die zugewiesenen Angriffe enthalten
+            attackCount: warData.attacksPerMember || 1 // CWL = 1, Normaler CW = 2
+        })).sort((a, b) => a.mapPosition - b.mapPosition);
+
+        let targets = warData.opponent.members.map(m => ({
+            tag: m.tag,
+            name: m.name,
+            townhallLevel: m.townhallLevel,
+            mapPosition: m.mapPosition,
+            isTaken: false // Hält fest, ob schon ein Hauptangriff zugewiesen ist
+        })).sort((a, b) => a.mapPosition - b.mapPosition);
+        
+        const isCWL = warData.attacksPerMember === 1;
+
+        // --- Phase 2: KI-Regeln anwenden ---
+
+        // Regel #1: "Keine-unnötigen-Fails"-Regel (von unten nach oben)
+        // Wir suchen für unsere unteren Spieler sichere Ziele
+        for (let i = attackers.length - 1; i >= 0; i--) {
+            let attacker = attackers[i];
+            if (attacker.attacks.length > 0) continue; // Hat schon ein Ziel
+
+            // Finde das stärkste, freie Ziel, das unser Angreifer sicher schaffen kann (gleiches TH oder niedriger)
+            let bestTarget = targets.find(target => 
+                !target.isTaken && target.townhallLevel <= attacker.townhallLevel
+            );
+
+            if (bestTarget) {
+                attacker.attacks.push({ target: bestTarget, strategy: 'Sicherer 3-Sterne Angriff ⭐⭐⭐', type: 'main' });
+                bestTarget.isTaken = true;
+            }
+        }
+
+        // Regel #2: "Headhunter" & "Fair-Fight" für die restlichen Top- und Mid-Tier-Spieler
+        attackers.forEach(attacker => {
+            if (attacker.attacks.length > 0) return; // Hat schon ein Ziel
+
+            // Finde den besten noch freien Gegner, der maximal 1 TH-Level höher ist
+            let bestTarget = targets.find(target => 
+                !target.isTaken && target.townhallLevel <= attacker.townhallLevel + 1
+            );
+            
+            // Wenn es keinen gibt, nimm das schwächste verbleibende Ziel
+            if (!bestTarget) {
+                bestTarget = targets.find(t => !t.isTaken);
+            }
+
+            if (bestTarget) {
+                let strategy = 'Spiegel-Angriff ⚔️';
+                if (bestTarget.townhallLevel > attacker.townhallLevel) {
+                    strategy = 'Sicherer 2-Sterne-Angriff ⭐⭐';
+                } else if (bestTarget.townhallLevel < attacker.townhallLevel) {
+                    strategy = 'Dip für sichere 3 Sterne 🏹';
+                }
+                attacker.attacks.push({ target: bestTarget, strategy: strategy, type: 'main' });
+                bestTarget.isTaken = true;
             }
         });
+        
+        // Regel #3: Spähangriffe & Nachbesserung (Clean-Up)
+        if (isCWL) {
+            // In CWL: Übrige Spieler (falls vorhanden) scouten die Top-Basen
+            const remainingAttackers = attackers.filter(a => a.attacks.length === 0);
+            const topTargets = targets.sort((a, b) => a.mapPosition - b.mapPosition).slice(0, remainingAttackers.length);
+            
+            remainingAttackers.forEach((attacker, index) => {
+                if (topTargets[index]) {
+                    attacker.attacks.push({ target: topTargets[index], strategy: 'Spähangriff 🕵️‍♂️ (Fallen & CB)', type: 'scout' });
+                }
+            });
+        } else {
+            // In normalen Kriegen: Zweite Angriffe als Nachbesserung planen
+            attackers.forEach(attacker => {
+                 if (attacker.attackCount > 1) {
+                    attacker.attacks.push({ target: null, strategy: 'Nachbesserung / Reserve 🛡️', type: 'cleanup' });
+                 }
+            });
+        }
+
+        // --- Phase 3 & 4: Den Plan rendern ---
+        let planHtml = '<h2>KI-Kriegsplan (1. Welle)</h2>';
+        planHtml += '<p>Dies sind die empfohlenen Erstangriffe. Zweite Angriffe sind für Nachbesserungen reserviert.</p>';
+        planHtml += '<div class="war-plan-grid">';
+
+        attackers.sort((a,b) => a.mapPosition - b.mapPosition).forEach(attacker => {
+            const firstAttack = attacker.attacks.find(a => a.type === 'main' || a.type === 'scout');
+            if (!firstAttack || !firstAttack.target) return;
+
+            planHtml += `
+                <div class="war-plan-matchup">
+                    <div class="plan-player our">
+                        <span class="plan-pos">${attacker.mapPosition}.</span>
+                        <span class="plan-name">${attacker.name} (RH${attacker.townhallLevel})</span>
+                    </div>
+                    <div class="plan-vs">⚔️</div>
+                    <div class="plan-player opponent">
+                        <span class="plan-name">${firstAttack.target.name} (RH${firstAttack.target.townhallLevel})</span>
+                        <span class="plan-pos">${firstAttack.target.mapPosition}.</span>
+                    </div>
+                    <div class="plan-strategy">${firstAttack.strategy}</div>
+                </div>
+            `;
+        });
         planHtml += '</div>';
+
+        if (!isCWL) {
+            planHtml += '<h2 style="margin-top: 2rem;">Nachbesserungs-Angriffe (2. Welle)</h2>';
+            planHtml += '<p>Diese Spieler sollten ihre zweiten Angriffe nutzen, um bei den höchsten Basen, die noch keine 3 Sterne haben, aufzuräumen.</p>';
+        }
+
         container.innerHTML = planHtml;
     }
+
     function renderHeroTable(allPlayersData) {
         const container = document.getElementById('hero-table-container');
         if (!container) return;
