@@ -192,16 +192,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.status === 404) {
                 notInWarMessage.classList.remove('hidden');
                 currentWarDashboard.classList.add('hidden');
-                if(currentWarMasterView) currentWarMasterView.style.cursor = 'default';
+                currentWarData = null; // Wichtig: Zurücksetzen
             } else if (response.ok) {
                 const warData = await response.json();
-                currentWarData = warData; // NEU: Speichere die Kriegsdaten global
+                currentWarData = warData; // Speichere die aktuellen Kriegsdaten global
                 notInWarMessage.classList.add('hidden');
                 currentWarDashboard.classList.remove('hidden');
-                if(currentWarMasterView) currentWarMasterView.style.cursor = 'pointer';
                 renderCurrentWarDashboard(warData);
                 renderDetailedWarView(warData);
-                generateAndRenderWarPlan(warData); // NEU: Rufe den Kriegsplan-Generator auf
+                // Der Kriegsplan-Generator bleibt hier
+                if (warData.state !== 'notInWar') {
+                    generateAndRenderWarPlan(warData);
+                }
             } else { throw new Error(`Serverfehler: ${response.status}`); }
         } catch (error) {
             console.error("Fehler beim Abrufen des aktuellen Kriegs:", error);
@@ -212,83 +214,46 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchWarlog();
     }
 async function fetchCWLGroup() {
-    const noCwlMessage = document.getElementById('no-cwl-message');
-    const cwlContent = document.getElementById('cwl-content');
-    const statsContainer = document.getElementById('cwl-player-stats-body');
-    if (!noCwlMessage || !cwlContent || !statsContainer) return;
+        const noCwlMessage = document.getElementById('no-cwl-message');
+        const cwlContent = document.getElementById('cwl-content');
+        if (!noCwlMessage || !cwlContent) return;
 
-    // Setze die Tabellen vor jedem Lauf zurück
-    statsContainer.innerHTML = ''; 
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/clan/cwl`);
+            if (response.status === 404) {
+                noCwlMessage.classList.remove('hidden');
+                cwlContent.classList.add('hidden');
+                return;
+            }
+            if (!response.ok) throw new Error(`Serverfehler: ${response.status}`);
 
-    try {
-        console.log("Starte fetchCWLGroup...");
-        const response = await fetch(`${API_BASE_URL}/api/clan/cwl`);
-        
-        if (response.status === 404) {
-            console.log("API meldet: Keine CWL aktiv (Status 404).");
+            const groupData = await response.json();
+            noCwlMessage.classList.add('hidden');
+            cwlContent.classList.remove('hidden');
+            
+            renderCWLGroup(groupData);
+            renderCWLWarSelection(groupData.rounds); // Zeigt die Buttons weiterhin an
+            initializeBonusCalculator(groupData.rounds);
+
+            // JETZT DIE NEUE LOGIK:
+            // Wir prüfen, ob die global gespeicherten Kriegsdaten ein CWL-Krieg sind.
+            if (currentWarData && currentWarData.clan && currentWarData.opponent) {
+                console.log("Nutze Daten aus 'currentWar' für die CWL-Statistik.");
+                const playerStats = calculateCWLPlayerStats([currentWarData]); // Wir übergeben sie als Array
+                renderCWLStatistics(playerStats.stats, playerStats.bestAttacker);
+                renderCWLRoundOverview([currentWarData]);
+            } else {
+                console.log("Keine aktuellen CWL-Kriegsdaten für die Statistik gefunden.");
+                renderCWLStatistics([], null); // Leert die Statistik-Tabelle mit einer Nachricht
+            }
+
+        } catch (error) {
+            console.error("Ein Fehler ist in fetchCWLGroup aufgetreten:", error);
+            noCwlMessage.textContent = "CWL-Daten konnten nicht geladen werden.";
             noCwlMessage.classList.remove('hidden');
             cwlContent.classList.add('hidden');
-            return;
         }
-        if (!response.ok) {
-            throw new Error(`Serverfehler beim Abrufen der Gruppen-Daten: ${response.status}`);
-        }
-
-        const groupData = await response.json();
-        console.log("CWL Gruppendaten empfangen:", groupData);
-
-        noCwlMessage.classList.add('hidden');
-        cwlContent.classList.remove('hidden');
-        
-        if (groupData && Array.isArray(groupData.clans)) {
-            renderCWLGroup(groupData);
-        } else {
-             console.log("Gruppendaten sind unvollständig, Clan-Tabelle kann nicht gerendert werden.");
-        }
-
-        // PRÜFUNG 1: Gibt es überhaupt Runden in den Daten?
-        if (!groupData || !Array.isArray(groupData.rounds) || groupData.rounds.length === 0) {
-            console.log("CWL ist aktiv, aber die API liefert keine Runden-Daten. Wahrscheinlich noch Vorbereitungstag.");
-            statsContainer.innerHTML = `<tr><td colspan="4"><p>Warte auf den Start des ersten Krieges...</p></td></tr>`;
-            return;
-        }
-
-        // PRÜFUNG 2: Gibt es gültige Kriegs-Tags?
-        const validWarTags = groupData.rounds
-            .map(round => round.warTags.find(tag => tag !== '#0'))
-            .filter(tag => tag);
-            
-        if (validWarTags.length === 0) {
-            console.log("Runden sind vorhanden, aber noch keine gültigen Kriegs-Tags. Kriegstage sind noch nicht abrufbar.");
-            statsContainer.innerHTML = `<tr><td colspan="4"><p>Kriegs-Daten sind in Kürze verfügbar...</p></td></tr>`;
-            return;
-        }
-
-        console.log(`Gefundene Kriegs-Tags: ${validWarTags.join(', ')}. Lade jetzt die Details...`);
-        renderCWLWarSelection(groupData.rounds);
-
-        const warPromises = validWarTags.map(tag => fetchCWLWarDataByTag(tag));
-        const cwlRoundsData = await Promise.all(warPromises);
-        const validRounds = cwlRoundsData.filter(r => r !== null);
-        
-        // FINALE PRÜFUNG: Konnten die Kriegsdetails erfolgreich geladen werden?
-        if (validRounds.length === 0) {
-            console.error("KRITISCHER FEHLER: Kriegs-Tags sind vorhanden, aber der Abruf der Kriegsdetails ist für ALLE fehlgeschlagen. Das ist ein klares Proxy/Caching-Problem.");
-            statsContainer.innerHTML = `<tr><td colspan="4" class="error-message">Fehler: Die Kriegsdetails konnten nicht vom Server geladen werden. Der Proxy liefert wahrscheinlich veraltete oder fehlerhafte Daten.</td></tr>`;
-        } else {
-            console.log(`Erfolgreich ${validRounds.length} von ${validWarTags.length} Kriegstagen geladen.`);
-            const playerStats = calculateCWLPlayerStats(validRounds);
-            renderCWLStatistics(playerStats.stats, playerStats.bestAttacker);
-            renderCWLRoundOverview(validRounds);
-        }
-
-    } catch (error) {
-        console.error("Ein unerwarteter Fehler ist in fetchCWLGroup aufgetreten:", error);
-        noCwlMessage.textContent = "Ein schwerwiegender Fehler ist aufgetreten. Bitte die Konsole prüfen.";
-        noCwlMessage.classList.remove('hidden');
-        cwlContent.classList.add('hidden');
     }
-}
     async function fetchCWLWarDataByTag(warTag) {
         if (!warTag || warTag === '#0') return null;
         try {
@@ -1010,5 +975,6 @@ function renderCWLWarDetails(warData) {
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 
 });
+
 
 
