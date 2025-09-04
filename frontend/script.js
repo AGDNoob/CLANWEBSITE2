@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let cwlBonusChartInstance = null;
     let thChartInstance = null;
     let leagueChartInstance = null;
-    let currentCWLData = null;
     let labDataLoaded = false;
     let currentWarData = null;
     // --- ELEMENT REFERENZEN ---
@@ -19,9 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const clanInfoMasterView = document.getElementById('clan-info-master-view');
     const playerProfileView = document.getElementById('player-profile-view');
     const profileBackButton = document.getElementById('profile-back-button');
-    const cwlGroupView = document.getElementById('cwl-group-view');
-    const cwlWarDetailView = document.getElementById('cwl-war-detail-view');
-    const cwlWarDetailBackButton = document.getElementById('cwl-war-detail-back-button');
     const cwlBonusCalculatorView = document.getElementById('cwl-bonus-calculator-view');
     const cwlBonusResultsView = document.getElementById('cwl-bonus-results-view');
     const bonusRechnerBackButton = document.getElementById('bonus-rechner-back-button');
@@ -42,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         await fetchClanInfo(); 
         await initializeWarCenter(); 
         await fetchCapitalRaids();
-        await fetchCWLGroup(); 
+        // fetchCWLGroup() wird nicht mehr benötigt, da der Rechner manuell ist
     }
     // ======================================================
     // NAVIGATION & VIEW MANAGEMENT
@@ -66,13 +62,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if(playerProfileView) playerProfileView.classList.add('hidden');
             if(currentWarMasterView) currentWarMasterView.classList.remove('hidden');
             if(currentWarDetailView) currentWarDetailView.classList.add('hidden');
-            if(cwlGroupView) cwlGroupView.classList.remove('hidden');
-            if(cwlWarDetailView) cwlWarDetailView.classList.add('hidden');
+            // cwlGroupView Management nicht mehr relevant
             if(cwlBonusCalculatorView) cwlBonusCalculatorView.classList.remove('hidden');
             if(cwlBonusResultsView) cwlBonusResultsView.classList.add('hidden');
             
             if (targetId === 'page-lab' && !labDataLoaded) {
                 fetchPlayerDataForLab();
+            }
+            if (targetId === 'page-cwl') {
+                setupManualBonusCalculator(); // Initialisiert den manuellen Rechner, wenn die Seite aufgerufen wird
             }
         });
     });
@@ -92,14 +90,9 @@ document.addEventListener('DOMContentLoaded', () => {
         currentWarMasterView.classList.remove('hidden');
     });
 
-    if(cwlWarDetailBackButton) cwlWarDetailBackButton.addEventListener('click', () => {
-        cwlWarDetailView.classList.add('hidden');
-        cwlGroupView.classList.remove('hidden');
-    });
-
     if(bonusRechnerBackButton) bonusRechnerBackButton.addEventListener('click', () => {
         cwlBonusResultsView.classList.add('hidden');
-        cwlBonusCalculatorView.classList.remove('hidden');
+        // Bonus-Rechner-View wird nicht mehr automatisch versteckt, nur die Ergebnisse
     });
 
     if(warLogAccordion) warLogAccordion.addEventListener('click', () => {
@@ -208,82 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         fetchWarlog();
     }
-
-    async function fetchCWLGroup() {
-        const noCwlMessage = document.getElementById('no-cwl-message');
-        const cwlContent = document.getElementById('cwl-content');
-        if (!noCwlMessage || !cwlContent) return;
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/clan/cwl`);
-            if (response.status === 404) {
-                noCwlMessage.classList.remove('hidden');
-                cwlContent.classList.add('hidden');
-                return;
-            }
-            if (!response.ok) throw new Error(`Serverfehler: ${response.status}`);
-
-            const groupData = await response.json();
-            noCwlMessage.classList.add('hidden');
-            cwlContent.classList.remove('hidden');
-            
-            renderCWLGroup(groupData);
-            renderCWLWarSelection(groupData.rounds);
-            initializeBonusCalculator(groupData.rounds);
-
-            // START DER "SAMMEL-STRATEGIE"
-            console.log("Starte das Sammeln der Daten für alle CWL-Kampftage...");
-            
-            const warDataPromises = groupData.rounds.map(round => {
-                const warTag = round.warTags.find(tag => tag !== '#0');
-                return fetchCWLWarDataByTag(warTag);
-            });
-
-            const allRoundsData = await Promise.all(warDataPromises);
-
-            const completedRoundsData = allRoundsData.filter(war => {
-                if (war && war.clan && Array.isArray(war.clan.members) && war.clan.members.length > 0) {
-                    return true; 
-                }
-                console.log("Ein Kriegstag wurde übersprungen (vermutlich der aktuelle), da keine Mitgliederdaten vorliegen.");
-                return false;
-            });
-
-            // Prüft, ob die Anzahl der erfolgreichen Runden kleiner ist als die Anzahl aller Runden, für die wir eine Antwort bekommen haben
-            const isDataPartial = completedRoundsData.length < allRoundsData.filter(r => r).length;
-
-            if (completedRoundsData.length > 0) {
-                const playerStats = calculateCWLPlayerStats(completedRoundsData);
-                renderCWLStatistics(playerStats.stats, playerStats.bestAttacker, isDataPartial); 
-                renderCWLRoundOverview(completedRoundsData);
-            } else {
-                console.log("Bisher keine abgeschlossenen CWL-Kriegstage mit Daten gefunden.");
-                renderCWLStatistics([], null, false); 
-            }
-
-        } catch (error) {
-            console.error("Ein Fehler ist in fetchCWLGroup aufgetreten:", error);
-            noCwlMessage.textContent = "CWL-Daten konnten nicht geladen werden.";
-            noCwlMessage.classList.remove('hidden');
-            cwlContent.classList.add('hidden');
-        }
-    }
-
-    async function fetchCWLWarDataByTag(warTag) {
-        if (!warTag || warTag === '#0') return null;
-        try {
-            // "CACHE-BUSTER": Hängt einen Zeitstempel an, um Caching im Backend zu verhindern
-            const timestamp = new Date().getTime();
-            const response = await fetch(`${API_BASE_URL}/api/clan/cwl/war/${warTag.replace('#', '')}?t=${timestamp}`);
-            
-            if (!response.ok) { throw new Error(`HTTP-Fehler für warTag ${warTag}: Status ${response.status}`); }
-            return await response.json();
-        } catch (error) {
-            console.error(`Fehler beim Abrufen der CWL-Kriegsdaten für Tag ${warTag}:`, error);
-            return null;
-        }
-    }
-
+    
     async function fetchPlayerDataForLab() {
         const loadingContainer = document.getElementById('lab-loading-state');
         const contentContainer = document.getElementById('lab-content-container');
@@ -326,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ======================================================
-    // RENDER-FUNKTIONEN
+    // RENDER-FUNKTIONEN (Allgemein)
     // ======================================================
     function renderClanInfo(data) {
         const clanNameEl = document.getElementById('clan-name');
@@ -550,177 +468,45 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = planHtml;
     }
 
-    function renderCWLGroup(groupData) {
-        const container = document.getElementById('cwl-group-table-body');
-        if (!container) return;
-        container.innerHTML = '';
-        
-        const sortedClans = [...groupData.clans]
-            .filter(clanEntry => clanEntry && clanEntry.clan && clanEntry.clan.name)
-            .sort((a, b) => a.clan.name.localeCompare(b.clan.name));
+    // ======================================================
+    // CWL BONUS RECHNER (MANUELLE LOGIK)
+    // ======================================================
 
-        sortedClans.forEach(clanEntry => {
-            const row = document.createElement('tr');
-            row.innerHTML = `<td><img src="${clanEntry.clan.badgeUrls.small}" alt="Wappen" width="30"> ${clanEntry.clan.name}</td><td>${clanEntry.clan.clanLevel}</td><td>${clanEntry.wars.filter(w => w.result === 'win').length}</td><td>${clanEntry.wars.filter(w => w.result === 'lose').length}</td>`;
-            container.appendChild(row);
-        });
-    }
-    
-    function renderCWLWarSelection(rounds) {
-        const container = document.getElementById('cwl-war-selection');
-        if (!container) return;
-        container.innerHTML = '';
-        rounds.forEach((round, index) => {
-            const warTag = round.warTags.find(tag => tag !== '#0');
-            if (warTag) {
-                const button = document.createElement('button');
-                button.className = 'day-selector-btn';
-                button.textContent = `Tag ${index + 1}`;
-                button.dataset.warTag = warTag;
-                button.addEventListener('click', async () => {
-                    document.querySelectorAll('.day-selector-btn').forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
-                    const warData = await fetchCWLWarDataByTag(warTag);
-                    if (warData) {
-                        renderCWLWarDetails(warData);
-                        if(cwlGroupView) cwlGroupView.classList.add('hidden');
-                        if(cwlWarDetailView) cwlWarDetailView.classList.remove('hidden');
-                    } else { alert("Kriegsdaten für diesen Tag konnten nicht geladen werden."); }
-                });
-                container.appendChild(button);
-            }
-        });
-    }
-    
-    function renderCWLWarDetails(warData) {
-        const container = document.getElementById('cwl-war-detail-content');
-        if (!container) return;
-
-        if (!warData || !warData.clan || !warData.opponent || !warData.opponent.name) {
-            container.innerHTML = `<div class="dashboard-box"><p class="error-message">Die Daten für diesen Kriegstag sind noch nicht vollständig verfügbar. Der Gegner steht z.B. noch nicht fest. Bitte versuche es später noch einmal.</p></div>`;
-            return;
-        }
-
-        const translatedState = warStateTranslations[warData.state] || warData.state;
-        let ourClanHtml = '<h3>Unser Clan</h3>';
-        let opponentClanHtml = `<h3>Gegner: ${warData.opponent.name}</h3>`;
-
-        if (Array.isArray(warData.clan.members)) {
-            [...warData.clan.members].sort((a, b) => a.mapPosition - b.mapPosition).forEach(member => {
-                let attacksHtml = '<div class="attack-info">Kein Angriff</div>';
-                if (member.attacks && Array.isArray(warData.opponent.members)) {
-                    attacksHtml = member.attacks.map(attack => {
-                        const defender = warData.opponent.members.find(def => def.tag === attack.defenderTag);
-                        if (defender) {
-                            return `<div class="attack-info"><span>⚔️ vs ${defender.mapPosition}. ${defender.name}</span><span class="attack-result">${attack.stars}⭐ ${attack.destructionPercentage}%</span></div>`;
-                        }
-                        return '';
-                    }).join('');
-                }
-                ourClanHtml += `<div class="war-player-card"><div class="war-player-header"><span class="player-map-pos">${member.mapPosition}.</span><span class="player-name">${member.name}</span><span class="player-th">RH${member.townhallLevel}</span></div><div class="attacks-container">${attacksHtml || '<div class="attack-info">Kein Angriff</div>'}</div></div>`;
-            });
-        }
-
-        if (Array.isArray(warData.opponent.members)) {
-            [...warData.opponent.members].sort((a, b) => a.mapPosition - b.mapPosition).forEach(member => {
-                opponentClanHtml += `<div class="war-player-card opponent"><div class="war-player-header"><span class="player-map-pos">${member.mapPosition}.</span><span class="player-name">${member.name}</span><span class="player-th">RH${member.townhallLevel}</span></div></div>`;
-            });
-        }
-
-        container.innerHTML = `<div class="cwl-war-header"><h2>${translatedState}</h2></div><div class="detailed-war-clans">${ourClanHtml}${opponentClanHtml}</div>`;
-    }
-
-    function calculateCWLPlayerStats(cwlRounds) {
-        const playerStats = {};
-        console.log("Verarbeite folgende Kriegsdaten für Statistiken:", cwlRounds);
-
-        cwlRounds.forEach((round, index) => {
-            if (!round || !round.clan || !Array.isArray(round.clan.members) || round.clan.members.length === 0) {
-                console.warn(`Kriegstag ${index + 1} enthält keine Mitgliederdaten. Überspringe...`);
-                return;
-            }
-
-            round.clan.members.forEach(member => {
-                if (!playerStats[member.tag]) {
-                    playerStats[member.tag] = { name: member.name, attacks: 0, stars: 0, destruction: 0 };
-                }
-                if (member.attacks) {
-                    playerStats[member.tag].attacks += member.attacks.length;
-                    member.attacks.forEach(attack => {
-                        playerStats[member.tag].stars += attack.stars;
-                        playerStats[member.tag].destruction += attack.destructionPercentage;
-                    });
-                }
-            });
-        });
-
-        const statsArray = Object.values(playerStats).sort((a, b) => b.stars - a.stars || (b.destruction / b.attacks) - (a.destruction / a.attacks));
-        const bestAttacker = statsArray.length > 0 ? statsArray[0] : null;
-
-        console.log("Ergebnis der Statistik-Berechnung:", { stats: statsArray, bestAttacker });
-        
-        return { stats: statsArray, bestAttacker };
-    }
-
-    function renderCWLStatistics(playerStats, bestAttacker, isDataPartial) {
-        const statsContainer = document.getElementById('cwl-player-stats-body');
-        const mvpContainer = document.getElementById('cwl-mvp-content');
-        // Du musst sicherstellen, dass dein <h3>-Tag für die Überschrift diese ID hat: <h3 id="cwl-stats-header">Gesamtstatistik</h3>
-        const statsHeader = document.getElementById('cwl-stats-header'); 
-
-        if (statsHeader) {
-            if (isDataPartial) {
-                statsHeader.innerHTML = 'Gesamtstatistik <span class="partial-data-hint">(Nur abgeschlossene Tage)</span>';
-            } else {
-                statsHeader.textContent = 'Gesamtstatistik';
-            }
-        }
-
-        if (statsContainer) {
-            statsContainer.innerHTML = '';
-            
-            if (!playerStats || playerStats.length === 0) {
-                statsContainer.innerHTML = `<tr><td colspan="4"><p>Warte auf die ersten vollständigen Daten nach Ende des Kampftages. Die Statistik wird hier Tag für Tag wachsen!</p></td></tr>`;
-            } else {
-                playerStats.forEach(player => {
-                    const avgDestruction = player.attacks > 0 ? (player.destruction / player.attacks).toFixed(2) : 0;
-                    const row = document.createElement('tr');
-                    row.innerHTML = `<td>${player.name}</td><td>${player.attacks}</td><td>${player.stars}</td><td>${avgDestruction}%</td>`;
-                    statsContainer.appendChild(row);
-                });
-            }
-        }
-        
-        if (mvpContainer) {
-            if (bestAttacker) {
-                const avgDestruction = bestAttacker.attacks > 0 ? (bestAttacker.destruction / bestAttacker.attacks).toFixed(2) : 0;
-                mvpContainer.innerHTML = `<h3>${bestAttacker.name}</h3><p>⭐ Gesamtsterne: ${bestAttacker.stars}</p><p>🎯 Angriffe genutzt: ${bestAttacker.attacks}</p><p>💥 Ø Zerstörung: ${avgDestruction}%</p>`;
-            } else {
-                mvpContainer.innerHTML = '<p>Noch keine Angriffsdaten für eine Auswertung vorhanden.</p>';
-            }
-        }
-    }
-
-    function renderCWLRoundOverview(rounds) {
-        const container = document.getElementById('cwl-round-overview-body');
-        if(!container) return;
-        container.innerHTML = '';
-        rounds.forEach((round, index) => {
-            if (!round || !round.opponent) return;
-            const row = document.createElement('tr');
-            const resultText = warResultTranslations[round.result] || 'Unentschieden';
-            // Wir nehmen den Index hier nicht mehr, da die "rounds" nur die abgeschlossenen Kriege sind.
-            // Besser wäre es, die Runde im Original-Array zu finden, aber für den Moment ist das okay.
-            row.innerHTML = `<td>Gegner</td><td>${round.opponent.name}</td><td>${resultText}</td><td>${round.clan.stars} - ${round.opponent.stars}</td>`;
-            container.appendChild(row);
-        });
-    }
-
-    function initializeBonusCalculator(cwlRounds) {
+    function setupManualBonusCalculator() {
+        const addAttackBtn = document.getElementById('add-attack-row-btn');
+        const clearAttacksBtn = document.getElementById('clear-attacks-btn');
         const calculateBtn = document.getElementById('calculate-bonus-btn');
-        if (!calculateBtn) return;
+        const attacksTableBody = document.querySelector('#manual-attacks-table tbody');
+
+        if (!addAttackBtn || !calculateBtn || !attacksTableBody || !clearAttacksBtn) return;
+
+        // --- Event Listener zum Hinzufügen einer neuen Zeile ---
+        addAttackBtn.onclick = () => {
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="text" placeholder="Spielername" class="manual-input"></td>
+                <td><input type="number" placeholder="16" class="manual-input small-input"></td>
+                <td><input type="number" placeholder="16" class="manual-input small-input"></td>
+                <td><input type="number" placeholder="3" class="manual-input small-input" min="0" max="3"></td>
+                <td><input type="number" placeholder="100" class="manual-input small-input" min="0" max="100"></td>
+                <td><button class="remove-row-btn">X</button></td>
+            `;
+            attacksTableBody.appendChild(newRow);
+
+            // Füge dem neuen Löschen-Button sofort einen Event Listener hinzu
+            newRow.querySelector('.remove-row-btn').addEventListener('click', (e) => {
+                e.target.closest('tr').remove();
+            });
+        };
         
-        calculateBtn.onclick = async () => {
+        // --- Event Listener zum Löschen aller Zeilen ---
+        clearAttacksBtn.onclick = () => {
+            attacksTableBody.innerHTML = ''; // Leert die Tabelle
+        };
+
+        // --- Event Listener für die eigentliche Berechnung ---
+        calculateBtn.onclick = () => {
+            // 1. Lese alle Einstellungs-Punkte aus
             const pointsConfig = {
                 ell_rh_p2: parseInt(document.getElementById('p-ell-rh-p2').value),
                 ell_rh_p1: parseInt(document.getElementById('p-ell-rh-p1').value),
@@ -741,50 +527,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 bonus_mut_extra: parseInt(document.getElementById('p-bonus-mut-extra').value),
                 bonus_alle_7: parseInt(document.getElementById('p-bonus-alle-7').value)
             };
-    
-            const warPromises = cwlRounds
-                .filter(round => round.warTags.some(tag => tag !== '#0'))
-                .map(round => fetchCWLWarDataByTag(round.warTags.find(tag => tag !== '#0')));
-            const cwlRoundsData = await Promise.all(warPromises);
-            const validRounds = cwlRoundsData.filter(r => r !== null);
-    
-            const result = calculateBonusPoints(validRounds, pointsConfig);
+
+            // 2. Lese alle manuell eingegebenen Angriffe aus der Tabelle
+            const allAttackRows = attacksTableBody.querySelectorAll('tr');
+            const allAttacks = [];
+            allAttackRows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                const spieler = inputs[0].value.trim();
+                const eigenesRH = parseInt(inputs[1].value);
+                const gegnerRH = parseInt(inputs[2].value);
+                const sterne = parseInt(inputs[3].value);
+                const prozent = parseInt(inputs[4].value);
+
+                // Nur gültige Zeilen hinzufügen
+                if (spieler && !isNaN(eigenesRH) && !isNaN(gegnerRH) && !isNaN(sterne) && !isNaN(prozent)) {
+                    allAttacks.push({ spieler, eigenesRH, gegnerRH, sterne, prozent });
+                }
+            });
+
+            // 3. Berechne die Punkte
+            const result = calculateBonusPoints(allAttacks, pointsConfig);
+            
+            // 4. Zeige die Ergebnisse an
             renderBonusResults(result);
-    
-            if(cwlBonusCalculatorView) cwlBonusCalculatorView.classList.add('hidden');
             if(cwlBonusResultsView) cwlBonusResultsView.classList.remove('hidden');
         };
     }
     
-    function calculateBonusPoints(cwlRoundsData, points) {
-        const allAttacks = [];
-        cwlRoundsData.forEach(war => {
-            if (war && war.clan && war.clan.members) {
-                war.clan.members.forEach(member => {
-                    if (member.attacks) {
-                        member.attacks.forEach(attack => {
-                            const opponent = war.opponent.members.find(o => o.tag === attack.defenderTag);
-                            if (opponent) {
-                                allAttacks.push({
-                                    spieler: member.name,
-                                    eigenesRH: member.townhallLevel,
-                                    gegnerRH: opponent.townhallLevel,
-                                    sterne: attack.stars,
-                                    prozent: attack.destructionPercentage
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        });
-    
+    function calculateBonusPoints(allAttacks, points) {
         const playerScores = {};
         allAttacks.forEach(atk => {
             if (!playerScores[atk.spieler]) {
-                playerScores[atk.spieler] = 0;
+                playerScores[atk.spieler] = { totalPoints: 0, attackCount: 0 };
             }
+            
+            playerScores[atk.spieler].attackCount++;
+            
             const rhDiff = atk.gegnerRH - atk.eigenesRH;
+            let currentAttackPoints = 0;
+
             let ell_pts = 0;
             if (rhDiff >= 2) ell_pts = points.ell_rh_p2;
             else if (rhDiff === 1) ell_pts = points.ell_rh_p1;
@@ -812,27 +593,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 bonus_pts += points.bonus_mut;
                 if (atk.prozent >= 30 && atk.prozent <= 49) bonus_pts += points.bonus_mut_extra;
             }
-            playerScores[atk.spieler] += ell_pts + atk_pts + bonus_pts;
+            
+            currentAttackPoints = ell_pts + atk_pts + bonus_pts;
+            playerScores[atk.spieler].totalPoints += currentAttackPoints;
         });
-
-        const attackCounts = allAttacks.reduce((acc, atk) => {
-            acc[atk.spieler] = (acc[atk.spieler] || 0) + 1;
-            return acc;
-        }, {});
         
         Object.keys(playerScores).forEach(spieler => {
-            if (attackCounts[spieler] === 7) {
-                playerScores[spieler] += points.bonus_alle_7;
+            if (playerScores[spieler].attackCount === 7) {
+                playerScores[spieler].totalPoints += points.bonus_alle_7;
             }
         });
         
-        return Object.entries(playerScores).map(([spieler, punkte]) => ({ spieler, punkte })).sort((a, b) => b.punkte - a.punkte);
+        return Object.entries(playerScores).map(([spieler, data]) => ({ spieler, punkte: data.totalPoints })).sort((a, b) => b.punkte - a.punkte);
     }
     
     function renderBonusResults(result) {
         const tableBody = document.getElementById('bonus-results-table-body');
         if(!tableBody) return;
         tableBody.innerHTML = '';
+
+        if (result.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="3">Keine gültigen Angriffe gefunden, um Punkte zu berechnen.</td></tr>';
+            return;
+        }
+
         result.forEach((player, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `<td>${index + 1}</td><td>${player.spieler}</td><td>${player.punkte.toFixed(0)}</td>`;
@@ -987,5 +771,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ======================================================
     fetchAllData(); 
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
+    // Initialisiere den Rechner einmal beim Laden der Seite
+    setupManualBonusCalculator();
 
 });
