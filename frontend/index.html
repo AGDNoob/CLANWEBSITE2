@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dein Clan Dashboard</title>
-    <!-- Chart.js für Diagramme laden -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
@@ -29,21 +28,18 @@
                 <li><a href="#" class="nav-link" data-target="page-war-center">⚔️ Kriegszentrale</a></li>
                 <li><a href="#" class="nav-link" data-target="page-capital">🏔️ Clan-Hauptstadt</a></li>
                 <li><a href="#" class="nav-link" data-target="page-cwl">🏆 CWL-Zentrale</a></li>
-                <!-- Zusammengelegter Navigationspunkt -->
                 <li><a href="#" class="nav-link" data-target="page-lab">🔬 Heldenlevel</a></li>
                 <li><a href="#" class="nav-link" data-target="page-credits">📜 Credits</a></li>
             </ul>
         </nav>
 
         <main class="main-content">
-            <!-- STARTSEITE -->
             <section id="page-home" class="page active">
                 <h1>Willkommen auf dem Clan Dashboard!</h1>
                 <p>Wähle links ein Werkzeug aus, um die Live-Daten zu sehen.</p>
                 <p>Alle Daten werden direkt von der offiziellen Clash of Clans API geladen.</p>
             </section>
 
-            <!-- CLAN-INFOS SEITE -->
             <section id="page-clan-info" class="page">
                 <div id="clan-info-master-view">
                     <header id="clan-header">
@@ -76,7 +72,6 @@
                 </div>
             </section>
 
-            <!-- CLAN-STATISTIKEN SEITE -->
             <section id="page-analytics" class="page">
                 <h1>Clan-Statistiken</h1>
                 <div class="analytics-grid">
@@ -102,7 +97,6 @@
                 </div>
             </section>
 
-            <!-- KRIEGSZENTRALE-SEITE -->
             <section id="page-war-center" class="page">
                 <h1>Kriegszentrale</h1>
                 <div id="current-war-master-view">
@@ -133,7 +127,6 @@
                 </div>
             </section>
 
-            <!-- CLAN-HAUPTSTADT SEITE -->
             <section id="page-capital" class="page">
                 <h1>Clan-Hauptstadt</h1>
                 <div class="dashboard-box">
@@ -147,107 +140,76 @@
                 </div>
             </section>
             
-            <!-- CWL-ZENTRALE SEITE -->
             <section id="page-cwl" class="page">
                 <h1>CWL-Zentrale</h1>
-                <p id="no-cwl-message">Aktuell findet keine Clankriegsliga statt.</p>
-                <div id="cwl-content" class="hidden">
-                    <div id="cwl-group-view">
-                        <div class="dashboard-box">
-                            <h2>CWL Gruppe & Statistiken</h2>
-                            <div class="cwl-stats-container">
-                                <div class="cwl-stat-box">
-                                    <h3>Runden-Übersicht</h3>
-                                    <table class="stats-table">
-                                        <thead><tr><th>Tag</th><th>Gegner</th><th>Ergebnis</th><th>Sterne</th></tr></thead>
-                                        <tbody id="cwl-round-overview-body"></tbody>
-                                    </table>
-                                </div>
-                                <div class="cwl-stat-box">
-                                    <h3>Spieler-Gesamtleistung</h3>
-                                     <table class="stats-table">
-                                        <thead><tr><th>Spieler</th><th>Angriffe</th><th>Sterne</th><th>Ø Zerst.</th></tr></thead>
-                                        <tbody id="cwl-player-stats-body"></tbody>
-                                    </table>
-                                </div>
-                                <div class="cwl-stat-box" id="cwl-mvp-box">
-                                    <h3>Bester Angreifer</h3>
-                                    <div id="cwl-mvp-content"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="dashboard-box">
-                            <h2>Kriegstage</h2>
-                            <div id="cwl-war-selection" class="day-selector-grid"></div>
-                        </div>
-                        <div class="dashboard-box">
-                            <h2>CWL Gruppen-Übersicht</h2>
-                            <table class="stats-table">
-                                <thead><tr><th>Clan</th><th>Level</th><th>Siege</th><th>Niederlagen</th></tr></thead>
-                                <tbody id="cwl-group-table-body"></tbody>
-                            </table>
-                        </div>
-                        <div class="dashboard-box" id="cwl-bonus-calculator-view">
-                            <h2>Interaktiver Bonus-Rechner</h2>
-                            <div class="bonus-rechner-grid">
-                                <div class="settings-box">
-                                    <h3>Punkte für RH-Differenz</h3>
-                                    <div class="setting-item"><label>RH+2</label><input type="number" id="p-ell-rh-p2" value="3"></div>
-                                    <div class="setting-item"><label>RH+1</label><input type="number" id="p-ell-rh-p1" value="2"></div>
-                                    <div class="setting-item"><label>RH=0</label><input type="number" id="p-ell-rh-0" value="1"></div>
-                                    <div class="setting-item"><label>RH-1</label><input type="number" id="p-ell-rh-m1" value="0"></div>
-                                    <div class="setting-item"><label>RH-2</label><input type="number" id="p-ell-rh-m2" value="-1"></div>
-                                </div>
-                                <div class="settings-box">
-                                    <h3>Punkte für 3 Sterne</h3>
-                                    <div class="setting-item"><label>3⭐ vs RH+2</label><input type="number" id="p-atk-3s-rh-p2" value="6"></div>
-                                    <div class="setting-item"><label>3⭐ vs RH=0</label><input type="number" id="p-atk-3s-rh-0" value="4"></div>
-                                    <div class="setting-item"><label>3⭐ vs RH-2</label><input type="number" id="p-atk-3s-rh-m2" value="2"></div>
-                                </div>
-                                 <div class="settings-box">
-                                    <h3>Punkte für 2 Sterne</h3>
-                                    <div class="setting-item"><label>2⭐ (90%+)</label><input type="number" id="p-atk-2s-90" value="4"></div>
-                                    <div class="setting-item"><label>2⭐ (80-89%)</label><input type="number" id="p-atk-2s-80-89" value="3"></div>
-                                    <div class="setting-item"><label>2⭐ (50-79%)</label><input type="number" id="p-atk-2s-50-79" value="2"></div>
-                                </div>
-                                <div class="settings-box">
-                                    <h3>Punkte für 1 Stern</h3>
-                                    <div class="setting-item"><label>1⭐ (90-99%)</label><input type="number" id="p-atk-1s-90-99" value="2"></div>
-                                    <div class="setting-item"><label>1⭐ (50-89%)</label><input type="number" id="p-atk-1s-50-89" value="1"></div>
-                                </div>
-                                 <div class="settings-box">
-                                    <h3>Bonuspunkte</h3>
-                                    <div class="setting-item"><label>Aktivität</label><input type="number" id="p-bonus-aktiv" value="1"></div>
-                                    <div class="setting-item"><label>100% Bonus</label><input type="number" id="p-bonus-100" value="1"></div>
-                                    <div class="setting-item"><label>Mutbonus (RH+3)</label><input type="number" id="p-bonus-mut" value="1"></div>
-                                    <div class="setting-item"><label>Extra Mut (30-49%)</label><input type="number" id="p-bonus-mut-extra" value="2"></div>
-                                    <div class="setting-item"><label>Alle 7 Angriffe</label><input type="number" id="p-bonus-alle-7" value="2"></div>
-                                </div>
-                            </div>
-                            <button id="calculate-bonus-btn" class="cta-button">Punkte berechnen!</button>
-                        </div>
-                        <div class="dashboard-box hidden" id="cwl-bonus-results-view">
-                            <button id="bonus-rechner-back-button">&larr; Zurück zum Rechner</button>
-                            <h2>🏆 Finale Bonus-Rangliste</h2>
-                            <div class="bonus-results-grid">
-                                <table class="stats-table">
-                                    <thead><tr><th>#</th><th>Spieler</th><th>Punkte</th></tr></thead>
-                                    <tbody id="bonus-results-table-body"></tbody>
-                                </table>
-                                <div class="chart-container">
-                                    <canvas id="bonus-chart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="cwl-war-detail-view" class="hidden">
-                        <button id="cwl-war-detail-back-button">&larr; Zurück zur CWL-Übersicht</button>
-                        <div id="cwl-war-detail-content"></div>
-                    </div>
+
+                <div class="dashboard-box">
+                    <p><strong>Info zur CWL-Ansicht:</strong></p>
+                    <p>Ich habe in den letzten Tagen etliche Stunden in die automatische CWL-Zentrale gesteckt und bin dem Geheimnis endlich auf die Spur gekommen: Es liegt nicht am Code, sondern an der offiziellen API. Supercell rückt die Live-Daten während der CWL einfach nicht raus.</p>
+                    <p>Deshalb habe ich beschlossen, die automatische Ansicht erstmal rauszunehmen. Der <strong>Bonus-Rechner</strong> für die manuelle Eingabe bleibt aber natürlich drin!</p>
                 </div>
+
+                <p id="no-cwl-message">Aktuell findet keine Clankriegsliga statt. Der Bonus-Rechner ist daher nicht verfügbar.</p>
+
+                <div id="cwl-content" class="hidden">
+                    
+                    <div class="dashboard-box" id="cwl-bonus-calculator-view">
+                        <h2>Interaktiver Bonus-Rechner</h2>
+                        <p>Hier könnt ihr am Ende der CWL die Punkte berechnen, um die Bonus-Medaillen fair zu verteilen. Klickt dazu einfach auf "Punkte berechnen". Das Skript holt sich automatisch die Daten aller abgeschlossenen Kriegstage.</p>
+                        <div class="bonus-rechner-grid">
+                            <div class="settings-box">
+                                <h3>Punkte für RH-Differenz</h3>
+                                <div class="setting-item"><label>RH+2</label><input type="number" id="p-ell-rh-p2" value="3"></div>
+                                <div class="setting-item"><label>RH+1</label><input type="number" id="p-ell-rh-p1" value="2"></div>
+                                <div class="setting-item"><label>RH=0</label><input type="number" id="p-ell-rh-0" value="1"></div>
+                                <div class="setting-item"><label>RH-1</label><input type="number" id="p-ell-rh-m1" value="0"></div>
+                                <div class="setting-item"><label>RH-2</label><input type="number" id="p-ell-rh-m2" value="-1"></div>
+                            </div>
+                            <div class="settings-box">
+                                <h3>Punkte für 3 Sterne</h3>
+                                <div class="setting-item"><label>3⭐ vs RH+2</label><input type="number" id="p-atk-3s-rh-p2" value="6"></div>
+                                <div class="setting-item"><label>3⭐ vs RH=0</label><input type="number" id="p-atk-3s-rh-0" value="4"></div>
+                                <div class="setting-item"><label>3⭐ vs RH-2</label><input type="number" id="p-atk-3s-rh-m2" value="2"></div>
+                            </div>
+                             <div class="settings-box">
+                                <h3>Punkte für 2 Sterne</h3>
+                                <div class="setting-item"><label>2⭐ (90%+)</label><input type="number" id="p-atk-2s-90" value="4"></div>
+                                <div class="setting-item"><label>2⭐ (80-89%)</label><input type="number" id="p-atk-2s-80-89" value="3"></div>
+                                <div class="setting-item"><label>2⭐ (50-79%)</label><input type="number" id="p-atk-2s-50-79" value="2"></div>
+                            </div>
+                            <div class="settings-box">
+                                <h3>Punkte für 1 Stern</h3>
+                                <div class="setting-item"><label>1⭐ (90-99%)</label><input type="number" id="p-atk-1s-90-99" value="2"></div>
+                                <div class="setting-item"><label>1⭐ (50-89%)</label><input type="number" id="p-atk-1s-50-89" value="1"></div>
+                            </div>
+                             <div class="settings-box">
+                                <h3>Bonuspunkte</h3>
+                                <div class="setting-item"><label>Aktivität</label><input type="number" id="p-bonus-aktiv" value="1"></div>
+                                <div class="setting-item"><label>100% Bonus</label><input type="number" id="p-bonus-100" value="1"></div>
+                                <div class="setting-item"><label>Mutbonus (RH+3)</label><input type="number" id="p-bonus-mut" value="1"></div>
+                                <div class="setting-item"><label>Extra Mut (30-49%)</label><input type="number" id="p-bonus-mut-extra" value="2"></div>
+                                <div class="setting-item"><label>Alle 7 Angriffe</label><input type="number" id="p-bonus-alle-7" value="2"></div>
+                            </div>
+                        </div>
+                        <button id="calculate-bonus-btn" class="cta-button">Punkte berechnen!</button>
+                    </div>
+                    <div class="dashboard-box hidden" id="cwl-bonus-results-view">
+                        <button id="bonus-rechner-back-button">&larr; Zurück zum Rechner</button>
+                        <h2>🏆 Finale Bonus-Rangliste</h2>
+                        <div class="bonus-results-grid">
+                            <table class="stats-table">
+                                <thead><tr><th>#</th><th>Spieler</th><th>Punkte</th></tr></thead>
+                                <tbody id="bonus-results-table-body"></tbody>
+                            </table>
+                            <div class="chart-container">
+                                <canvas id="bonus-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    </div>
             </section>
 
-            <!-- Zusammengelegte Seite für Helden & Tiere -->
             <section id="page-lab" class="page">
                 <h1>🔬 Heldenlevel</h1>
                 <p>Hier siehst du eine Übersicht der Helden aller Mitglieder. Daten werden live geladen, dies kann einen Moment dauern.</p>
@@ -261,13 +223,11 @@
                     <div class="dashboard-box">
                         <h2>Helden-Level</h2>
                         <div id="hero-table-container" class="lab-table-container">
-                            <!-- Helden-Tabelle wird hier per JS eingefügt -->
-                        </div>
+                            </div>
                     </div>
                 </div>
             </section>
             
-            <!-- CREDITS SEITE -->
             <section id="page-credits" class="page">
                 <div class="credits-content">
                     <h1>Credits</h1>
