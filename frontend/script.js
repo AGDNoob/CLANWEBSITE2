@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ======================================================
     // KONFIGURATION & GLOBALE VARIABLEN
     // ======================================================
-    const API_BASE_URL = 'https://agdnoob1.pythonanywhere.com/'; // Für lokales Testen
+    const API_BASE_URL = 'https://agdnoob1.pythonanywhere.com'; // Für lokales Testen
     // const API_BASE_URL = 'https://magicdragons.vercel.app'; // Für Live-Version
     const POLLING_INTERVAL_MS = 60000; // 60 Sekunden
     let currentMemberList = [];
@@ -1002,3 +1002,4 @@ function renderCWLWarDetails(warData) {
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 
 });
+
