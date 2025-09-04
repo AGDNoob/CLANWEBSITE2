@@ -230,45 +230,64 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
+// HILFSFUNKTION: Erstellt eine einklappbare Spieler-Sektion (MIT NEUER AUTOMATIK)
+function createPlayerSection(name, th, attackCount) {
+    const accordionContainer = document.getElementById('player-accordion-container');
+    const playerSection = document.createElement('div');
+    playerSection.className = 'player-section';
+    playerSection.dataset.playerName = name;
+    playerSection.dataset.playerTh = th;
 
-    // HILFSFUNKTION: Erstellt eine einklappbare Spieler-Sektion
-    function createPlayerSection(name, th, attackCount) {
-        const accordionContainer = document.getElementById('player-accordion-container');
-        const playerSection = document.createElement('div');
-        playerSection.className = 'player-section';
-        playerSection.dataset.playerName = name;
-        playerSection.dataset.playerTh = th;
+    // Erstelle den Header und den Container für die Angriffe
+    playerSection.innerHTML = `
+        <div class="player-header">
+            <h4>${name} (RH ${th})</h4>
+            <div class="toggle-icon">▼</div>
+        </div>
+        <div class="attacks-wrapper"></div>
+    `;
+    
+    const attacksWrapper = playerSection.querySelector('.attacks-wrapper');
 
-        let attacksHtml = '';
-        for (let i = 1; i <= attackCount; i++) {
-            attacksHtml += `
-                <div class="attack-row">
-                    <label>Angriff #${i}</label>
-                    <input type="number" placeholder="Gegner RH" title="Gegner Rathaus-Level">
-                    <input type="number" placeholder="Sterne ⭐" min="0" max="3" title="Sterne">
-                    <input type="number" placeholder="Prozent %" min="0" max="100" title="Zerstörung in Prozent">
-                </div>
-            `;
-        }
-
-        playerSection.innerHTML = `
-            <div class="player-header">
-                <h4>${name} (RH ${th})</h4>
-                <div class="toggle-icon">▼</div>
-            </div>
-            <div class="attacks-wrapper">
-                ${attacksHtml}
-            </div>
+    // Erstelle jede Angriffszeile einzeln, um Event Listener hinzuzufügen
+    for (let i = 1; i <= attackCount; i++) {
+        const attackRow = document.createElement('div');
+        attackRow.className = 'attack-row';
+        attackRow.innerHTML = `
+            <label>Angriff #${i}</label>
+            <input type="number" placeholder="Gegner RH" title="Gegner Rathaus-Level" class="gegner-rh-input">
+            <input type="number" placeholder="Sterne ⭐" min="0" max="3" title="Sterne" class="sterne-input">
+            <input type="number" placeholder="Prozent %" min="0" max="100" title="Zerstörung in Prozent" class="prozent-input">
         `;
         
-        accordionContainer.appendChild(playerSection);
+        // HIER KOMMT DIE NEUE LOGIK
+        const sterneInput = attackRow.querySelector('.sterne-input');
+        const prozentInput = attackRow.querySelector('.prozent-input');
 
-        // Event Listener für das Ein-/Ausklappen hinzufügen
-        playerSection.querySelector('.player-header').addEventListener('click', () => {
-            playerSection.classList.toggle('closed');
+        // Listener 1: Wenn Sterne geändert werden
+        sterneInput.addEventListener('input', () => {
+            if (sterneInput.value === '3') {
+                prozentInput.value = 100;
+            }
         });
-    }
 
+        // Listener 2: Wenn Prozente geändert werden
+        prozentInput.addEventListener('input', () => {
+            if (prozentInput.value === '100') {
+                sterneInput.value = 3;
+            }
+        });
+
+        attacksWrapper.appendChild(attackRow);
+    }
+    
+    accordionContainer.appendChild(playerSection);
+
+    // Event Listener für das Ein-/Ausklappen hinzufügen
+    playerSection.querySelector('.player-header').addEventListener('click', () => {
+        playerSection.classList.toggle('closed');
+    });
+}
     // Die Funktion calculateBonusPoints bleibt fast gleich, nimmt jetzt aber die manuellen Daten
     function calculateBonusPoints(allAttacks, points) {
         const playerScores = {};
@@ -327,3 +346,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // KORREKTUR: Der Rechner wird nur noch hier, einmal und zuverlässig, initialisiert.
     setupManualBonusCalculator(); 
 });
+
