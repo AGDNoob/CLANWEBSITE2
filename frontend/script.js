@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
         allPlayersData.sort((a, b) => b.townHallLevel - a.townHallLevel);
         allPlayersData.forEach(player => {
             if (!player || !player.heroes) return;
-            tableHtml += `<tr><td><div class="player-cell">${player.name}<span class="player-th-sublabel">RH${player.townHallLevel}</span></div></td>`;
+            tableHtml += `<tr><td><div class="player-cell">${player.name}<span class="player-th-sublabel">RH${player.townhallLevel}</span></div></td>`;
             const playerHeroes = new Map(player.heroes.map(hero => [hero.name, hero]));
             HERO_ORDER.forEach(heroName => {
                 const hero = playerHeroes.get(heroName);
