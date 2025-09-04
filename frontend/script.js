@@ -3,8 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ======================================================
     // KONFIGURATION & GLOBALE VARIABLEN
     // ======================================================
-    const API_BASE_URL = 'https://agdnoob1.pythonanywhere.com'; // Für lokales Testen
-    // const API_BASE_URL = 'https://magicdragons.vercel.app'; // Für Live-Version
+    const API_BASE_URL = 'https://agdnoob1.pythonanywhere.com';
     const POLLING_INTERVAL_MS = 60000; // 60 Sekunden
     let currentMemberList = [];
     let capitalChartInstance = null;
@@ -12,8 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let thChartInstance = null;
     let leagueChartInstance = null;
     let currentCWLData = null;
-    let labDataLoaded = false; // Verhindert mehrfaches Laden der Daten
-    let currentWarData = null; // NEUE VARIABLE für die Kriegsdaten
+    let labDataLoaded = false;
+    let currentWarData = null;
     // --- ELEMENT REFERENZEN ---
     const navLinks = document.querySelectorAll('.nav-link');
     const pages = document.querySelectorAll('.page');
@@ -38,23 +37,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // ======================================================
     // LIVE-UPDATE LOGIK (POLLING)
     // ======================================================
-   // NEU: Die Funktion wird "async", damit wir auf Ergebnisse warten können.
-async function fetchAllData() {
-    console.log("Rufe Live-Daten ab...", new Date().toLocaleTimeString());
-    
-    // Warte, bis die Clan-Infos geladen sind.
-    await fetchClanInfo(); 
-    
-    // Warte, bis der aktuelle Krieg (und damit die CWL-Tagesdaten) geladen ist.
-    await initializeWarCenter(); 
-    
-    // Lade den Rest.
-    await fetchCapitalRaids();
-    
-    // Diese Funktion wird jetzt als letztes aufgerufen und hat garantiert
-    // Zugriff auf die aktuellen Kriegsdaten.
-    await fetchCWLGroup(); 
-}
+    async function fetchAllData() {
+        console.log("Rufe Live-Daten ab...", new Date().toLocaleTimeString());
+        await fetchClanInfo(); 
+        await initializeWarCenter(); 
+        await fetchCapitalRaids();
+        await fetchCWLGroup(); 
+    }
     // ======================================================
     // NAVIGATION & VIEW MANAGEMENT
     // ======================================================
@@ -73,7 +62,6 @@ async function fetchAllData() {
                 mobileOverlay.classList.remove('open');
             }
 
-            // Reset views on navigation
             if(clanInfoMasterView) clanInfoMasterView.classList.remove('hidden');
             if(playerProfileView) playerProfileView.classList.add('hidden');
             if(currentWarMasterView) currentWarMasterView.classList.remove('hidden');
@@ -83,7 +71,6 @@ async function fetchAllData() {
             if(cwlBonusCalculatorView) cwlBonusCalculatorView.classList.remove('hidden');
             if(cwlBonusResultsView) cwlBonusResultsView.classList.add('hidden');
             
-            // Logik für die zusammengelegte Seite
             if (targetId === 'page-lab' && !labDataLoaded) {
                 fetchPlayerDataForLab();
             }
@@ -167,10 +154,10 @@ async function fetchAllData() {
             renderDonationStats(currentMemberList);
             renderThDistributionChart(currentMemberList);
             renderLeagueDistributionChart(currentMemberList);
-            return true; // Signalisiert Erfolg
+            return true;
         } catch (error) { 
             console.error("Fehler bei Clan-Infos:", error); 
-            return false; // Signalisiert Fehler
+            return false;
         }
     }
 
@@ -192,7 +179,7 @@ async function fetchAllData() {
         } catch (error) { console.error("Fehler bei Hauptstadt-Raids:", error); }
     }
     
-   async function initializeWarCenter() {
+    async function initializeWarCenter() {
         const notInWarMessage = document.getElementById('not-in-war-message');
         const currentWarDashboard = document.getElementById('current-war-dashboard');
         if(!notInWarMessage || !currentWarDashboard) return;
@@ -201,15 +188,14 @@ async function fetchAllData() {
             if (response.status === 404) {
                 notInWarMessage.classList.remove('hidden');
                 currentWarDashboard.classList.add('hidden');
-                currentWarData = null; // Wichtig: Zurücksetzen
+                currentWarData = null;
             } else if (response.ok) {
                 const warData = await response.json();
-                currentWarData = warData; // Speichere die aktuellen Kriegsdaten global
+                currentWarData = warData;
                 notInWarMessage.classList.add('hidden');
                 currentWarDashboard.classList.remove('hidden');
                 renderCurrentWarDashboard(warData);
                 renderDetailedWarView(warData);
-                // Der Kriegsplan-Generator bleibt hier
                 if (warData.state !== 'notInWar') {
                     generateAndRenderWarPlan(warData);
                 }
@@ -222,107 +208,70 @@ async function fetchAllData() {
         }
         fetchWarlog();
     }
-// In der Datei script.js
-async function fetchCWLGroup() {
-    const noCwlMessage = document.getElementById('no-cwl-message');
-    const cwlContent = document.getElementById('cwl-content');
-    if (!noCwlMessage || !cwlContent) return;
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/clan/cwl`);
-        if (response.status === 404) {
+    // ======================================================
+    // HIER BEGINNEN DIE ZWEI GEÄNDERTEN FUNKTIONEN
+    // ======================================================
+
+    async function fetchCWLGroup() {
+        const noCwlMessage = document.getElementById('no-cwl-message');
+        const cwlContent = document.getElementById('cwl-content');
+        if (!noCwlMessage || !cwlContent) return;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/clan/cwl`);
+            if (response.status === 404) {
+                noCwlMessage.classList.remove('hidden');
+                cwlContent.classList.add('hidden');
+                return;
+            }
+            if (!response.ok) throw new Error(`Serverfehler: ${response.status}`);
+
+            const groupData = await response.json();
+            noCwlMessage.classList.add('hidden');
+            cwlContent.classList.remove('hidden');
+            
+            renderCWLGroup(groupData);
+            renderCWLWarSelection(groupData.rounds);
+            initializeBonusCalculator(groupData.rounds);
+
+            // START DER "SAMMEL-STRATEGIE"
+            console.log("Starte das Sammeln der Daten für alle CWL-Kampftage...");
+            
+            const warDataPromises = groupData.rounds.map(round => {
+                const warTag = round.warTags.find(tag => tag !== '#0');
+                return fetchCWLWarDataByTag(warTag);
+            });
+
+            const allRoundsData = await Promise.all(warDataPromises);
+
+            const completedRoundsData = allRoundsData.filter(war => {
+                if (war && war.clan && Array.isArray(war.clan.members) && war.clan.members.length > 0) {
+                    return true; 
+                }
+                console.log("Ein Kriegstag wurde übersprungen (vermutlich der aktuelle), da keine Mitgliederdaten vorliegen.");
+                return false;
+            });
+
+            const isDataPartial = completedRoundsData.length < allRoundsData.filter(r => r).length;
+
+            if (completedRoundsData.length > 0) {
+                const playerStats = calculateCWLPlayerStats(completedRoundsData);
+                renderCWLStatistics(playerStats.stats, playerStats.bestAttacker, isDataPartial); 
+                renderCWLRoundOverview(completedRoundsData);
+            } else {
+                console.log("Bisher keine abgeschlossenen CWL-Kriegstage mit Daten gefunden.");
+                renderCWLStatistics([], null, false); 
+            }
+
+        } catch (error) {
+            console.error("Ein Fehler ist in fetchCWLGroup aufgetreten:", error);
+            noCwlMessage.textContent = "CWL-Daten konnten nicht geladen werden.";
             noCwlMessage.classList.remove('hidden');
             cwlContent.classList.add('hidden');
-            return;
-        }
-        if (!response.ok) throw new Error(`Serverfehler: ${response.status}`);
-
-        const groupData = await response.json();
-        noCwlMessage.classList.add('hidden');
-        cwlContent.classList.remove('hidden');
-        
-        renderCWLGroup(groupData);
-        renderCWLWarSelection(groupData.rounds);
-        initializeBonusCalculator(groupData.rounds);
-
-        // START DER "SAMMEL-STRATEGIE"
-        console.log("Starte das Sammeln der Daten für alle CWL-Kampftage...");
-        
-        const warDataPromises = groupData.rounds.map(round => {
-            const warTag = round.warTags.find(tag => tag !== '#0');
-            return fetchCWLWarDataByTag(warTag);
-        });
-
-        const allRoundsData = await Promise.all(warDataPromises);
-
-        const completedRoundsData = allRoundsData.filter(war => {
-            if (war && war.clan && Array.isArray(war.clan.members) && war.clan.members.length > 0) {
-                return true; 
-            }
-            console.log("Ein Kriegstag wurde übersprungen (vermutlich der aktuelle), da keine Mitgliederdaten vorliegen.");
-            return false;
-        });
-
-        const isDataPartial = completedRoundsData.length < allRoundsData.filter(r => r).length;
-
-        if (completedRoundsData.length > 0) {
-            const playerStats = calculateCWLPlayerStats(completedRoundsData);
-            renderCWLStatistics(playerStats.stats, playerStats.bestAttacker, isDataPartial); 
-            renderCWLRoundOverview(completedRoundsData);
-        } else {
-            console.log("Bisher keine abgeschlossenen CWL-Kriegstage mit Daten gefunden.");
-            renderCWLStatistics([], null, false); 
-        }
-
-    } catch (error) {
-        console.error("Ein Fehler ist in fetchCWLGroup aufgetreten:", error);
-        noCwlMessage.textContent = "CWL-Daten konnten nicht geladen werden.";
-        noCwlMessage.classList.remove('hidden');
-        cwlContent.classList.add('hidden');
-    }
-}
-
-function renderCWLStatistics(playerStats, bestAttacker, isDataPartial) {
-    const statsContainer = document.getElementById('cwl-player-stats-body');
-    const mvpContainer = document.getElementById('cwl-mvp-content');
-    // Hinzugefügt: Referenz zur Überschrift, damit wir sie ändern können.
-    // Du musst sicherstellen, dass dein <h3>-Tag diese ID hat: <h3 id="cwl-stats-header">Gesamtstatistik</h3>
-    const statsHeader = document.getElementById('cwl-stats-header'); 
-
-    if (statsHeader) {
-        if (isDataPartial) {
-            statsHeader.innerHTML = 'Gesamtstatistik <span class="partial-data-hint">(Nur abgeschlossene Tage)</span>';
-        } else {
-            statsHeader.textContent = 'Gesamtstatistik';
         }
     }
 
-    if (statsContainer) {
-        statsContainer.innerHTML = '';
-        
-        if (!playerStats || playerStats.length === 0) {
-            statsContainer.innerHTML = `<tr><td colspan="4"><p>Warte auf die ersten vollständigen Daten nach Ende des Kampftages. Die Statistik wird hier Tag für Tag wachsen!</p></td></tr>`;
-        } else {
-            playerStats.forEach(player => {
-                const avgDestruction = player.attacks > 0 ? (player.destruction / player.attacks).toFixed(2) : 0;
-                const row = document.createElement('tr');
-                row.innerHTML = `<td>${player.name}</td><td>${player.attacks}</td><td>${player.stars}</td><td>${avgDestruction}%</td>`;
-                statsContainer.appendChild(row);
-            });
-        }
-    }
-    
-    if (mvpContainer) {
-        if (bestAttacker) {
-            const avgDestruction = bestAttacker.attacks > 0 ? (bestAttacker.destruction / bestAttacker.attacks).toFixed(2) : 0;
-            mvpContainer.innerHTML = `<h3>${bestAttacker.name}</h3><p>⭐ Gesamtsterne: ${bestAttacker.stars}</p><p>🎯 Angriffe genutzt: ${bestAttacker.attacks}</p><p>💥 Ø Zerstörung: ${avgDestruction}%</p>`;
-        } else {
-            mvpContainer.innerHTML = '<p>Noch keine Angriffsdaten für eine Auswertung vorhanden.</p>';
-        }
-    }
-}
-
-    }
     async function fetchCWLWarDataByTag(warTag) {
         if (!warTag || warTag === '#0') return null;
         try {
@@ -335,51 +284,46 @@ function renderCWLStatistics(playerStats, bestAttacker, isDataPartial) {
         }
     }
 
-    // Zusammengelegte, robuste Ladefunktion für Helden & Tiere
-   async function fetchPlayerDataForLab() {
-    const loadingContainer = document.getElementById('lab-loading-state');
-    const contentContainer = document.getElementById('lab-content-container');
-    if (!loadingContainer || !contentContainer) return;
+    async function fetchPlayerDataForLab() {
+        const loadingContainer = document.getElementById('lab-loading-state');
+        const contentContainer = document.getElementById('lab-content-container');
+        if (!loadingContainer || !contentContainer) return;
 
-    loadingContainer.classList.remove('hidden');
-    contentContainer.classList.add('hidden');
-    labDataLoaded = true;
+        loadingContainer.classList.remove('hidden');
+        contentContainer.classList.add('hidden');
+        labDataLoaded = true;
 
-    // Wir brauchen die Mitgliederliste nur, um die Spieler-Tags zu bekommen
-    if (currentMemberList.length === 0) {
-        const success = await fetchClanInfo();
-        if (!success) {
-            loadingContainer.innerHTML = '<p class="error-message">Die Clan-Mitgliederliste konnte nicht geladen werden. <button id="retry-lab">Erneut versuchen</button></p>';
+        if (currentMemberList.length === 0) {
+            const success = await fetchClanInfo();
+            if (!success) {
+                loadingContainer.innerHTML = '<p class="error-message">Die Clan-Mitgliederliste konnte nicht geladen werden. <button id="retry-lab">Erneut versuchen</button></p>';
+                document.getElementById('retry-lab').addEventListener('click', () => { labDataLoaded = false; fetchPlayerDataForLab(); });
+                return;
+            }
+        }
+
+        try {
+            loadingContainer.innerHTML = '<div class="spinner"></div><p>Lade detaillierte Spielerdaten...</p>';
+            
+            const playerPromises = currentMemberList.map(member =>
+                fetch(`${API_BASE_URL}/api/player/${member.tag.replace('#', '')}`)
+                    .then(res => res.ok ? res.json() : Promise.reject(`Fehler bei ${member.name}: ${res.statusText}`))
+            );
+            
+            const allPlayersData = await Promise.all(playerPromises);
+            
+            renderHeroTable(allPlayersData);
+            
+            loadingContainer.classList.add('hidden');
+            contentContainer.classList.remove('hidden');
+
+        } catch (error) {
+            console.error("Fehler beim Abrufen der Spielerdaten für das Labor:", error);
+            loadingContainer.classList.remove('hidden');
+            loadingContainer.innerHTML = `<p class="error-message">Einige Spielerdaten konnten nicht geladen werden. <button id="retry-lab">Erneut versuchen</button></p>`;
             document.getElementById('retry-lab').addEventListener('click', () => { labDataLoaded = false; fetchPlayerDataForLab(); });
-            return;
         }
     }
-
-    try {
-        loadingContainer.innerHTML = '<div class="spinner"></div><p>Lade detaillierte Spielerdaten...</p>';
-        
-        // Hier holen wir die VOLLSTÄNDIGEN Daten für jeden Spieler
-        const playerPromises = currentMemberList.map(member =>
-            fetch(`${API_BASE_URL}/api/player/${member.tag.replace('#', '')}`)
-                .then(res => res.ok ? res.json() : Promise.reject(`Fehler bei ${member.name}: ${res.statusText}`))
-        );
-        
-        // HIER WAR DER FEHLER VERSTECKT. 'allPlayersData' ist die richtige Variable mit allen Details.
-        const allPlayersData = await Promise.all(playerPromises);
-        
-        // Wir übergeben die detaillierten Daten an BEIDE Tabellen-Funktionen
-        renderHeroTable(allPlayersData);
-        
-        loadingContainer.classList.add('hidden');
-        contentContainer.classList.remove('hidden');
-
-    } catch (error) {
-        console.error("Fehler beim Abrufen der Spielerdaten für das Labor:", error);
-        loadingContainer.classList.remove('hidden');
-        loadingContainer.innerHTML = `<p class="error-message">Einige Spielerdaten konnten nicht geladen werden. <button id="retry-lab">Erneut versuchen</button></p>`;
-        document.getElementById('retry-lab').addEventListener('click', () => { labDataLoaded = false; fetchPlayerDataForLab(); });
-    }
-}
 
     // ======================================================
     // RENDER-FUNKTIONEN
@@ -527,67 +471,61 @@ function renderCWLStatistics(playerStats, bestAttacker, isDataPartial) {
     }
 
     function renderDetailedWarView(war) {
-    const ourContainer = document.getElementById('detailed-war-our-clan');
-    const opponentContainer = document.getElementById('detailed-war-opponent-clan');
-    if (!ourContainer || !opponentContainer) return;
-    ourContainer.innerHTML = '<h3>Unser Clan</h3>';
-    opponentContainer.innerHTML = `<h3>Gegner: ${war.opponent.name}</h3>`;
+        const ourContainer = document.getElementById('detailed-war-our-clan');
+        const opponentContainer = document.getElementById('detailed-war-opponent-clan');
+        if (!ourContainer || !opponentContainer) return;
+        ourContainer.innerHTML = '<h3>Unser Clan</h3>';
+        opponentContainer.innerHTML = `<h3>Gegner: ${war.opponent.name}</h3>`;
 
-    // NEU & SICHER: Wir prüfen, ob die Mitgliederlisten überhaupt existieren, bevor wir sie nutzen.
-    if (Array.isArray(war.clan.members)) {
-        const sortedMembers = [...war.clan.members].sort((a, b) => a.mapPosition - b.mapPosition);
-        
-        sortedMembers.forEach(member => {
-            const memberCard = document.createElement('div');
-            memberCard.className = 'war-player-card';
+        if (Array.isArray(war.clan.members)) {
+            const sortedMembers = [...war.clan.members].sort((a, b) => a.mapPosition - b.mapPosition);
+            
+            sortedMembers.forEach(member => {
+                const memberCard = document.createElement('div');
+                memberCard.className = 'war-player-card';
 
-            let attacksHtml = '<div class="attack-info">Kein Angriff</div>';
-            if (member.attacks && Array.isArray(war.opponent.members)) { // Zusätzliche Sicherheit
-                attacksHtml = member.attacks.map(attack => {
-                    const defender = war.opponent.members.find(def => def.tag === attack.defenderTag);
-                    const defenderName = defender ? `${defender.mapPosition}. ${defender.name}` : 'Unbekannt';
-                    return `<div class="attack-info"><span>⚔️ vs ${defenderName}</span><span class="attack-result">${attack.stars}⭐ ${attack.destructionPercentage}%</span></div>`;
-                }).join('');
-            }
-            memberCard.innerHTML = `<div class="war-player-header"><span class="player-map-pos">${member.mapPosition}.</span><span class="player-name">${member.name}</span><span class="player-th">RH${member.townhallLevel}</span></div><div class="attacks-container">${attacksHtml}</div>`;
-            ourContainer.appendChild(memberCard);
-        });
-    }
-
-    if (Array.isArray(war.opponent.members)) {
-        [...war.opponent.members].sort((a, b) => a.mapPosition - b.mapPosition).forEach(member => {
-            const opponentCard = document.createElement('div');
-            opponentCard.className = 'war-player-card opponent';
-            let defenseHtml = `${member.defenseCount || 0} Verteidigung(en)`;
-            if (member.bestOpponentAttack && Array.isArray(war.clan.members)) { // Zusätzliche Sicherheit
-                const attacker = war.clan.members.find(att => att.tag === member.bestOpponentAttack.attackerTag);
-                if (attacker) { // Nur anzeigen, wenn Angreifer gefunden wird
-                    defenseHtml = `Bester Angriff von ${attacker.name}: ${member.bestOpponentAttack.stars}⭐`;
+                let attacksHtml = '<div class="attack-info">Kein Angriff</div>';
+                if (member.attacks && Array.isArray(war.opponent.members)) {
+                    attacksHtml = member.attacks.map(attack => {
+                        const defender = war.opponent.members.find(def => def.tag === attack.defenderTag);
+                        const defenderName = defender ? `${defender.mapPosition}. ${defender.name}` : 'Unbekannt';
+                        return `<div class="attack-info"><span>⚔️ vs ${defenderName}</span><span class="attack-result">${attack.stars}⭐ ${attack.destructionPercentage}%</span></div>`;
+                    }).join('');
                 }
-            }
-            opponentCard.innerHTML = `<div class="war-player-header"><span class="player-map-pos">${member.mapPosition}.</span><span class="player-name">${member.name}</span><span class="player-th">RH${member.townhallLevel}</span></div><div class="defenses-container">${defenseHtml}</div>`;
-            opponentContainer.appendChild(opponentCard);
-        });
+                memberCard.innerHTML = `<div class="war-player-header"><span class="player-map-pos">${member.mapPosition}.</span><span class="player-name">${member.name}</span><span class="player-th">RH${member.townhallLevel}</span></div><div class="attacks-container">${attacksHtml}</div>`;
+                ourContainer.appendChild(memberCard);
+            });
+        }
+
+        if (Array.isArray(war.opponent.members)) {
+            [...war.opponent.members].sort((a, b) => a.mapPosition - b.mapPosition).forEach(member => {
+                const opponentCard = document.createElement('div');
+                opponentCard.className = 'war-player-card opponent';
+                let defenseHtml = `${member.defenseCount || 0} Verteidigung(en)`;
+                if (member.bestOpponentAttack && Array.isArray(war.clan.members)) {
+                    const attacker = war.clan.members.find(att => att.tag === member.bestOpponentAttack.attackerTag);
+                    if (attacker) {
+                        defenseHtml = `Bester Angriff von ${attacker.name}: ${member.bestOpponentAttack.stars}⭐`;
+                    }
+                }
+                opponentCard.innerHTML = `<div class="war-player-header"><span class="player-map-pos">${member.mapPosition}.</span><span class="player-name">${member.name}</span><span class="player-th">RH${member.townhallLevel}</span></div><div class="defenses-container">${defenseHtml}</div>`;
+                opponentContainer.appendChild(opponentCard);
+            });
+        }
     }
-}
-    // ======================================================
-    // NEUE FUNKTION: KI-KRIEGSPLAN GENERATOR
-    // ======================================================
+    
     function generateAndRenderWarPlan(warData) {
         const container = document.getElementById('war-plan-container');
-        // Sicherheitscheck, ob die Daten vollständig sind
         if (!container || !warData || !Array.isArray(warData.clan.members) || !Array.isArray(warData.opponent.members)) {
             container.innerHTML = '<p class="error-message">Daten für den Kriegsplan sind unvollständig oder es sind keine Mitglieder im Krieg.</p>';
             return;
         }
 
-        // 1. Beide Listen nach Kartenposition sortieren
         const ourMembers = [...warData.clan.members].sort((a, b) => a.mapPosition - b.mapPosition);
         const opponentMembers = [...warData.opponent.members].sort((a, b) => a.mapPosition - b.mapPosition);
 
         let planHtml = '<div class="war-plan-grid">';
 
-        // 2. Durch unsere Mitglieder gehen und den "Spiegel"-Gegner zuweisen
         ourMembers.forEach(player => {
             const opponent = opponentMembers.find(opp => opp.mapPosition === player.mapPosition);
             
@@ -611,22 +549,22 @@ function renderCWLStatistics(playerStats, bestAttacker, isDataPartial) {
         planHtml += '</div>';
         container.innerHTML = planHtml;
     }
-    function renderCWLGroup(groupData) {
-    const container = document.getElementById('cwl-group-table-body');
-    if (!container) return;
-    container.innerHTML = '';
-    
-    // NEU & SICHER: Wir filtern zuerst alle Clans raus, die keine gültigen Daten haben.
-    const sortedClans = [...groupData.clans]
-        .filter(clanEntry => clanEntry && clanEntry.clan && clanEntry.clan.name)
-        .sort((a, b) => a.clan.name.localeCompare(b.clan.name));
 
-    sortedClans.forEach(clanEntry => {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td><img src="${clanEntry.clan.badgeUrls.small}" alt="Wappen" width="30"> ${clanEntry.clan.name}</td><td>${clanEntry.clan.clanLevel}</td><td>${clanEntry.wars.filter(w => w.result === 'win').length}</td><td>${clanEntry.wars.filter(w => w.result === 'lose').length}</td>`;
-        container.appendChild(row);
-    });
-}
+    function renderCWLGroup(groupData) {
+        const container = document.getElementById('cwl-group-table-body');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        const sortedClans = [...groupData.clans]
+            .filter(clanEntry => clanEntry && clanEntry.clan && clanEntry.clan.name)
+            .sort((a, b) => a.clan.name.localeCompare(b.clan.name));
+
+        sortedClans.forEach(clanEntry => {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td><img src="${clanEntry.clan.badgeUrls.small}" alt="Wappen" width="30"> ${clanEntry.clan.name}</td><td>${clanEntry.clan.clanLevel}</td><td>${clanEntry.wars.filter(w => w.result === 'win').length}</td><td>${clanEntry.wars.filter(w => w.result === 'lose').length}</td>`;
+            container.appendChild(row);
+        });
+    }
     
     function renderCWLWarSelection(rounds) {
         const container = document.getElementById('cwl-war-selection');
@@ -654,111 +592,115 @@ function renderCWLStatistics(playerStats, bestAttacker, isDataPartial) {
         });
     }
     
-function renderCWLWarDetails(warData) {
-    const container = document.getElementById('cwl-war-detail-content');
-    if (!container) return;
+    function renderCWLWarDetails(warData) {
+        const container = document.getElementById('cwl-war-detail-content');
+        if (!container) return;
 
-    // FINALE, PARANOIDE SICHERHEITSPRÜFUNG:
-    // Wir prüfen jetzt, ob der Gegner auch wirklich einen Namen hat.
-    if (!warData || !warData.clan || !warData.opponent || !warData.opponent.name) {
-        container.innerHTML = `<div class="dashboard-box"><p class="error-message">Die Daten für diesen Kriegstag sind noch nicht vollständig verfügbar. Der Gegner steht z.B. noch nicht fest. Bitte versuche es später noch einmal.</p></div>`;
-        return;
-    }
-
-    const translatedState = warStateTranslations[warData.state] || warData.state;
-    let ourClanHtml = '<h3>Unser Clan</h3>';
-    let opponentClanHtml = `<h3>Gegner: ${warData.opponent.name}</h3>`;
-
-    // Prüfe, ob die Mitgliederliste existiert
-    if (Array.isArray(warData.clan.members)) {
-        [...warData.clan.members].sort((a, b) => a.mapPosition - b.mapPosition).forEach(member => {
-            let attacksHtml = '<div class="attack-info">Kein Angriff</div>';
-            if (member.attacks && Array.isArray(warData.opponent.members)) {
-                attacksHtml = member.attacks.map(attack => {
-                    const defender = warData.opponent.members.find(def => def.tag === attack.defenderTag);
-                    if (defender) {
-                       return `<div class="attack-info"><span>⚔️ vs ${defender.mapPosition}. ${defender.name}</span><span class="attack-result">${attack.stars}⭐ ${attack.destructionPercentage}%</span></div>`;
-                    }
-                    return '';
-                }).join('');
-            }
-            ourClanHtml += `<div class="war-player-card"><div class="war-player-header"><span class="player-map-pos">${member.mapPosition}.</span><span class="player-name">${member.name}</span><span class="player-th">RH${member.townhallLevel}</span></div><div class="attacks-container">${attacksHtml || '<div class="attack-info">Kein Angriff</div>'}</div></div>`;
-        });
-    }
-
-    // Prüfe, ob die Gegner-Mitgliederliste existiert
-    if (Array.isArray(warData.opponent.members)) {
-        [...warData.opponent.members].sort((a, b) => a.mapPosition - b.mapPosition).forEach(member => {
-             opponentClanHtml += `<div class="war-player-card opponent"><div class="war-player-header"><span class="player-map-pos">${member.mapPosition}.</span><span class="player-name">${member.name}</span><span class="player-th">RH${member.townhallLevel}</span></div></div>`;
-        });
-    }
-
-    container.innerHTML = `<div class="cwl-war-header"><h2>${translatedState}</h2></div><div class="detailed-war-clans">${ourClanHtml}${opponentClanHtml}</div>`;
-}
-   function calculateCWLPlayerStats(cwlRounds) {
-    const playerStats = {};
-    
-    // NEU: Wir loggen die Daten, die wir zur Verarbeitung bekommen
-    console.log("Verarbeite folgende Kriegsdaten für Statistiken:", cwlRounds);
-
-    cwlRounds.forEach((round, index) => {
-        // Sicherheitscheck: Hat diese Runde überhaupt Mitgliederdaten?
-        if (!round || !round.clan || !Array.isArray(round.clan.members) || round.clan.members.length === 0) {
-            console.warn(`Kriegstag ${index + 1} enthält keine Mitgliederdaten. Überspringe...`);
-            return; // Gehe zum nächsten Kriegstag
+        if (!warData || !warData.clan || !warData.opponent || !warData.opponent.name) {
+            container.innerHTML = `<div class="dashboard-box"><p class="error-message">Die Daten für diesen Kriegstag sind noch nicht vollständig verfügbar. Der Gegner steht z.B. noch nicht fest. Bitte versuche es später noch einmal.</p></div>`;
+            return;
         }
 
-        round.clan.members.forEach(member => {
-            if (!playerStats[member.tag]) {
-                playerStats[member.tag] = { name: member.name, attacks: 0, stars: 0, destruction: 0 };
-            }
-            if (member.attacks) {
-                playerStats[member.tag].attacks += member.attacks.length;
-                member.attacks.forEach(attack => {
-                    playerStats[member.tag].stars += attack.stars;
-                    playerStats[member.tag].destruction += attack.destructionPercentage;
-                });
-            }
-        });
-    });
+        const translatedState = warStateTranslations[warData.state] || warData.state;
+        let ourClanHtml = '<h3>Unser Clan</h3>';
+        let opponentClanHtml = `<h3>Gegner: ${warData.opponent.name}</h3>`;
 
-    const statsArray = Object.values(playerStats).sort((a, b) => b.stars - a.stars || (b.destruction / b.attacks) - (a.destruction / a.attacks));
-    const bestAttacker = statsArray.length > 0 ? statsArray[0] : null;
-
-    // NEU: Wir loggen das Ergebnis der Berechnung
-    console.log("Ergebnis der Statistik-Berechnung:", { stats: statsArray, bestAttacker });
-    
-    return { stats: statsArray, bestAttacker };
-}
-
-    function renderCWLStatistics(playerStats, bestAttacker) {
-    const statsContainer = document.getElementById('cwl-player-stats-body');
-    if(statsContainer) {
-        statsContainer.innerHTML = '';
-        
-        // NEU: Zeige eine klare Nachricht an, wenn die API keine Daten liefert
-        if (!playerStats || playerStats.length === 0) {
-            statsContainer.innerHTML = `<tr><td colspan="4"><p>Warte auf die detaillierten Angriffsdaten von der API (diese kommen oft erst nach Ende des Kampftages).</p></td></tr>`;
-        } else {
-            playerStats.forEach(player => {
-                const avgDestruction = player.attacks > 0 ? (player.destruction / player.attacks).toFixed(2) : 0;
-                const row = document.createElement('tr');
-                row.innerHTML = `<td>${player.name}</td><td>${player.attacks}</td><td>${player.stars}</td><td>${avgDestruction}%</td>`;
-                statsContainer.appendChild(row);
+        if (Array.isArray(warData.clan.members)) {
+            [...warData.clan.members].sort((a, b) => a.mapPosition - b.mapPosition).forEach(member => {
+                let attacksHtml = '<div class="attack-info">Kein Angriff</div>';
+                if (member.attacks && Array.isArray(warData.opponent.members)) {
+                    attacksHtml = member.attacks.map(attack => {
+                        const defender = warData.opponent.members.find(def => def.tag === attack.defenderTag);
+                        if (defender) {
+                            return `<div class="attack-info"><span>⚔️ vs ${defender.mapPosition}. ${defender.name}</span><span class="attack-result">${attack.stars}⭐ ${attack.destructionPercentage}%</span></div>`;
+                        }
+                        return '';
+                    }).join('');
+                }
+                ourClanHtml += `<div class="war-player-card"><div class="war-player-header"><span class="player-map-pos">${member.mapPosition}.</span><span class="player-name">${member.name}</span><span class="player-th">RH${member.townhallLevel}</span></div><div class="attacks-container">${attacksHtml || '<div class="attack-info">Kein Angriff</div>'}</div></div>`;
             });
         }
+
+        if (Array.isArray(warData.opponent.members)) {
+            [...warData.opponent.members].sort((a, b) => a.mapPosition - b.mapPosition).forEach(member => {
+                opponentClanHtml += `<div class="war-player-card opponent"><div class="war-player-header"><span class="player-map-pos">${member.mapPosition}.</span><span class="player-name">${member.name}</span><span class="player-th">RH${member.townhallLevel}</span></div></div>`;
+            });
+        }
+
+        container.innerHTML = `<div class="cwl-war-header"><h2>${translatedState}</h2></div><div class="detailed-war-clans">${ourClanHtml}${opponentClanHtml}</div>`;
     }
-    
-    const mvpContainer = document.getElementById('cwl-mvp-content');
-    if (mvpContainer) {
-        if (bestAttacker) {
-            const avgDestruction = bestAttacker.attacks > 0 ? (bestAttacker.destruction / bestAttacker.attacks).toFixed(2) : 0;
-            mvpContainer.innerHTML = `<h3>${bestAttacker.name}</h3><p>⭐ Gesamtsterne: ${bestAttacker.stars}</p><p>🎯 Angriffe genutzt: ${bestAttacker.attacks}</p><p>💥 Ø Zerstörung: ${avgDestruction}%</p>`;
-        } else {
-            mvpContainer.innerHTML = '<p>Noch keine Angriffsdaten für eine Auswertung vorhanden.</p>';
+
+    function calculateCWLPlayerStats(cwlRounds) {
+        const playerStats = {};
+        console.log("Verarbeite folgende Kriegsdaten für Statistiken:", cwlRounds);
+
+        cwlRounds.forEach((round, index) => {
+            if (!round || !round.clan || !Array.isArray(round.clan.members) || round.clan.members.length === 0) {
+                console.warn(`Kriegstag ${index + 1} enthält keine Mitgliederdaten. Überspringe...`);
+                return;
+            }
+
+            round.clan.members.forEach(member => {
+                if (!playerStats[member.tag]) {
+                    playerStats[member.tag] = { name: member.name, attacks: 0, stars: 0, destruction: 0 };
+                }
+                if (member.attacks) {
+                    playerStats[member.tag].attacks += member.attacks.length;
+                    member.attacks.forEach(attack => {
+                        playerStats[member.tag].stars += attack.stars;
+                        playerStats[member.tag].destruction += attack.destructionPercentage;
+                    });
+                }
+            });
+        });
+
+        const statsArray = Object.values(playerStats).sort((a, b) => b.stars - a.stars || (b.destruction / b.attacks) - (a.destruction / a.attacks));
+        const bestAttacker = statsArray.length > 0 ? statsArray[0] : null;
+
+        console.log("Ergebnis der Statistik-Berechnung:", { stats: statsArray, bestAttacker });
+        
+        return { stats: statsArray, bestAttacker };
+    }
+
+    function renderCWLStatistics(playerStats, bestAttacker, isDataPartial) {
+        const statsContainer = document.getElementById('cwl-player-stats-body');
+        const mvpContainer = document.getElementById('cwl-mvp-content');
+        // Du musst sicherstellen, dass dein <h3>-Tag für die Überschrift diese ID hat: <h3 id="cwl-stats-header">Gesamtstatistik</h3>
+        const statsHeader = document.getElementById('cwl-stats-header'); 
+
+        if (statsHeader) {
+            if (isDataPartial) {
+                statsHeader.innerHTML = 'Gesamtstatistik <span class="partial-data-hint">(Nur abgeschlossene Tage)</span>';
+            } else {
+                statsHeader.textContent = 'Gesamtstatistik';
+            }
+        }
+
+        if (statsContainer) {
+            statsContainer.innerHTML = '';
+            
+            if (!playerStats || playerStats.length === 0) {
+                statsContainer.innerHTML = `<tr><td colspan="4"><p>Warte auf die ersten vollständigen Daten nach Ende des Kampftages. Die Statistik wird hier Tag für Tag wachsen!</p></td></tr>`;
+            } else {
+                playerStats.forEach(player => {
+                    const avgDestruction = player.attacks > 0 ? (player.destruction / player.attacks).toFixed(2) : 0;
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${player.name}</td><td>${player.attacks}</td><td>${player.stars}</td><td>${avgDestruction}%</td>`;
+                    statsContainer.appendChild(row);
+                });
+            }
+        }
+        
+        if (mvpContainer) {
+            if (bestAttacker) {
+                const avgDestruction = bestAttacker.attacks > 0 ? (bestAttacker.destruction / bestAttacker.attacks).toFixed(2) : 0;
+                mvpContainer.innerHTML = `<h3>${bestAttacker.name}</h3><p>⭐ Gesamtsterne: ${bestAttacker.stars}</p><p>🎯 Angriffe genutzt: ${bestAttacker.attacks}</p><p>💥 Ø Zerstörung: ${avgDestruction}%</p>`;
+            } else {
+                mvpContainer.innerHTML = '<p>Noch keine Angriffsdaten für eine Auswertung vorhanden.</p>';
+            }
         }
     }
-}
+
     function renderCWLRoundOverview(rounds) {
         const container = document.getElementById('cwl-round-overview-body');
         if(!container) return;
@@ -881,7 +823,7 @@ function renderCWLWarDetails(warData) {
                 playerScores[spieler] += points.bonus_alle_7;
             }
         });
-    
+        
         return Object.entries(playerScores).map(([spieler, punkte]) => ({ spieler, punkte })).sort((a, b) => b.punkte - a.punkte);
     }
     
@@ -1037,15 +979,11 @@ function renderCWLWarDetails(warData) {
         tableHtml += `</tbody></table>`;
         container.innerHTML = tableHtml;
     }
+
+    // ======================================================
     // STARTPUNKT DER ANWENDUNG
+    // ======================================================
     fetchAllData(); 
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 
 });
-
-
-
-
-
-
-
