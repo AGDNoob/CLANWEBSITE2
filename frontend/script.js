@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
         allPlayersData.sort((a, b) => b.townHallLevel - a.townHallLevel);
         allPlayersData.forEach(player => {
             if (!player || !player.heroes) return;
-            tableHtml += `<tr><td><div class="player-cell">${player.name}<span class="player-th-sublabel">RH${player.townhallLevel}</span></div></td>`;
+            tableHtml += `<tr><td><div class="player-cell">${player.name}<span class="player-th-sublabel">RH${player.townHallLevel}</span></div></td>`;
             const playerHeroes = new Map(player.heroes.map(hero => [hero.name, hero]));
             HERO_ORDER.forEach(heroName => {
                 const hero = playerHeroes.get(heroName);
@@ -443,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ell_rh_m1: parseInt(document.getElementById('p-ell-rh-m1').value),
                 ell_rh_m2: parseInt(document.getElementById('p-ell-rh-m2').value),
                 atk_3s_vs_rh_p2: parseInt(document.getElementById('p-atk-3s-vs-rh-p2').value),
-                atk_3s_vs_rh_0: parseInt(document.getElementById('p-atk-3s-rh-0').value),
+                atk_3s_vs_rh_0: parseInt(document.getElementById('p-atk-3s-vs-rh-0').value),
                 atk_3s_vs_rh_m2: parseInt(document.getElementById('p-atk-3s-vs-rh-m2').value),
                 atk_2s_90: parseInt(document.getElementById('p-atk-2s-90').value),
                 atk_2s_80_89: parseInt(document.getElementById('p-atk-2s-80-89').value),
