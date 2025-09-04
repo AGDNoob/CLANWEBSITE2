@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // ======================================================
-    // RENDER-FUNKTIONEN
+    // RENDER-FUNKTIONEN (WIEDERHERGESTELLT)
     // ======================================================
     function renderClanInfo(data) {
         const clanNameEl = document.getElementById('clan-name');
@@ -403,6 +403,60 @@ document.addEventListener('DOMContentLoaded', () => {
         tableHtml += `</tbody></table>`;
         container.innerHTML = tableHtml;
     }
+    function renderDonationStats(members) {
+        const tableBody = document.getElementById('donation-stats-body');
+        if (!tableBody) return;
+        const sortedMembers = [...members].sort((a, b) => b.donations - a.donations);
+        tableBody.innerHTML = '';
+        sortedMembers.slice(0, 10).forEach((member, index) => {
+            const ratio = member.donationsReceived > 0 ? (member.donations / member.donationsReceived).toFixed(2) : '∞';
+            const ratioClass = ratio >= 1 ? 'good' : 'bad';
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${index + 1}</td><td>${member.name}</td><td>${member.donations}</td><td>${member.donationsReceived}</td><td class="donation-ratio ${ratioClass}">${ratio}</td>`;
+            tableBody.appendChild(row);
+        });
+    }
+    function renderThDistributionChart(members) {
+        const ctx = document.getElementById('th-distribution-chart');
+        if (!ctx) return;
+        const thLevels = members.reduce((acc, member) => {
+            const level = `RH ${member.townHallLevel}`;
+            acc[level] = (acc[level] || 0) + 1;
+            return acc;
+        }, {});
+        const sortedThLevels = Object.entries(thLevels).sort((a, b) => parseInt(b[0].split(' ')[1]) - parseInt(a[0].split(' ')[1]));
+        if (thChartInstance) thChartInstance.destroy();
+        thChartInstance = new Chart(ctx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: sortedThLevels.map(entry => entry[0]),
+                datasets: [{ data: sortedThLevels.map(entry => entry[1]), backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF'] }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: '#f8f8f2' } } } }
+        });
+    }
+    function renderLeagueDistributionChart(members) {
+        const ctx = document.getElementById('league-distribution-chart');
+        if (!ctx) return;
+        const leagueColorMap = { 'Legend': '#e67e22', 'Titan': '#576574', 'Champion': '#9b59b6', 'Master': '#d35400', 'Crystal': '#3498db', 'Gold': '#f1c40f', 'Silver': '#bdc3c7', 'Bronze': '#cd7f32', 'Unranked': '#7f8c8d', 'Keine Liga': '#7f8c8d' };
+        const leagues = members.reduce((acc, member) => {
+            const leagueName = member.league ? member.league.name.replace(/ \w*$/, '') : 'Keine Liga';
+            acc[leagueName] = (acc[leagueName] || 0) + 1;
+            return acc;
+        }, {});
+        const sortedLeagues = Object.entries(leagues).sort((a, b) => b[1] - a[1]);
+        const backgroundColors = sortedLeagues.map(([leagueName]) => {
+            const baseLeague = Object.keys(leagueColorMap).find(key => leagueName.includes(key));
+            return leagueColorMap[baseLeague] || '#ffffff';
+        });
+        if (leagueChartInstance) leagueChartInstance.destroy();
+        leagueChartInstance = new Chart(ctx.getContext('2d'), {
+            type: 'pie',
+            data: { labels: sortedLeagues.map(entry => entry[0]), datasets: [{ data: sortedLeagues.map(entry => entry[1]), backgroundColor: backgroundColors }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: '#f8f8f2' } } } }
+        });
+    }
+
 
     // ======================================================
     // CWL BONUS RECHNER V2.2 - MANUELLE LOGIK
@@ -466,7 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const gegnerRH = parseInt(inputs[0].value);
                     const sterne = parseInt(inputs[1].value);
                     const prozent = parseInt(inputs[2].value);
-                    if (!isNaN(gegnerRH) && !isNaN(sterne) && !isNaN(prozent)) {
+                    if (spieler && !isNaN(eigenesRH) && !isNaN(gegnerRH) && !isNaN(sterne) && !isNaN(prozent)) {
                         allAttacks.push({ spieler, eigenesRH, gegnerRH, sterne, prozent });
                     }
                 });
