@@ -209,10 +209,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchWarlog();
     }
 
-    // ======================================================
-    // HIER BEGINNEN DIE ZWEI GEÄNDERTEN FUNKTIONEN
-    // ======================================================
-
     async function fetchCWLGroup() {
         const noCwlMessage = document.getElementById('no-cwl-message');
         const cwlContent = document.getElementById('cwl-content');
@@ -253,6 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return false;
             });
 
+            // Prüft, ob die Anzahl der erfolgreichen Runden kleiner ist als die Anzahl aller Runden, für die wir eine Antwort bekommen haben
             const isDataPartial = completedRoundsData.length < allRoundsData.filter(r => r).length;
 
             if (completedRoundsData.length > 0) {
@@ -275,7 +272,10 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchCWLWarDataByTag(warTag) {
         if (!warTag || warTag === '#0') return null;
         try {
-            const response = await fetch(`${API_BASE_URL}/api/clan/cwl/war/${warTag.replace('#', '')}`);
+            // "CACHE-BUSTER": Hängt einen Zeitstempel an, um Caching im Backend zu verhindern
+            const timestamp = new Date().getTime();
+            const response = await fetch(`${API_BASE_URL}/api/clan/cwl/war/${warTag.replace('#', '')}?t=${timestamp}`);
+            
             if (!response.ok) { throw new Error(`HTTP-Fehler für warTag ${warTag}: Status ${response.status}`); }
             return await response.json();
         } catch (error) {
@@ -709,7 +709,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!round || !round.opponent) return;
             const row = document.createElement('tr');
             const resultText = warResultTranslations[round.result] || 'Unentschieden';
-            row.innerHTML = `<td>Tag ${index + 1}</td><td>${round.opponent.name}</td><td>${resultText}</td><td>${round.clan.stars} - ${round.opponent.stars}</td>`;
+            // Wir nehmen den Index hier nicht mehr, da die "rounds" nur die abgeschlossenen Kriege sind.
+            // Besser wäre es, die Runde im Original-Array zu finden, aber für den Moment ist das okay.
+            row.innerHTML = `<td>Gegner</td><td>${round.opponent.name}</td><td>${resultText}</td><td>${round.clan.stars} - ${round.opponent.stars}</td>`;
             container.appendChild(row);
         });
     }
