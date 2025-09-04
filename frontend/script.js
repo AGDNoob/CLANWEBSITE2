@@ -222,46 +222,99 @@ async function fetchAllData() {
         }
         fetchWarlog();
     }
+// In der Datei script.js
 async function fetchCWLGroup() {
-        const noCwlMessage = document.getElementById('no-cwl-message');
-        const cwlContent = document.getElementById('cwl-content');
-        if (!noCwlMessage || !cwlContent) return;
+    const noCwlMessage = document.getElementById('no-cwl-message');
+    const cwlContent = document.getElementById('cwl-content');
+    if (!noCwlMessage || !cwlContent) return;
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/clan/cwl`);
-            if (response.status === 404) {
-                noCwlMessage.classList.remove('hidden');
-                cwlContent.classList.add('hidden');
-                return;
-            }
-            if (!response.ok) throw new Error(`Serverfehler: ${response.status}`);
-
-            const groupData = await response.json();
-            noCwlMessage.classList.add('hidden');
-            cwlContent.classList.remove('hidden');
-            
-            renderCWLGroup(groupData);
-            renderCWLWarSelection(groupData.rounds); // Zeigt die Buttons weiterhin an
-            initializeBonusCalculator(groupData.rounds);
-
-            // JETZT DIE NEUE LOGIK:
-            // Wir prüfen, ob die global gespeicherten Kriegsdaten ein CWL-Krieg sind.
-            if (currentWarData && currentWarData.clan && currentWarData.opponent) {
-                console.log("Nutze Daten aus 'currentWar' für die CWL-Statistik.");
-                const playerStats = calculateCWLPlayerStats([currentWarData]); // Wir übergeben sie als Array
-                renderCWLStatistics(playerStats.stats, playerStats.bestAttacker);
-                renderCWLRoundOverview([currentWarData]);
-            } else {
-                console.log("Keine aktuellen CWL-Kriegsdaten für die Statistik gefunden.");
-                renderCWLStatistics([], null); // Leert die Statistik-Tabelle mit einer Nachricht
-            }
-
-        } catch (error) {
-            console.error("Ein Fehler ist in fetchCWLGroup aufgetreten:", error);
-            noCwlMessage.textContent = "CWL-Daten konnten nicht geladen werden.";
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/clan/cwl`);
+        if (response.status === 404) {
             noCwlMessage.classList.remove('hidden');
             cwlContent.classList.add('hidden');
+            return;
         }
+        if (!response.ok) throw new Error(`Serverfehler: ${response.status}`);
+
+        const groupData = await response.json();
+        noCwlMessage.classList.add('hidden');
+        cwlContent.classList.remove('hidden');
+        
+        renderCWLGroup(groupData);
+        renderCWLWarSelection(groupData.rounds);
+        initializeBonusCalculator(groupData.rounds);
+
+        // ▼▼▼ START DER NEUEN "SAMMEL-STRATEGIE" ▼▼▼
+
+        console.log("Starte das Sammeln der Daten für alle CWL-Kampftage...");
+        
+        // 1. Erstelle Promises für JEDEN Kriegstag, um die Daten parallel abzufragen
+        const warDataPromises = groupData.rounds.map(round => {
+            const warTag = round.warTags.find(tag => tag !== '#0');
+            return fetchCWLWarDataByTag(warTag); // Deine existierende Funktion ist perfekt dafür
+        });
+
+        // 2. Warte, bis alle Anfragen abgeschlossen sind
+        const allRoundsData = await Promise.all(warDataPromises);
+
+        // 3. Filtere nur die Runden, die vollständige Mitgliederdaten haben (also die abgeschlossenen)
+        const completedRoundsData = allRoundsData.filter(war => {
+            if (war && war.clan && Array.isArray(war.clan.members) && war.clan.members.length > 0) {
+                return true; // Behalte diese Runde
+            }
+            console.log("Ein Kriegstag wurde übersprungen (vermutlich der aktuelle), da keine Mitgliederdaten vorliegen.");
+            return false; // Verwerfe diese Runde
+        });
+
+        // 4. Berechne und rendere die Statistiken basierend auf den vollständigen Daten
+        if (completedRoundsData.length > 0) {
+            const playerStats = calculateCWLPlayerStats(completedRoundsData);
+            // Übergib eine Information, dass die Daten unvollständig sein könnten
+            renderCWLStatistics(playerStats.stats, playerStats.bestAttacker, true); 
+            renderCWLRoundOverview(completedRoundsData);
+        } else {
+            console.log("Bisher keine abgeschlossenen CWL-Kriegstage mit Daten gefunden.");
+            // Hier nutzen wir die Nachricht für "gar keine Daten"
+            renderCWLStatistics([], null, false); 
+        }
+
+        // ▲▲▲ ENDE DER NEUEN "SAMMEL-STRATEGIE" ▲▲▲
+
+    } catch (error) {
+        // ... deine Fehlerbehandlung ...
+    }
+}
+
+// Kleine Anpassung an renderCWLStatistics, um die Nachricht zu steuern
+function renderCWLStatistics(playerStats, bestAttacker, isDataPartial) { // Neuer Parameter: isDataPartial
+    const statsContainer = document.getElementById('cwl-player-stats-body');
+    const statsHeader = document.getElementById('cwl-stats-header'); // Angenommen, du hast eine h3 oder so mit dieser ID
+
+    if(statsContainer) {
+        statsContainer.innerHTML = '';
+        
+        // NEU: Passe die Überschrift an
+        if(statsHeader && isDataPartial) {
+            statsHeader.innerHTML = 'Gesamtstatistik <span class="partial-data-hint">(Nur abgeschlossene Tage)</span>';
+        } else if (statsHeader) {
+            statsHeader.textContent = 'Gesamtstatistik';
+        }
+        
+        if (!playerStats || playerStats.length === 0) {
+            // Dies ist die Nachricht, wenn ENTWEDER die CWL gerade erst begonnen hat ODER die API immer noch keine Daten hat.
+            statsContainer.innerHTML = `<tr><td colspan="4"><p>Warte auf die ersten vollständigen Daten nach Ende des Kampftages. Die Statistik wird hier Tag für Tag wachsen!</p></td></tr>`;
+        } else {
+            playerStats.forEach(player => {
+                const avgDestruction = player.attacks > 0 ? (player.destruction / player.attacks).toFixed(2) : 0;
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${player.name}</td><td>${player.attacks}</td><td>${player.stars}</td><td>${avgDestruction}%</td>`;
+                statsContainer.appendChild(row);
+            });
+        }
+    }
+    // ... MVP-Logik bleibt gleich
+}
     }
     async function fetchCWLWarDataByTag(warTag) {
         if (!warTag || warTag === '#0') return null;
@@ -982,6 +1035,7 @@ function renderCWLWarDetails(warData) {
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
 
 });
+
 
 
 
