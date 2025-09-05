@@ -159,6 +159,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 notInWarMessage.classList.remove('hidden');
                 currentWarDashboard.classList.add('hidden');
                 currentWarData = null;
+                 // HINWEIS: Auch Planer-Container leeren, wenn kein Krieg ist
+                const planContainer = document.getElementById('war-plan-container');
+                if (planContainer) planContainer.innerHTML = '<p>Derzeit findet kein Krieg statt. Der Plan wird automatisch generiert, sobald ein Krieg startet.</p>';
             } else if (response.ok) {
                 const warData = await response.json();
                 currentWarData = warData;
@@ -167,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderCurrentWarDashboard(warData);
                 renderDetailedWarView(warData);
                 if (warData.state !== 'notInWar') {
+                    // HIER WIRD DIE KI AUFGERUFEN
                     generateAndRenderWarPlan(warData);
                 }
             } else { throw new Error(`Serverfehler: ${response.status}`); }
@@ -375,12 +379,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // ======================================================
-    // NEUER KI-KRIEGSPLANER
+    // NEUER KI-KRIEGSPLANER (INTEGRIERT)
     // ======================================================
     function generateAndRenderWarPlan(warData) {
         const container = document.getElementById('war-plan-container');
         if (!container || !warData || !Array.isArray(warData.clan.members) || !Array.isArray(warData.opponent.members) || warData.clan.members.length === 0) {
-            container.innerHTML = '<p class="error-message">Daten für den Kriegsplan sind unvollständig.</p>';
+            container.innerHTML = '<p class="error-message">Daten für den Kriegsplan sind unvollständig oder ungültig.</p>';
             return;
         }
 
@@ -391,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
             townhallLevel: m.townhallLevel,
             mapPosition: m.mapPosition,
             attacks: [], // Wird die zugewiesenen Angriffe enthalten
-            attackCount: warData.attacksPerMember || 1 // CWL = 1, Normaler CW = 2
+            attackCount: warData.attacksPerMember || 1
         })).sort((a, b) => a.mapPosition - b.mapPosition);
 
         let targets = warData.opponent.members.map(m => ({
@@ -400,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
             townhallLevel: m.townhallLevel,
             mapPosition: m.mapPosition,
             isTaken: false // Hält fest, ob schon ein Hauptangriff zugewiesen ist
-        })).sort((a, b) => a.mapPosition - b.mapPosition);
+        })).sort((a, b) => b.mapPosition - a.mapPosition); // Wichtig: von stark nach schwach sortieren
         
         const isCWL = warData.attacksPerMember === 1;
 
@@ -410,8 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Wir suchen für unsere unteren Spieler sichere Ziele
         for (let i = attackers.length - 1; i >= 0; i--) {
             let attacker = attackers[i];
-            if (attacker.attacks.length > 0) continue; // Hat schon ein Ziel
-
+            
             // Finde das stärkste, freie Ziel, das unser Angreifer sicher schaffen kann (gleiches TH oder niedriger)
             let bestTarget = targets.find(target => 
                 !target.isTaken && target.townhallLevel <= attacker.townhallLevel
@@ -432,9 +435,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 !target.isTaken && target.townhallLevel <= attacker.townhallLevel + 1
             );
             
-            // Wenn es keinen gibt, nimm das schwächste verbleibende Ziel
+            // Wenn es keinen gibt (sehr unwahrscheinlich), nimm das schwächste verbleibende Ziel
             if (!bestTarget) {
-                bestTarget = targets.find(t => !t.isTaken);
+                bestTarget = targets.reverse().find(t => !t.isTaken); // .reverse() damit von schwach nach stark gesucht wird
+                targets.reverse(); // Sortierung wiederherstellen
             }
 
             if (bestTarget) {
@@ -451,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Regel #3: Spähangriffe & Nachbesserung (Clean-Up)
         if (isCWL) {
-            // In CWL: Übrige Spieler (falls vorhanden) scouten die Top-Basen
+            // In CWL: Übrige Spieler (falls Logik-Fehler) scouten die Top-Basen
             const remainingAttackers = attackers.filter(a => a.attacks.length === 0);
             const topTargets = targets.sort((a, b) => a.mapPosition - b.mapPosition).slice(0, remainingAttackers.length);
             
@@ -503,6 +507,9 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = planHtml;
     }
 
+    // ======================================================
+    // ANDERE RENDER-FUNKTIONEN (UNVERÄNDERT)
+    // ======================================================
     function renderHeroTable(allPlayersData) {
         const container = document.getElementById('hero-table-container');
         if (!container) return;
