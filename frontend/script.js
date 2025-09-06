@@ -152,31 +152,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- ÜBERARBEITET: Kernlogik für die Kriegszentrale ---
     async function initializeWarCenter() {
-        const warCenterPage = document.getElementById('page-war-center');
-        const currentWarBox = document.getElementById('current-war-box');
+        const notInWarMessage = document.getElementById('not-in-war-message');
+        const currentWarDashboard = document.getElementById('current-war-dashboard');
         const warOrganizerView = document.getElementById('war-organizer-view');
-
-        if (!warCenterPage || !currentWarBox || !warOrganizerView) return;
-
-        // Erstelle eine dedizierte Info-Box, falls sie nicht existiert
-        let infoBox = document.getElementById('war-center-info-box');
-        if (!infoBox) {
-            infoBox = document.createElement('div');
-            infoBox.id = 'war-center-info-box';
-            infoBox.className = 'dashboard-box';
-            warCenterPage.insertBefore(infoBox, currentWarBox); // Füge sie vor der Kriegs-Box ein
-        }
+        
+        if(!notInWarMessage || !currentWarDashboard || !warOrganizerView) return;
 
         try {
-            infoBox.innerHTML = `<p>Lade Kriegsdaten...</p>`;
-            infoBox.classList.remove('hidden');
-
             const response = await fetch(`${API_BASE_URL}/api/clan/currentwar`);
             
             if (response.status === 404) {
                 // --- Zustand: NICHT IM KRIEG ---
-                infoBox.innerHTML = `<h2>Kein aktiver Krieg</h2><p>Aktuell findet kein Clankrieg statt. Das Kriegsprotokoll unten ist weiterhin verfügbar.</p>`;
-                currentWarBox.classList.add('hidden');
+                notInWarMessage.textContent = "Aktuell findet kein Clankrieg statt. Das Kriegsprotokoll ist unten verfügbar.";
+                notInWarMessage.classList.remove('hidden');
+                currentWarDashboard.classList.add('hidden');
                 warOrganizerView.classList.add('hidden');
                 currentWarData = null;
             } else if (response.ok) {
@@ -184,8 +173,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const warData = await response.json();
                 currentWarData = warData;
 
-                infoBox.classList.add('hidden');
-                currentWarBox.classList.remove('hidden');
+                notInWarMessage.classList.add('hidden');
+                currentWarDashboard.classList.remove('hidden');
                 warOrganizerView.classList.remove('hidden');
 
                 renderCurrentWarDashboard(warData);
@@ -199,13 +188,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error("Fehler beim Abrufen des aktuellen Kriegs:", error);
-            infoBox.innerHTML = `<p class="error-message">Fehler beim Laden der Kriegsdaten. Die Verbindung zum Server konnte nicht hergestellt werden.</p>`;
-            infoBox.classList.remove('hidden');
-            currentWarBox.classList.add('hidden');
+            notInWarMessage.textContent = "Fehler: Kriegsdaten konnten nicht geladen werden.";
+            notInWarMessage.classList.remove('hidden');
+            currentWarDashboard.classList.add('hidden');
             warOrganizerView.classList.add('hidden');
         }
         
-        fetchWarlog(); // Das Kriegsprotokoll wird immer geladen
+        fetchWarlog();
     }
 
     async function fetchPlayerDataForLab() {
@@ -517,9 +506,9 @@ document.addEventListener('DOMContentLoaded', () => {
             HERO_ORDER.forEach(heroName => {
                 const hero = playerHeroes.get(heroName);
                 if (hero) {
-                    // NEU: Logik zur Korrektur des Battle Copter Levels
+                    // NEU: Robuste Logik zur Korrektur des Battle Copter Levels
                     let displayLevel = hero.level;
-                    if (hero.name === 'Battle Copter' && hero.level === 1) {
+                    if (hero.name && hero.name.toLowerCase() === 'battle copter' && hero.level === 1) {
                         displayLevel = 15;
                     }
                     tableHtml += `<td class="${hero.level === hero.maxLevel ? 'is-maxed' : ''}">${displayLevel}</td>`;
