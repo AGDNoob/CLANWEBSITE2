@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error("Fehler bei Hauptstadt-Raids:", error); }
     }
 
-    // --- ÜBERARBEITET: Kernlogik für die Kriegszentrale ---
+    // --- KORRIGIERT & VEREINFACHT: Kernlogik für die Kriegszentrale ---
     async function initializeWarCenter() {
         const notInWarMessage = document.getElementById('not-in-war-message');
         const currentWarDashboard = document.getElementById('current-war-dashboard');
@@ -506,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
             HERO_ORDER.forEach(heroName => {
                 const hero = playerHeroes.get(heroName);
                 if (hero) {
-                    // NEU: Robuste Logik zur Korrektur des Battle Copter Levels
+                    // KORRIGIERT: Robuste Logik zur Korrektur des Battle Copter Levels
                     let displayLevel = hero.level;
                     if (hero.name && hero.name.toLowerCase() === 'battle copter' && hero.level === 1) {
                         displayLevel = 15;
@@ -585,7 +585,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const accordionContainer = document.getElementById('player-accordion-container');
 
         if (!addPlayerBtn || !calculateBtn || !accordionContainer || !clearAllBtn) {
-            console.error("Rechner-Buttons konnten nicht initialisiert werden. HTML-IDs prüfen!");
             return;
         }
 
