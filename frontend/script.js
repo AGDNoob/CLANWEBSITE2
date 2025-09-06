@@ -149,85 +149,107 @@ document.addEventListener('DOMContentLoaded', () => {
             renderCapitalRaids(data.items);
         } catch (error) { console.error("Fehler bei Hauptstadt-Raids:", error); }
     }
+
+    // --- ÜBERARBEITET: Kernlogik für die Kriegszentrale ---
     async function initializeWarCenter() {
-        const notInWarMessage = document.getElementById('not-in-war-message');
-        const currentWarDashboard = document.getElementById('current-war-dashboard');
-        if(!notInWarMessage || !currentWarDashboard) return;
+        const warCenterPage = document.getElementById('page-war-center');
+        const currentWarBox = document.getElementById('current-war-box');
+        const warOrganizerView = document.getElementById('war-organizer-view');
+
+        if (!warCenterPage || !currentWarBox || !warOrganizerView) return;
+
+        // Erstelle eine dedizierte Info-Box, falls sie nicht existiert
+        let infoBox = document.getElementById('war-center-info-box');
+        if (!infoBox) {
+            infoBox = document.createElement('div');
+            infoBox.id = 'war-center-info-box';
+            infoBox.className = 'dashboard-box';
+            warCenterPage.insertBefore(infoBox, currentWarBox); // Füge sie vor der Kriegs-Box ein
+        }
+
         try {
+            infoBox.innerHTML = `<p>Lade Kriegsdaten...</p>`;
+            infoBox.classList.remove('hidden');
+
             const response = await fetch(`${API_BASE_URL}/api/clan/currentwar`);
+            
             if (response.status === 404) {
-                notInWarMessage.classList.remove('hidden');
-                currentWarDashboard.classList.add('hidden');
+                // --- Zustand: NICHT IM KRIEG ---
+                infoBox.innerHTML = `<h2>Kein aktiver Krieg</h2><p>Aktuell findet kein Clankrieg statt. Das Kriegsprotokoll unten ist weiterhin verfügbar.</p>`;
+                currentWarBox.classList.add('hidden');
+                warOrganizerView.classList.add('hidden');
                 currentWarData = null;
-                 // HINWEIS: Auch Planer-Container leeren, wenn kein Krieg ist
-                const planContainer = document.getElementById('war-plan-container');
-                if (planContainer) planContainer.innerHTML = '<p>Derzeit findet kein Krieg statt. Der Plan wird automatisch generiert, sobald ein Krieg startet.</p>';
             } else if (response.ok) {
+                // --- Zustand: IM KRIEG ---
                 const warData = await response.json();
                 currentWarData = warData;
-                notInWarMessage.classList.add('hidden');
-                currentWarDashboard.classList.remove('hidden');
+
+                infoBox.classList.add('hidden');
+                currentWarBox.classList.remove('hidden');
+                warOrganizerView.classList.remove('hidden');
+
                 renderCurrentWarDashboard(warData);
                 renderDetailedWarView(warData);
+
                 if (warData.state !== 'notInWar') {
-                    // HIER WIRD DIE KI AUFGERUFEN
                     generateAndRenderWarPlan(warData);
                 }
-            } else { throw new Error(`Serverfehler: ${response.status}`); }
+            } else { 
+                throw new Error(`Serverfehler: ${response.status}`); 
+            }
         } catch (error) {
             console.error("Fehler beim Abrufen des aktuellen Kriegs:", error);
-            notInWarMessage.textContent = "Daten zum aktuellen Krieg konnten nicht geladen werden.";
-            notInWarMessage.classList.remove('hidden');
-            currentWarDashboard.classList.add('hidden');
+            infoBox.innerHTML = `<p class="error-message">Fehler beim Laden der Kriegsdaten. Die Verbindung zum Server konnte nicht hergestellt werden.</p>`;
+            infoBox.classList.remove('hidden');
+            currentWarBox.classList.add('hidden');
+            warOrganizerView.classList.add('hidden');
         }
-        fetchWarlog();
+        
+        fetchWarlog(); // Das Kriegsprotokoll wird immer geladen
     }
+
     async function fetchPlayerDataForLab() {
-    const loadingContainer = document.getElementById('lab-loading-state');
-    const contentContainer = document.getElementById('lab-content-container');
-    if (!loadingContainer || !contentContainer) return;
+        const loadingContainer = document.getElementById('lab-loading-state');
+        const contentContainer = document.getElementById('lab-content-container');
+        if (!loadingContainer || !contentContainer) return;
 
-    labDataLoaded = true;
-    loadingContainer.classList.remove('hidden');
-    contentContainer.classList.add('hidden');
+        labDataLoaded = true;
+        loadingContainer.classList.remove('hidden');
+        contentContainer.classList.add('hidden');
 
-    try {
-        if (currentMemberList.length === 0) {
-            console.log("Mitgliederliste ist leer, lade sie zuerst...");
-            await fetchClanInfo();
-        }
-
-        loadingContainer.innerHTML = '<div class="spinner"></div><p>Lade detaillierte Spielerdaten (das kann einen Moment dauern)...</p>';
-        
-        const allPlayersData = [];
-        // KORREKTUR: Wir verwenden eine for...of-Schleife, um die Anfragen nacheinander zu senden
-        // und den Server nicht zu überlasten.
-        for (const member of currentMemberList) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/player/${member.tag.replace('#', '')}`);
-                if (!response.ok) {
-                    console.error(`Fehler bei ${member.name} (${member.tag}): Server antwortete mit ${response.status}`);
-                    continue; // Überspringe dieses Mitglied und mache mit dem nächsten weiter
-                }
-                const playerData = await response.json();
-                allPlayersData.push(playerData);
-            } catch (error) {
-                console.error(`Netzwerkfehler beim Abrufen von ${member.name}:`, error);
+        try {
+            if (currentMemberList.length === 0) {
+                await fetchClanInfo();
             }
-            // Eine kleine Pause, um dem Server Zeit zum Atmen zu geben
-            await new Promise(resolve => setTimeout(resolve, 200)); 
-        }
 
-        renderHeroTable(allPlayersData);
-        
-        loadingContainer.classList.add('hidden');
-        contentContainer.classList.remove('hidden');
-    } catch (error) {
-        console.error("Fehler beim Abrufen der Spielerdaten für das Labor:", error);
-        loadingContainer.innerHTML = `<p class="error-message">Einige Spielerdaten konnten nicht geladen werden. Prüfe die Konsole und das Backend. <button id="retry-lab">Erneut versuchen</button></p>`;
-        document.getElementById('retry-lab').addEventListener('click', () => { labDataLoaded = false; fetchPlayerDataForLab(); });
+            loadingContainer.innerHTML = '<div class="spinner"></div><p>Lade detaillierte Spielerdaten (das kann einen Moment dauern)...</p>';
+            
+            const allPlayersData = [];
+            for (const member of currentMemberList) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/player/${member.tag.replace('#', '')}`);
+                    if (!response.ok) {
+                        console.error(`Fehler bei ${member.name} (${member.tag}): Server antwortete mit ${response.status}`);
+                        continue;
+                    }
+                    const playerData = await response.json();
+                    allPlayersData.push(playerData);
+                } catch (error) {
+                    console.error(`Netzwerkfehler beim Abrufen von ${member.name}:`, error);
+                }
+                await new Promise(resolve => setTimeout(resolve, 200)); 
+            }
+
+            renderHeroTable(allPlayersData);
+            
+            loadingContainer.classList.add('hidden');
+            contentContainer.classList.remove('hidden');
+        } catch (error) {
+            console.error("Fehler beim Abrufen der Spielerdaten für das Labor:", error);
+            loadingContainer.innerHTML = `<p class="error-message">Einige Spielerdaten konnten nicht geladen werden. Prüfe die Konsole. <button id="retry-lab">Erneut versuchen</button></p>`;
+            document.getElementById('retry-lab').addEventListener('click', () => { labDataLoaded = false; fetchPlayerDataForLab(); });
+        }
     }
-}
     
     // ======================================================
     // RENDER-FUNKTIONEN
@@ -386,109 +408,73 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // ======================================================
-    // NEUER KI-KRIEGSPLANER (INTEGRIERT)
+    // KI-KRIEGSPLANER
     // ======================================================
     function generateAndRenderWarPlan(warData) {
         const container = document.getElementById('war-plan-container');
         if (!container || !warData || !Array.isArray(warData.clan.members) || !Array.isArray(warData.opponent.members) || warData.clan.members.length === 0) {
-            container.innerHTML = '<p class="error-message">Daten für den Kriegsplan sind unvollständig oder ungültig.</p>';
+            container.innerHTML = '<p class="error-message">Daten für den Kriegsplan sind unvollständig.</p>';
             return;
         }
 
-        // --- Phase 1: Daten & Profile erstellen ---
         let attackers = warData.clan.members.map(m => ({
-            tag: m.tag,
             name: m.name,
             townhallLevel: m.townhallLevel,
             mapPosition: m.mapPosition,
-            attacks: [], // Wird die zugewiesenen Angriffe enthalten
+            attacks: [],
             attackCount: warData.attacksPerMember || 1
         })).sort((a, b) => a.mapPosition - b.mapPosition);
 
         let targets = warData.opponent.members.map(m => ({
-            tag: m.tag,
             name: m.name,
             townhallLevel: m.townhallLevel,
             mapPosition: m.mapPosition,
-            isTaken: false // Hält fest, ob schon ein Hauptangriff zugewiesen ist
-        })).sort((a, b) => b.mapPosition - a.mapPosition); // Wichtig: von stark nach schwach sortieren
+            isTaken: false
+        })).sort((a, b) => b.mapPosition - a.mapPosition);
         
         const isCWL = warData.attacksPerMember === 1;
 
-        // --- Phase 2: KI-Regeln anwenden ---
-
-        // Regel #1: "Keine-unnötigen-Fails"-Regel (von unten nach oben)
-        // Wir suchen für unsere unteren Spieler sichere Ziele
         for (let i = attackers.length - 1; i >= 0; i--) {
             let attacker = attackers[i];
-            
-            // Finde das stärkste, freie Ziel, das unser Angreifer sicher schaffen kann (gleiches TH oder niedriger)
-            let bestTarget = targets.find(target => 
-                !target.isTaken && target.townhallLevel <= attacker.townhallLevel
-            );
-
+            let bestTarget = targets.find(t => !t.isTaken && t.townhallLevel <= attacker.townhallLevel);
             if (bestTarget) {
                 attacker.attacks.push({ target: bestTarget, strategy: 'Sicherer 3-Sterne Angriff ⭐⭐⭐', type: 'main' });
                 bestTarget.isTaken = true;
             }
         }
 
-        // Regel #2: "Headhunter" & "Fair-Fight" für die restlichen Top- und Mid-Tier-Spieler
         attackers.forEach(attacker => {
-            if (attacker.attacks.length > 0) return; // Hat schon ein Ziel
-
-            // Finde den besten noch freien Gegner, der maximal 1 TH-Level höher ist
-            let bestTarget = targets.find(target => 
-                !target.isTaken && target.townhallLevel <= attacker.townhallLevel + 1
-            );
-            
-            // Wenn es keinen gibt (sehr unwahrscheinlich), nimm das schwächste verbleibende Ziel
+            if (attacker.attacks.length > 0) return;
+            let bestTarget = targets.find(t => !t.isTaken && t.townhallLevel <= attacker.townhallLevel + 1);
             if (!bestTarget) {
-                bestTarget = targets.reverse().find(t => !t.isTaken); // .reverse() damit von schwach nach stark gesucht wird
-                targets.reverse(); // Sortierung wiederherstellen
+                bestTarget = targets.reverse().find(t => !t.isTaken);
+                if(bestTarget) targets.reverse();
             }
-
             if (bestTarget) {
                 let strategy = 'Spiegel-Angriff ⚔️';
-                if (bestTarget.townhallLevel > attacker.townhallLevel) {
-                    strategy = 'Sicherer 2-Sterne-Angriff ⭐⭐';
-                } else if (bestTarget.townhallLevel < attacker.townhallLevel) {
-                    strategy = 'Dip für sichere 3 Sterne 🏹';
-                }
+                if (bestTarget.townhallLevel > attacker.townhallLevel) strategy = 'Sicherer 2-Sterne-Angriff ⭐⭐';
+                else if (bestTarget.townhallLevel < attacker.townhallLevel) strategy = 'Dip für sichere 3 Sterne 🏹';
                 attacker.attacks.push({ target: bestTarget, strategy: strategy, type: 'main' });
                 bestTarget.isTaken = true;
             }
         });
         
-        // Regel #3: Spähangriffe & Nachbesserung (Clean-Up)
         if (isCWL) {
-            // In CWL: Übrige Spieler (falls Logik-Fehler) scouten die Top-Basen
             const remainingAttackers = attackers.filter(a => a.attacks.length === 0);
-            const topTargets = targets.sort((a, b) => a.mapPosition - b.mapPosition).slice(0, remainingAttackers.length);
-            
+            const topTargets = [...targets].sort((a, b) => a.mapPosition - b.mapPosition).slice(0, remainingAttackers.length);
             remainingAttackers.forEach((attacker, index) => {
                 if (topTargets[index]) {
                     attacker.attacks.push({ target: topTargets[index], strategy: 'Spähangriff 🕵️‍♂️ (Fallen & CB)', type: 'scout' });
                 }
             });
-        } else {
-            // In normalen Kriegen: Zweite Angriffe als Nachbesserung planen
-            attackers.forEach(attacker => {
-                 if (attacker.attackCount > 1) {
-                    attacker.attacks.push({ target: null, strategy: 'Nachbesserung / Reserve 🛡️', type: 'cleanup' });
-                 }
-            });
         }
-
-        // --- Phase 3 & 4: Den Plan rendern ---
+        
         let planHtml = '<h2>KI-Kriegsplan (1. Welle)</h2>';
         planHtml += '<p>Dies sind die empfohlenen Erstangriffe. Zweite Angriffe sind für Nachbesserungen reserviert.</p>';
         planHtml += '<div class="war-plan-grid">';
-
         attackers.sort((a,b) => a.mapPosition - b.mapPosition).forEach(attacker => {
-            const firstAttack = attacker.attacks.find(a => a.type === 'main' || a.type === 'scout');
+            const firstAttack = attacker.attacks[0];
             if (!firstAttack || !firstAttack.target) return;
-
             planHtml += `
                 <div class="war-plan-matchup">
                     <div class="plan-player our">
@@ -508,15 +494,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!isCWL) {
             planHtml += '<h2 style="margin-top: 2rem;">Nachbesserungs-Angriffe (2. Welle)</h2>';
-            planHtml += '<p>Diese Spieler sollten ihre zweiten Angriffe nutzen, um bei den höchsten Basen, die noch keine 3 Sterne haben, aufzuräumen.</p>';
         }
-
         container.innerHTML = planHtml;
     }
 
-    // ======================================================
-    // ANDERE RENDER-FUNKTIONEN (UNVERÄNDERT)
-    // ======================================================
+    // --- ÜBERARBEITET: Helden-Tabelle mit Copter-Fix ---
     function renderHeroTable(allPlayersData) {
         const container = document.getElementById('hero-table-container');
         if (!container) return;
@@ -524,15 +506,23 @@ document.addEventListener('DOMContentLoaded', () => {
         let tableHtml = `<table class="lab-table"><thead><tr><th>Spieler</th>`;
         HERO_ORDER.forEach(hero => { tableHtml += `<th>${hero.replace('Barbarian ', '').replace('Archer ', '')}</th>`; });
         tableHtml += `</tr></thead><tbody>`;
-        allPlayersData.sort((a, b) => b.townHallLevel - a.townhallLevel);
+        
+        allPlayersData.sort((a, b) => a.townHallLevel - b.townHallLevel || b.expLevel - a.expLevel);
+
         allPlayersData.forEach(player => {
             if (!player || !player.heroes) return;
-            tableHtml += `<tr><td><div class="player-cell">${player.name}<span class="player-th-sublabel">RH${player.townhallLevel}</span></div></td>`;
+            tableHtml += `<tr><td><div class="player-cell">${player.name}<span class="player-th-sublabel">RH${player.townHallLevel}</span></div></td>`;
             const playerHeroes = new Map(player.heroes.map(hero => [hero.name, hero]));
+            
             HERO_ORDER.forEach(heroName => {
                 const hero = playerHeroes.get(heroName);
                 if (hero) {
-                    tableHtml += `<td class="${hero.level === hero.maxLevel ? 'is-maxed' : ''}">${hero.level}</td>`;
+                    // NEU: Logik zur Korrektur des Battle Copter Levels
+                    let displayLevel = hero.level;
+                    if (hero.name === 'Battle Copter' && hero.level === 1) {
+                        displayLevel = 15;
+                    }
+                    tableHtml += `<td class="${hero.level === hero.maxLevel ? 'is-maxed' : ''}">${displayLevel}</td>`;
                 } else {
                     tableHtml += `<td>-</td>`;
                 }
@@ -542,6 +532,9 @@ document.addEventListener('DOMContentLoaded', () => {
         tableHtml += `</tbody></table>`;
         container.innerHTML = tableHtml;
     }
+    
+    // (Restliche Funktionen bleiben unverändert)
+    
     function renderDonationStats(members) {
         const tableBody = document.getElementById('donation-stats-body');
         if (!tableBody) return;
@@ -596,9 +589,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ======================================================
-    // CWL BONUS RECHNER V2.2 - MANUELLE LOGIK
-    // ======================================================
     function setupManualBonusCalculator() {
         const addPlayerBtn = document.getElementById('add-player-btn');
         const calculateBtn = document.getElementById('calculate-bonus-btn');
@@ -628,12 +618,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         calculateBtn.onclick = () => {
-            const firstSettingInput = document.getElementById('p-ell-rh-p2');
-            if (!firstSettingInput) {
-                alert("Fehler: Die Einstellungs-Felder für die Punktevergabe konnten im HTML nicht gefunden werden. Bitte stelle sicher, dass die index.html aktuell ist.");
-                return;
-            }
-
             const pointsConfig = {
                 ell_rh_p2: parseInt(document.getElementById('p-ell-rh-p2').value),
                 ell_rh_p1: parseInt(document.getElementById('p-ell-rh-p1').value),
@@ -681,7 +665,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
-
     function createPlayerSection(name, th, attackCount) {
         const accordionContainer = document.getElementById('player-accordion-container');
         const playerSection = document.createElement('div');
@@ -705,7 +688,6 @@ document.addEventListener('DOMContentLoaded', () => {
             playerSection.classList.toggle('closed');
         });
     }
-
     function calculateBonusPoints(allAttacks, points) {
         const playerScores = {};
         allAttacks.forEach(atk => {
@@ -744,7 +726,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         return Object.entries(playerScores).map(([spieler, data]) => ({ spieler, punkte: data.totalPoints })).sort((a, b) => b.punkte - a.punkte);
     }
-    
     function renderBonusResults(result) {
         const tableBody = document.getElementById('bonus-results-table-body');
         if(!tableBody) return;
@@ -760,7 +741,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         renderBonusChart(result);
     }
-    
     function renderBonusChart(result) {
         const ctx = document.getElementById('bonus-chart');
         if(!ctx) return;
@@ -780,4 +760,3 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
     setupManualBonusCalculator(); 
 });
-
