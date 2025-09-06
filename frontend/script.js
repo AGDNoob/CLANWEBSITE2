@@ -150,37 +150,26 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error("Fehler bei Hauptstadt-Raids:", error); }
     }
 
-    // --- FINALER FIX: Kernlogik für die Kriegszentrale ---
+    // --- FINALER FIX: Kernlogik für die Kriegszentrale (CSS-basiert) ---
     async function initializeWarCenter() {
+        const warCenterPage = document.getElementById('page-war-center');
         const notInWarMessage = document.getElementById('not-in-war-message');
-        const currentWarDashboard = document.getElementById('current-war-dashboard');
-        const warOrganizerView = document.getElementById('war-organizer-view');
-        
-        // Failsafe, falls die Elemente im HTML nicht gefunden werden
-        if(!notInWarMessage || !currentWarDashboard || !warOrganizerView) {
-            console.error("Ein oder mehrere Elemente der Kriegszentrale fehlen im HTML!");
-            return;
-        }
+        if (!warCenterPage || !notInWarMessage) return;
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/clan/currentwar`);
             
             if (response.status === 404) {
                 // --- Zustand: NICHT IM KRIEG ---
-                notInWarMessage.textContent = "Aktuell findet kein Clankrieg statt. Das Kriegsprotokoll ist unten verfügbar.";
-                notInWarMessage.classList.remove('hidden');
-                currentWarDashboard.classList.add('hidden');
-                warOrganizerView.classList.add('hidden');
-                currentWarData = null;
+                warCenterPage.classList.add('not-in-war');
+                warCenterPage.classList.remove('in-war');
+                notInWarMessage.textContent = "Aktuell findet kein Clankrieg statt.";
             } else if (response.ok) {
                 // --- Zustand: IM KRIEG ---
                 const warData = await response.json();
-                currentWarData = warData;
-
-                notInWarMessage.classList.add('hidden');
-                currentWarDashboard.classList.remove('hidden');
-                warOrganizerView.classList.remove('hidden');
-
+                warCenterPage.classList.add('in-war');
+                warCenterPage.classList.remove('not-in-war');
+                
                 renderCurrentWarDashboard(warData);
                 renderDetailedWarView(warData);
 
@@ -192,16 +181,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error("Fehler beim Abrufen des aktuellen Kriegs:", error);
+            warCenterPage.classList.add('not-in-war');
+            warCenterPage.classList.remove('in-war');
             notInWarMessage.textContent = "Fehler: Kriegsdaten konnten nicht geladen werden.";
-            notInWarMessage.classList.remove('hidden');
-            currentWarDashboard.classList.add('hidden');
-            warOrganizerView.classList.add('hidden');
         }
         
         fetchWarlog();
     }
 
-    // --- FINALER FIX: Helden-Labor mit Lade-Zähler und schnellerem Laden ---
     async function fetchPlayerDataForLab() {
         const loadingContainer = document.getElementById('lab-loading-state');
         const contentContainer = document.getElementById('lab-content-container');
@@ -238,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (error) {
                     console.error(`Netzwerkfehler beim Abrufen von ${member.name}:`, error);
                 }
-                await new Promise(resolve => setTimeout(resolve, 100)); // Pause auf 100ms reduziert
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
 
             renderHeroTable(allPlayersData);
