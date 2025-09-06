@@ -150,13 +150,17 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error("Fehler bei Hauptstadt-Raids:", error); }
     }
 
-    // --- KORRIGIERT & VEREINFACHT: Kernlogik für die Kriegszentrale ---
+    // --- FINALER FIX: Kernlogik für die Kriegszentrale ---
     async function initializeWarCenter() {
         const notInWarMessage = document.getElementById('not-in-war-message');
         const currentWarDashboard = document.getElementById('current-war-dashboard');
         const warOrganizerView = document.getElementById('war-organizer-view');
         
-        if(!notInWarMessage || !currentWarDashboard || !warOrganizerView) return;
+        // Failsafe, falls die Elemente im HTML nicht gefunden werden
+        if(!notInWarMessage || !currentWarDashboard || !warOrganizerView) {
+            console.error("Ein oder mehrere Elemente der Kriegszentrale fehlen im HTML!");
+            return;
+        }
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/clan/currentwar`);
@@ -197,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchWarlog();
     }
 
+    // --- FINALER FIX: Helden-Labor mit Lade-Zähler und schnellerem Laden ---
     async function fetchPlayerDataForLab() {
         const loadingContainer = document.getElementById('lab-loading-state');
         const contentContainer = document.getElementById('lab-content-container');
@@ -211,10 +216,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 await fetchClanInfo();
             }
 
-            loadingContainer.innerHTML = '<div class="spinner"></div><p>Lade detaillierte Spielerdaten (das kann einen Moment dauern)...</p>';
+            loadingContainer.innerHTML = '<div class="spinner"></div><p>Lade Spielerdaten...</p>';
+            const loadingText = loadingContainer.querySelector('p');
             
             const allPlayersData = [];
+            const totalCount = currentMemberList.length;
+            let loadedCount = 0;
+
             for (const member of currentMemberList) {
+                loadedCount++;
+                if(loadingText) loadingText.textContent = `Lade Spielerdaten... (${loadedCount}/${totalCount})`;
+
                 try {
                     const response = await fetch(`${API_BASE_URL}/api/player/${member.tag.replace('#', '')}`);
                     if (!response.ok) {
@@ -226,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (error) {
                     console.error(`Netzwerkfehler beim Abrufen von ${member.name}:`, error);
                 }
-                await new Promise(resolve => setTimeout(resolve, 200)); 
+                await new Promise(resolve => setTimeout(resolve, 100)); // Pause auf 100ms reduziert
             }
 
             renderHeroTable(allPlayersData);
@@ -487,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = planHtml;
     }
 
-    // --- ÜBERARBEITET: Helden-Tabelle mit Copter-Fix ---
+    // --- FINALER FIX: Helden-Tabelle mit korrekter Sortierung und Copter-Fix ---
     function renderHeroTable(allPlayersData) {
         const container = document.getElementById('hero-table-container');
         if (!container) return;
@@ -496,7 +508,8 @@ document.addEventListener('DOMContentLoaded', () => {
         HERO_ORDER.forEach(hero => { tableHtml += `<th>${hero.replace('Barbarian ', '').replace('Archer ', '')}</th>`; });
         tableHtml += `</tr></thead><tbody>`;
         
-        allPlayersData.sort((a, b) => a.townHallLevel - b.townHallLevel || b.expLevel - a.expLevel);
+        // KORRIGIERT: Sortierung ist jetzt absteigend (stärkste Spieler oben)
+        allPlayersData.sort((a, b) => b.townHallLevel - a.townHallLevel || b.expLevel - a.expLevel);
 
         allPlayersData.forEach(player => {
             if (!player || !player.heroes) return;
