@@ -992,3 +992,32 @@ button:hover, .btn:hover {
     border-radius: var(--border-radius-sm);
     text-align: center;
 }
+/* ==========================================================================
+   15. ZUSTANDS-STEUERUNG FÜR KRIEGSZENTRALE
+   ========================================================================== */
+
+/* Grundzustand: Verstecke kriegsspezifische Elemente standardmäßig */
+#page-war-center #current-war-box,
+#page-war-center #war-organizer-view {
+  display: none;
+}
+#page-war-center #not-in-war-message {
+  display: none; /* Auch die Nachricht ist standardmäßig versteckt */
+}
+
+/* Zustand, wenn ein Krieg aktiv ist */
+#page-war-center.in-war #current-war-box,
+#page-war-center.in-war #war-organizer-view {
+  display: block;
+}
+
+/* Zustand, wenn KEIN Krieg aktiv ist */
+#page-war-center.not-in-war #current-war-box {
+  display: block; /* Zeige die äußere Box an... */
+}
+#page-war-center.not-in-war #current-war-dashboard {
+  display: none; /* ...aber verstecke das Dashboard mit den Scores darin. */
+}
+#page-war-center.not-in-war #not-in-war-message {
+  display: block; /* Zeige stattdessen die Nachricht an. */
+}
