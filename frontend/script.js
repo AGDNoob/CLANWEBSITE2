@@ -183,44 +183,51 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchWarlog();
     }
     async function fetchPlayerDataForLab() {
-        const loadingContainer = document.getElementById('lab-loading-state');
-        const contentContainer = document.getElementById('lab-content-container');
-        if (!loadingContainer || !contentContainer) return;
+    const loadingContainer = document.getElementById('lab-loading-state');
+    const contentContainer = document.getElementById('lab-content-container');
+    if (!loadingContainer || !contentContainer) return;
 
-        labDataLoaded = true;
-        loadingContainer.classList.remove('hidden');
-        contentContainer.classList.add('hidden');
+    labDataLoaded = true;
+    loadingContainer.classList.remove('hidden');
+    contentContainer.classList.add('hidden');
 
-        try {
-            if (currentMemberList.length === 0) {
-                console.log("Mitgliederliste ist leer, lade sie zuerst...");
-                await fetchClanInfo();
-            }
-
-            loadingContainer.innerHTML = '<div class="spinner"></div><p>Lade detaillierte Spielerdaten...</p>';
-            
-            const playerPromises = currentMemberList.map(member =>
-                fetch(`${API_BASE_URL}/api/player/${member.tag.replace('#', '')}`)
-                    .then(res => {
-                        if (!res.ok) {
-                           console.error(`Fehler bei ${member.name} (${member.tag}): Server antwortete mit ${res.status}`);
-                           return Promise.reject(`Fehler bei ${member.name}: ${res.statusText}`);
-                        }
-                        return res.json();
-                    })
-            );
-
-            const allPlayersData = await Promise.all(playerPromises);
-            renderHeroTable(allPlayersData);
-            
-            loadingContainer.classList.add('hidden');
-            contentContainer.classList.remove('hidden');
-        } catch (error) {
-            console.error("Fehler beim Abrufen der Spielerdaten für das Labor:", error);
-            loadingContainer.innerHTML = `<p class="error-message">Einige Spielerdaten konnten nicht geladen werden. Prüfe die Konsole und das Backend. <button id="retry-lab">Erneut versuchen</button></p>`;
-            document.getElementById('retry-lab').addEventListener('click', () => { labDataLoaded = false; fetchPlayerDataForLab(); });
+    try {
+        if (currentMemberList.length === 0) {
+            console.log("Mitgliederliste ist leer, lade sie zuerst...");
+            await fetchClanInfo();
         }
+
+        loadingContainer.innerHTML = '<div class="spinner"></div><p>Lade detaillierte Spielerdaten (das kann einen Moment dauern)...</p>';
+        
+        const allPlayersData = [];
+        // KORREKTUR: Wir verwenden eine for...of-Schleife, um die Anfragen nacheinander zu senden
+        // und den Server nicht zu überlasten.
+        for (const member of currentMemberList) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/player/${member.tag.replace('#', '')}`);
+                if (!response.ok) {
+                    console.error(`Fehler bei ${member.name} (${member.tag}): Server antwortete mit ${response.status}`);
+                    continue; // Überspringe dieses Mitglied und mache mit dem nächsten weiter
+                }
+                const playerData = await response.json();
+                allPlayersData.push(playerData);
+            } catch (error) {
+                console.error(`Netzwerkfehler beim Abrufen von ${member.name}:`, error);
+            }
+            // Eine kleine Pause, um dem Server Zeit zum Atmen zu geben
+            await new Promise(resolve => setTimeout(resolve, 200)); 
+        }
+
+        renderHeroTable(allPlayersData);
+        
+        loadingContainer.classList.add('hidden');
+        contentContainer.classList.remove('hidden');
+    } catch (error) {
+        console.error("Fehler beim Abrufen der Spielerdaten für das Labor:", error);
+        loadingContainer.innerHTML = `<p class="error-message">Einige Spielerdaten konnten nicht geladen werden. Prüfe die Konsole und das Backend. <button id="retry-lab">Erneut versuchen</button></p>`;
+        document.getElementById('retry-lab').addEventListener('click', () => { labDataLoaded = false; fetchPlayerDataForLab(); });
     }
+}
     
     // ======================================================
     // RENDER-FUNKTIONEN
@@ -773,3 +780,4 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(fetchAllData, POLLING_INTERVAL_MS);
     setupManualBonusCalculator(); 
 });
+
