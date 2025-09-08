@@ -1,1023 +1,235 @@
-/* ==========================================================================
-   1. DESIGN SYSTEM & CSS-VARIABLEN (CUSTOM PROPERTIES)
-   ========================================================================== */
+/* ======================
+   1. BASE & VARIABLES
+====================== */
 :root {
-  /* Farbpalette: Dracula Theme mit CoC Akzenten */
-  --color-background: #282a36; /* Dunkler Hintergrund */
-  --color-background-secondary: #383a59; /* Etwas hellerer Hintergrund für Container */
-  --color-background-glass: rgba(68, 71, 90, 0.6);
-  --color-current-line: #44475a; /* Akzent für aktive Elemente, Ränder */
-  --color-foreground: #f8f8f2; /* Heller Text */
-  --color-comment: #6272a4;    /* Weniger wichtiger Text, Kommentare */
+  --bg: #1c1e26;
+  --bg-alt: #232530;
+  --bg-card: #2e303e;
+  --fg: #e0e0e0;
+  --fg-muted: #a0a0a0;
 
-  /* Akzentfarben */
-  --color-cyan: #8be9fd;
-  --color-green: #50fa7b;
-  --color-orange: #ffb86c;
-  --color-pink: #ff79c6;
-  --color-purple: #bd93f9;
-  --color-red: #ff5555;
-  --color-yellow: #f1fa8c;
+  --accent: #7aa2f7;
+  --success: #9ece6a;
+  --danger: #f7768e;
+  --warning: #e0af68;
 
-  /* Typografie */
-  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  --font-family-mono: 'Fira Code', 'JetBrains Mono', monospace;
-  
-  --font-size-base: 16px;
-  --font-size-sm: 0.875rem; /* 14px */
-  --font-size-md: 1rem;    /* 16px */
-  --font-size-lg: 1.125rem;/* 18px */
-  --font-size-xl: 1.25rem; /* 20px */
+  --radius: 12px;
+  --shadow: 0 6px 16px rgba(0,0,0,0.4);
 
-  --font-weight-light: 300;
-  --font-weight-normal: 400;
-  --font-weight-bold: 700;
-
-  /* Abstände (Spacing) */
-  --spacing-xs: 0.25rem; /* 4px */
-  --spacing-sm: 0.5rem;  /* 8px */
-  --spacing-md: 1rem;    /* 16px */
-  --spacing-lg: 1.5rem;  /* 24px */
-  --spacing-xl: 2rem;    /* 32px */
-  --spacing-xxl: 4rem;   /* 64px */
-
-  /* Sonstiges */
-  --border-radius-sm: 4px;
-  --border-radius-md: 8px;
-  --border-radius-lg: 16px;
-  --box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), 0 6px 6px rgba(0, 0, 0, 0.25);
-  --box-shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-  --transition-fast: all 0.2s ease-in-out;
-  --transition-slow: all 0.4s ease-in-out;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 2rem;
 }
 
-/* ==========================================================================
-   2. GLOBAL RESET & BASE STYLES
-   ========================================================================== */
-*, *::before, *::after {
+/* ======================
+   2. GLOBAL RESET
+====================== */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
-
-html {
-  font-size: var(--font-size-base);
-  scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 body {
-  font-family: var(--font-family-sans);
-  font-weight: var(--font-weight-normal);
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+  color: var(--fg);
+  background: var(--bg);
   line-height: 1.6;
-  color: var(--color-foreground);
-  background: var(--color-background);
-  overflow-x: hidden;
 }
+img { max-width: 100%; display: block; }
+a { color: var(--accent); text-decoration: none; }
 
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* ==========================================================================
-   3. TYPOGRAFIE
-   ========================================================================== */
-h1, h2, h3, h4, h5, h6 {
-  font-weight: var(--font-weight-bold);
-  line-height: 1.2;
-  margin-bottom: var(--spacing-md);
-  color: var(--color-cyan);
-  letter-spacing: -0.5px;
-}
-
-h1 { font-size: 2.5rem; }
-h2 { font-size: 2rem; color: var(--color-purple); }
-h3 { font-size: 1.5rem; color: var(--color-green); }
-
-p {
-  margin-bottom: var(--spacing-md);
-  max-width: 75ch;
-  color: var(--color-comment);
-}
-
-a {
-  color: var(--color-pink);
-  text-decoration: none;
-  transition: var(--transition-fast);
-  position: relative;
-  padding-bottom: 2px;
-}
-
-a:hover {
-  color: var(--color-yellow);
-}
-
-/* Animierter Unterstrich-Effekt */
-a::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  transform: scaleX(0);
-  height: 2px;
-  bottom: 0;
-  left: 0;
-  background-color: var(--color-yellow);
-  transform-origin: bottom right;
-  transition: transform 0.25s ease-out;
-}
-
-a:hover::after {
-  transform: scaleX(1);
-  transform-origin: bottom left;
-}
-
-/* ==========================================================================
-   4. LAYOUT
-   ========================================================================== */
+/* ======================
+   3. LAYOUT
+====================== */
 .app-container {
   display: flex;
   min-height: 100vh;
 }
-
 .sidebar {
-  width: 260px;
-  background-color: var(--color-background-secondary);
-  padding: var(--spacing-lg);
-  border-right: 1px solid var(--color-current-line);
-  transition: transform 0.3s ease-in-out;
+  width: 240px;
+  background: var(--bg-alt);
+  padding: var(--spacing-lg) var(--spacing-md);
+  border-right: 1px solid #2c2f40;
+  transition: transform 0.3s ease;
   z-index: 1000;
 }
-
 .main-content {
-  flex-grow: 1;
-  padding: var(--spacing-xl);
+  flex: 1;
+  padding: var(--spacing-lg);
   overflow-y: auto;
 }
 
-.page {
-  display: none;
+/* Mobile Sidebar */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 100%;
+    transform: translateX(-100%);
+  }
+  .sidebar.open { transform: translateX(0); }
+  #mobile-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 900;
+  }
+  #mobile-overlay.open { display: block; }
+  .main-content { padding: var(--spacing-md); }
 }
 
-.page.active {
-  display: block;
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-.hidden {
-  display: none !important;
-}
-
-.card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--spacing-lg);
-}
-
-.analytics-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-lg);
-}
-
-.analytics-grid .full-width {
-    grid-column: 1 / -1;
-}
-
-/* ==========================================================================
-   5. KOMPONENTEN
-   ========================================================================== */
-
-/* ----- Buttons ----- */
-button, .btn {
-  display: inline-block;
-  padding: var(--spacing-sm) var(--spacing-lg);
-  border: none;
-  border-radius: var(--border-radius-md);
-  font-weight: var(--font-weight-bold);
-  cursor: pointer;
-  transition: var(--transition-fast);
-  text-align: center;
-  background: var(--color-current-line);
-  color: var(--color-foreground);
-  border: 1px solid var(--color-comment);
-}
-
-button:hover, .btn:hover {
-  background-color: var(--color-comment);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-
-.cta-button {
-  background: linear-gradient(45deg, var(--color-green), var(--color-cyan));
-  color: var(--color-background);
-  border: none;
-  padding: var(--spacing-md) var(--spacing-xl);
-  font-size: var(--font-size-lg);
-}
-.cta-button:hover {
-    box-shadow: 0 5px 15px rgba(80, 250, 123, 0.4);
-}
-
-/* ----- Sidebar / Navigation ----- */
+/* ======================
+   4. SIDEBAR NAV
+====================== */
 .sidebar-header {
-  margin-bottom: var(--spacing-xl);
   text-align: center;
+  margin-bottom: var(--spacing-lg);
 }
-.sidebar-header h3 {
-  color: var(--color-foreground);
-}
-
-.sidebar-nav {
-  list-style: none;
-}
-
 .nav-link {
   display: block;
   padding: var(--spacing-sm) var(--spacing-md);
   margin-bottom: var(--spacing-sm);
-  border-radius: var(--border-radius-md);
-  transition: var(--transition-fast);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-comment);
+  border-radius: var(--radius);
+  color: var(--fg-muted);
+  font-weight: 500;
+  transition: 0.2s;
 }
-
 .nav-link:hover {
-  background-color: var(--color-current-line);
-  color: var(--color-cyan);
-  transform: translateX(5px);
+  background: var(--bg-card);
+  color: var(--accent);
 }
-
 .nav-link.active {
-  background-color: var(--color-purple);
-  color: var(--color-background);
-  box-shadow: 0 4px 8px rgba(189, 147, 249, 0.3);
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
 }
 
-/* ----- Generische Boxen & Karten ----- */
-.dashboard-box, .stats-box {
-    background-color: var(--color-background-secondary);
-    border-radius: var(--border-radius-lg);
-    padding: var(--spacing-lg);
-    border: 1px solid var(--color-current-line);
-    margin-bottom: var(--spacing-xl);
-}
-
-.member-card, .raid-card {
-  background-color: var(--color-background-secondary);
-  border-radius: var(--border-radius-md);
+/* ======================
+   5. CARDS & BOXES
+====================== */
+.card,
+.dashboard-box,
+.stats-box,
+.member-card,
+.raid-card,
+.profile-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
   padding: var(--spacing-md);
-  border: 1px solid var(--color-current-line);
-  transition: var(--transition-slow);
-  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.member-card:hover,
+.raid-card:hover {
+  transform: translateY(-3px);
 }
 
-.member-card:hover, .raid-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--box-shadow);
-  border-color: var(--color-green);
-}
-
-/* ----- Tabellen (Überarbeitet) ----- */
+/* ======================
+   6. TABLES
+====================== */
 .stats-table {
   width: 100%;
   border-collapse: collapse;
 }
-
-.stats-table th, .stats-table td {
-  padding: var(--spacing-md);
-  text-align: left;
-  border-bottom: 1px solid var(--color-current-line);
+.stats-table th,
+.stats-table td {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid #3a3d4d;
 }
-
-.stats-table thead {
-  color: var(--color-purple);
-  font-size: var(--font-size-sm);
+.stats-table th {
+  color: var(--accent);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 0.8rem;
+  text-align: left;
 }
-
-.stats-table tbody tr {
-    transition: var(--transition-fast);
-}
-
 .stats-table tbody tr:nth-child(even) {
-    background-color: rgba(0,0,0,0.1); /* Subtiler Zebra-Effekt */
+  background: rgba(255,255,255,0.03);
 }
+.donation-ratio.good { color: var(--success); font-weight: 600; }
+.donation-ratio.bad { color: var(--danger); font-weight: 600; }
 
-.stats-table tbody tr:hover {
-  background-color: var(--color-current-line);
+/* ======================
+   7. WAR CENTER
+====================== */
+.war-header {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
 }
+.war-scores {
+  display: flex;
+  justify-content: space-around;
+  background: var(--bg-alt);
+  border-radius: var(--radius);
+  padding: var(--spacing-sm);
+}
+.war-state { text-align: center; color: var(--warning); margin-top: var(--spacing-sm); }
+.warlog-entry {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius);
+  margin-bottom: var(--spacing-sm);
+}
+.warlog-entry.win { background: rgba(158,206,106,0.15); border-left: 4px solid var(--success); }
+.warlog-entry.lose { background: rgba(247,118,142,0.15); border-left: 4px solid var(--danger); }
+.warlog-entry.tie { background: rgba(122,162,247,0.15); border-left: 4px solid var(--accent); }
 
-.stats-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.donation-ratio.good { color: var(--color-green); font-weight: var(--font-weight-bold); }
-.donation-ratio.bad { color: var(--color-red); font-weight: var(--font-weight-bold); }
-
-
-/* ----- Akkordeon (für Warlog) ----- */
-.accordion {
-    cursor: pointer;
-    transition: var(--transition-fast);
-}
-.accordion:hover {
-    border-color: var(--color-cyan);
-}
-.accordion.active .accordion-arrow {
-    transform: rotate(180deg);
-}
-
-.accordion-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.accordion-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-in-out;
-    padding-top: 0;
-    margin-top: 0;
-}
-.accordion.active .accordion-content {
-    padding-top: var(--spacing-lg);
-    margin-top: var(--spacing-lg);
-}
-
-/* ----- Mobile Header & Overlay ----- */
-.mobile-header {
-    display: none;
-}
-#mobile-overlay {
-    display: none;
-}
-
-
-/* ==========================================================================
-   6. SEITENSPEZIFISCHE STILE: CLAN-INFOS
-   ========================================================================== */
-#clan-header {
-    margin-bottom: var(--spacing-xl);
-    text-align: center;
-}
-#clan-description {
-    max-width: 60ch;
-    margin: 0 auto var(--spacing-lg) auto;
-}
-#clan-stats span {
-    margin: 0 var(--spacing-sm);
-    font-weight: var(--font-weight-bold);
-    color: var(--color-cyan);
-}
-
-.member-card-header {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-sm);
-}
-.member-card-body {
-    display: flex;
-    justify-content: space-between;
-    font-size: var(--font-size-sm);
-    color: var(--color-comment);
-}
-
-/* Spielerprofil */
-.profile-card {
-    background: var(--color-background-secondary);
-    border-radius: var(--border-radius-lg);
-    padding: var(--spacing-xl);
-    max-width: 600px;
-    margin: var(--spacing-lg) auto;
-}
+/* ======================
+   8. PROFILE
+====================== */
 .profile-header {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
-    padding-bottom: var(--spacing-lg);
-    border-bottom: 1px solid var(--color-current-line);
-}
-.profile-header img {
-    width: 80px;
+  display: flex;
+  gap: var(--spacing-md);
+  border-bottom: 1px solid #3a3d4d;
+  padding-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
 }
 .profile-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-md);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+  gap: var(--spacing-sm);
 }
 .stat-item {
-    background-color: var(--color-background);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--border-radius-md);
-    display: flex;
-    justify-content: space-between;
-}
-.stat-item span:first-child {
-    color: var(--color-comment);
-}
-.stat-item span:last-child {
-    font-weight: var(--font-weight-bold);
+  background: var(--bg-alt);
+  border-radius: var(--radius);
+  padding: var(--spacing-sm);
+  display: flex;
+  justify-content: space-between;
 }
 
-/* ==========================================================================
-   7. SEITENSPEZIFISCHE STILE: STATISTIKEN & CHARTS
-   ========================================================================== */
-.chart-container {
-    height: 400px;
-    position: relative;
-}
-.chart-container-half {
-    height: 300px;
-    position: relative;
-}
-
-/* ==========================================================================
-   8. SEITENSPEZIFISCHE STILE: KRIEGSZENTRALE
-   ========================================================================== */
-#current-war-box {
-    cursor: pointer;
-}
-.war-header, .war-scores {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    text-align: center;
-}
-.war-header {
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
-}
-.clan-side, .opponent-side {
-    flex: 1;
-}
-.vs-separator {
-    font-size: var(--font-size-xl);
-    color: var(--color-red);
-    font-weight: var(--font-weight-bold);
-}
-
-.war-scores {
-    background-color: var(--color-background);
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius-md);
-    margin-bottom: var(--spacing-lg);
-}
-.war-scores span {
-    flex: 1;
-}
-.war-scores span:nth-child(2),
-.war-scores span:nth-child(5) {
-    font-weight: var(--font-weight-bold);
-    color: var(--color-comment);
-}
-.war-state {
-    text-align: center;
-    color: var(--color-orange);
-}
-
-/* Detaillierte Kriegsansicht */
-.detailed-war-clans {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-lg);
-}
-
-.war-player-card {
-    background-color: var(--color-background-secondary);
-    border-radius: var(--border-radius-md);
-    margin-bottom: var(--spacing-sm);
-    padding: var(--spacing-sm);
-    font-size: var(--font-size-sm);
-}
-
-.war-player-header {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    font-weight: var(--font-weight-bold);
-    margin-bottom: var(--spacing-xs);
-}
-
-.player-map-pos {
-    background-color: var(--color-current-line);
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.player-name {
-    flex-grow: 1;
-}
-
-.attacks-container {
-    padding-left: 32px; /* Einrücken unter der Map-Position */
-}
-
-.attack-info {
-    display: flex;
-    justify-content: space-between;
-    background-color: var(--color-background);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--border-radius-sm);
-    margin-top: var(--spacing-xs);
-}
-
-.attack-result {
-    font-weight: var(--font-weight-bold);
-}
-
-/* Feinschliff für Warlog */
-.warlog-entry {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--border-radius-md);
-    margin-bottom: var(--spacing-sm);
-    border-left: 5px solid;
-}
-.warlog-entry.win {
-    background-color: rgba(80, 250, 123, 0.1);
-    border-left-color: var(--color-green);
-}
-.warlog-entry.lose {
-    background-color: rgba(255, 85, 85, 0.1);
-    border-left-color: var(--color-red);
-}
-.warlog-entry.tie {
-    background-color: rgba(68, 71, 90, 0.5);
-    border-left-color: var(--color-current-line);
-}
-.war-result {
-    font-weight: bold;
-}
-.war-details {
-    font-size: var(--font-size-sm);
-    color: var(--color-comment);
-}
-/* Bonus Rechner */
-.bonus-rechner-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
-}
-.settings-box {
-    background-color: var(--color-background);
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius-md);
-}
-.setting-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-sm);
-}
-.setting-item label {
-    color: var(--color-comment);
-}
-.setting-item input {
-    width: 60px;
-    background-color: var(--color-current-line);
-    border: 1px solid var(--color-comment);
-    color: var(--color-foreground);
-    padding: var(--spacing-xs);
-    border-radius: var(--border-radius-sm);
-    text-align: center;
-}
-
+/* ======================
+   9. RESPONSIVE GRIDS
+====================== */
+.card-grid,
+.analytics-grid,
+.detailed-war-clans,
 .bonus-results-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-xl);
-    align-items: flex-start;
+  display: grid;
+  gap: var(--spacing-md);
+}
+.card-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.analytics-grid { grid-template-columns: 1fr 1fr; }
+.detailed-war-clans { grid-template-columns: 1fr 1fr; }
+.bonus-results-grid { grid-template-columns: 1fr 1fr; }
+@media (max-width: 768px) {
+  .analytics-grid,
+  .detailed-war-clans,
+  .bonus-results-grid { grid-template-columns: 1fr; }
 }
 
-/* ==========================================================================
-   10. SEITENSPEZIFISCHE STILE: LABOR-SPION
-   ========================================================================== */
-
-#page-lab h2 {
-    margin-bottom: var(--spacing-sm);
-}
-#page-lab .dashboard-box {
-    margin-bottom: var(--spacing-xl);
-}
-
-.loading-state {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    padding: var(--spacing-xxl);
-    min-height: 400px;
-}
-
-/* Spinner Animation (Überarbeitet) */
-.spinner {
-    width: 60px;
-    height: 60px;
-    position: relative;
-    animation: spin 1.2s linear infinite;
-    margin-bottom: var(--spacing-lg);
-}
-
-.spinner::before,
-.spinner::after {
-    content: "";
-    position: absolute;
-    border-radius: 50%;
-}
-
-.spinner::before {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(0deg, var(--color-purple) 0%, var(--color-pink) 100%);
-    animation: spin 1.2s linear infinite reverse; /* Rotiert in die andere Richtung */
-}
-
-.spinner::after {
-    width: 85%;
-    height: 85%;
-    background: var(--color-background-secondary);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.lab-table-container {
-    overflow-x: auto; /* Wichtig für mobile Ansicht */
-    -webkit-overflow-scrolling: touch; /* Flüssigeres Scrollen auf iOS */
-    border: 1px solid var(--color-current-line);
-    border-radius: var(--border-radius-lg);
-    background-color: var(--color-background-secondary);
-    box-shadow: var(--box-shadow-inset);
-}
-
-.lab-table {
-    width: 100%;
-    min-width: 600px; /* Mindestbreite, um Umbrüche zu vermeiden */
-    border-collapse: collapse;
-}
-
-.lab-table th,
-.lab-table td {
-    padding: var(--spacing-sm) var(--spacing-md); /* Vertikaler Abstand reduziert */
-    text-align: center;
-    white-space: nowrap;
-    border-bottom: 1px solid var(--color-current-line);
-    font-size: var(--font-size-sm);
-}
-
-.lab-table th {
-    font-size: 0.8rem; /* Macht die Schrift im Header etwas kleiner */
-    padding-top: var(--spacing-sm);
-    padding-bottom: var(--spacing-sm);
-}
-
-.lab-table th {
-    background-color: var(--color-background-glass);
-    color: var(--color-purple);
-    font-weight: var(--font-weight-bold);
-    position: sticky; /* Header bleibt beim Scrollen sichtbar */
-    top: 0;
-    backdrop-filter: blur(5px);
-}
-
-.lab-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.lab-table tbody tr:hover {
-    background-color: var(--color-current-line);
-}
-
-/* Erster Tabelleneintrag (Spielername) linksbündig */
-.lab-table th:first-child,
-.lab-table td:first-child {
-    text-align: left;
-    padding-left: var(--spacing-lg);
-    position: sticky; /* Spielernamen bleiben beim horizontalen Scrollen sichtbar */
-    left: 0;
-    background-color: var(--color-background-secondary); /* Sorgt für Lesbarkeit beim Scrollen */
-}
-
-/* Leichte Anpassung für den Hover-Effekt des fixierten Spieleramens */
-.lab-table tbody tr:hover td:first-child {
-    background-color: var(--color-current-line);
-}
-
-.player-cell {
-    display: flex;
-    flex-direction: column;
-}
-
-.player-th-sublabel {
-    font-size: 0.75rem;
-    color: var(--color-comment);
-}
-
-.lab-table .is-maxed {
-    color: var(--color-yellow);
-    font-weight: var(--font-weight-bold);
-}
-
-
-/* ==========================================================================
-   11. RESPONSIVE DESIGN
-   ========================================================================== */
-@media (max-width: 1024px) {
-    .sidebar {
-        position: fixed;
-        left: 0;
-        top: 0;
-        height: 100%;
-        transform: translateX(-100%);
-    }
-    .sidebar.open {
-        transform: translateX(0);
-    }
-    .main-content {
-        padding: var(--spacing-lg);
-        padding-top: 80px; /* Platz für den mobilen Header */
-        margin-left: 0;
-        width: 100%;
-    }
-    .mobile-header {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-md);
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        background-color: var(--color-background-secondary);
-        padding: var(--spacing-sm) var(--spacing-md);
-        z-index: 999;
-        border-bottom: 1px solid var(--color-current-line);
-    }
-    #hamburger-btn {
-        font-size: 1.5rem;
-        background: transparent;
-        border: none;
-    }
-    #mobile-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        z-index: 998;
-        display: none;
-    }
-    #mobile-overlay.open {
-        display: block;
-    }
-    .bonus-results-grid,
-    .detailed-war-clans,
-    .analytics-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 600px) {
-    h1 { font-size: 2rem; }
-    h2 { font-size: 1.75rem; }
-
-    .war-header {
-        flex-direction: column;
-    }
-    .vs-separator {
-        margin: var(--spacing-sm) 0;
-    }
-}
-
-
-/* ==========================================================================
-   12. HELPER & ANIMATIONEN
-   ========================================================================== */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
+/* ======================
+   10. HELPERS
+====================== */
 .error-message {
-    color: var(--color-red);
-    background-color: rgba(255, 85, 85, 0.1);
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius-md);
-    border: 1px solid var(--color-red);
-    text-align: center;
-}
-/* ==========================================================================
-   13. STILE FÜR DEN KRIEGS-ORGANISATOR
-   ========================================================================== */
-#war-organizer-view h2 {
-    color: var(--color-orange);
-}
-
-.war-plan-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--spacing-sm);
-    margin-top: var(--spacing-lg);
-}
-
-.war-plan-matchup {
-    display: flex;
-    align-items: center;
-    background-color: var(--color-background);
-    border-radius: var(--border-radius-md);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-left: 4px solid var(--color-comment);
-    transition: var(--transition-fast);
-}
-
-.war-plan-matchup:hover {
-    transform: translateX(5px);
-    border-left-color: var(--color-orange);
-}
-
-.plan-player {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    font-size: var(--font-size-md);
-}
-
-.plan-player.opponent {
-    justify-content: flex-end;
-    text-align: right;
-}
-
-.plan-pos {
-    font-weight: var(--font-weight-bold);
-    color: var(--color-cyan);
-    background-color: var(--color-current-line);
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.plan-vs {
-    font-size: 1.5rem;
-    color: var(--color-red);
-    margin: 0 var(--spacing-md);
-    animation: pulse 1.5s infinite ease-in-out;
-}
-
-/* Kleine Animation für das VS-Zeichen */
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
-
-}
-/* ==========================================================================
-   14. STILE FÜR DEN MANUELLEN CWL-RECHNER V2.0
-   ========================================================================== */
-.add-player-form {
-    display: flex;
-    gap: var(--spacing-md);
-    flex-wrap: wrap;
-}
-
-.add-player-form input {
-    padding: var(--spacing-sm);
-    border: 1px solid var(--color-current-line);
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-    border-radius: var(--border-radius-md);
-    flex-grow: 1;
-}
-
-.player-accordion-container {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-xl);
-}
-
-.player-section {
-    background-color: var(--color-background-secondary);
-    border: 1px solid var(--color-current-line);
-    border-radius: var(--border-radius-md);
-    overflow: hidden;
-}
-
-.player-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-md);
-    cursor: pointer;
-    background-color: var(--color-current-line);
-}
-
-.player-header:hover {
-    background-color: var(--color-comment);
-}
-
-.player-header h4 {
-    margin: 0;
-    color: var(--color-foreground);
-}
-
-.player-header .toggle-icon {
-    transition: transform 0.3s ease;
-}
-
-.player-section.closed .toggle-icon {
-    transform: rotate(-90deg);
-}
-
-.attacks-wrapper {
-    max-height: 1000px; /* Genug Höhe für 7 Angriffe */
-    overflow: hidden;
-    transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
-    padding: var(--spacing-md);
-}
-
-.player-section.closed .attacks-wrapper {
-    max-height: 0;
-    padding: 0 var(--spacing-md);
-}
-
-.attack-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    gap: var(--spacing-md);
-    align-items: center;
-    margin-bottom: var(--spacing-sm);
-    padding-bottom: var(--spacing-sm);
-    border-bottom: 1px solid var(--color-current-line);
-}
-.attack-row:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-
-.attack-row label {
-    font-weight: bold;
-    color: var(--color-cyan);
-}
-.attack-row input {
-    width: 100%;
-    padding: var(--spacing-xs);
-    background-color: var(--color-background);
-    border: 1px solid var(--color-comment);
-    color: var(--color-foreground);
-    border-radius: var(--border-radius-sm);
-    text-align: center;
-}
-/* ==========================================================================
-   15. ZUSTANDS-STEUERUNG FÜR KRIEGSZENTRALE
-   ========================================================================== */
-
-/* Grundzustand: Verstecke kriegsspezifische Elemente standardmäßig */
-#page-war-center #current-war-box,
-#page-war-center #war-organizer-view {
-  display: none;
-}
-#page-war-center #not-in-war-message {
-  display: none; /* Auch die Nachricht ist standardmäßig versteckt */
-}
-
-/* Zustand, wenn ein Krieg aktiv ist */
-#page-war-center.in-war #current-war-box,
-#page-war-center.in-war #war-organizer-view {
-  display: block;
-}
-
-/* Zustand, wenn KEIN Krieg aktiv ist */
-#page-war-center.not-in-war #current-war-box {
-  display: block; /* Zeige die äußere Box an... */
-}
-#page-war-center.not-in-war #current-war-dashboard {
-  display: none; /* ...aber verstecke das Dashboard mit den Scores darin. */
-}
-#page-war-center.not-in-war #not-in-war-message {
-  display: block; /* Zeige stattdessen die Nachricht an. */
+  color: var(--danger);
+  background: rgba(247,118,142,0.15);
+  border: 1px solid var(--danger);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius);
+  text-align: center;
 }
