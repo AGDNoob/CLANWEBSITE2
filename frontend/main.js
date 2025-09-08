@@ -145,6 +145,7 @@ async function initializeWarCenter() {
     warCenterPage.classList.add('in-war');
     warCenterPage.classList.remove('not-in-war');
     notInWarMessage.textContent = "";
+    notInWarMessage.classList.add('hidden');
     renderCurrentWarDashboard(warData);
     renderDetailedWarView(warData);
     generateAndRenderWarPlan(warData);
