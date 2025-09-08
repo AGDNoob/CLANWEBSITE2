@@ -1,56 +1,97 @@
-// warplanner.js – KI Kriegsplaner (2 Angriffe/Spieler)
+// warplanner.js – KI Kriegsplaner (CW: 2 Angriffe/Spieler, Overkill-Schutz)
 
-function generateAndRenderWarPlan(war) {
+function generateAndRenderWarPlan(warData) {
   const container = document.getElementById('war-plan-container');
-  if (!container) return;
-
-  if (!war?.clan?.members || !war?.opponent?.members) {
-    container.innerHTML = '<p class="error-message">Keine Kriegsdaten verfügbar.</p>';
+  if (!container || !warData?.clan?.members || !warData?.opponent?.members) {
+    if (container) container.innerHTML = '<p class="error-message">Unvollständige War-Daten.</p>';
     return;
   }
 
-  let attackers = war.clan.members.map(m => ({
+  let attackers = warData.clan.members.map(m => ({
     name: m.name,
     th: m.townhallLevel,
     mapPos: m.mapPosition,
     attacks: []
-  })).sort((a, b) => a.mapPos - b.mapPos);
+  })).sort((a,b) => a.mapPos - b.mapPos);
 
-  let targets = war.opponent.members.map(m => ({
+  let targets = warData.opponent.members.map(m => ({
     name: m.name,
     th: m.townhallLevel,
     mapPos: m.mapPosition,
+    stars: 0,      // Platzhalter (kann aus DB kommen)
     taken: false
-  })).sort((a, b) => a.mapPos - b.mapPos);
+  })).sort((a,b) => a.mapPos - b.mapPos);
 
-  // Zuweisung (einfaches Matching)
-  attackers.forEach(attacker => {
-    const target = targets.find(t => !t.taken && Math.abs(t.th - attacker.th) <= 1);
-    if (target) {
-      attacker.attacks.push({ target, strategy: pickStrategy(attacker, target) });
-      target.taken = true;
+  function assignTarget(attacker, isSecondAttack = false) {
+    // Mirror
+    let t = targets.find(x => !x.taken && x.th === attacker.th);
+    if (t) return { t, strat: "Mirror ⚔️" };
+
+    // Dip (max 2 down)
+    t = targets.find(x => !x.taken && attacker.th > x.th && (attacker.th - x.th) <= 2);
+    if (t) return { t, strat: "Dip 🏹 (sicher 3⭐)" };
+
+    // Push (max 2 up)
+    t = targets.find(x => !x.taken && x.th > attacker.th && (x.th - attacker.th) <= 2);
+    if (t) return { t, strat: "Push ⭐⭐" };
+
+    // Cleanup (nur 2. Angriff)
+    if (isSecondAttack) {
+      t = targets.find(x => !x.taken && (x.stars ?? 0) < 3);
+      if (t) return { t, strat: "Cleanup 🔄" };
     }
+
+    // Notlösung: irgendein freies Ziel (aber Overkill ≥3 vermeiden)
+    t = targets.find(x => !x.taken && Math.abs(x.th - attacker.th) <= 2);
+    if (t) return { t, strat: "Flex 🤔" };
+
+    // wirklich letzte Notlösung
+    t = targets.find(x => !x.taken);
+    if (t) return { t, strat: "Flex 🤔" };
+    return null;
+  }
+
+  // 1. Angriff (sicher)
+  attackers.forEach(a => {
+    const pick = assignTarget(a, false);
+    if (pick) { pick.t.taken = true; a.attacks.push({ target: pick.t, strategy: pick.strat }); }
   });
 
-  // Ausgabe
-  container.innerHTML = '<h2>KI-Kriegsplan</h2><div class="war-plan-grid"></div>';
-  const grid = container.querySelector('.war-plan-grid');
+  // 2. Angriff (Cleanup/Rest)
   attackers.forEach(a => {
-    a.attacks.forEach(atk => {
-      grid.innerHTML += `
-        <div class="war-plan-matchup">
-          <div class="plan-player our">${a.mapPos}. ${a.name} (RH${a.th})</div>
-          <div class="plan-vs">⚔️</div>
-          <div class="plan-player opponent">${atk.target.name} (RH${atk.target.th})</div>
+    const pick = assignTarget(a, true);
+    if (pick) { pick.t.taken = true; a.attacks.push({ target: pick.t, strategy: pick.strat }); }
+  });
+
+  // Render
+  let html = `<h2>KI-Kriegsplan (2 Angriffe/Spieler)</h2>
+              <p>Priorität: Mirror/Dip → Push → Cleanup. Overkill (≥3 TH-Diff) wird vermieden.</p>
+              <div class="war-plan-grid">`;
+  attackers.forEach(a => {
+    if (!a.attacks.length) return;
+    html += `
+      <div class="war-plan-matchup">
+        <div class="plan-player our">
+          <span class="plan-pos">${a.mapPos}.</span>
+          <span class="plan-name">${a.name} (RH${a.th})</span>
+        </div>
+        <div class="plan-attacks">`;
+    a.attacks.forEach((atk, idx) => {
+      html += `
+        <div class="attack-block" style="margin-top:.4rem">
+          <div class="plan-vs">Angriff ${idx+1} ⚔️</div>
+          <div class="plan-player opponent">
+            <span class="plan-name">${atk.target.name} (RH${atk.target.th})</span>
+            <span class="plan-pos">${atk.target.mapPos}.</span>
+          </div>
           <div class="plan-strategy">${atk.strategy}</div>
         </div>`;
     });
+    html += `</div></div>`;
   });
+  html += `</div>`;
+  container.innerHTML = html;
 }
 
-function pickStrategy(attacker, target) {
-  if (attacker.th > target.th) return "Dip → sichere 3⭐";
-  if (attacker.th === target.th) return "Mirror → 3⭐ Chance";
-  if (attacker.th < target.th) return "Safe 2⭐ (High%)";
-  return "Flex";
-}
+// global
+window.generateAndRenderWarPlan = generateAndRenderWarPlan;
