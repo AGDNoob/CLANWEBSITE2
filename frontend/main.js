@@ -25,7 +25,7 @@ async function fetchAllData() {
   // War center
   await initializeWarCenter();
 
-  // Capital raids
+  // Hauptstadt
   const raids = await fetchCapitalRaids();
   if (raids?.items) renderCapitalRaids(raids.items);
 
@@ -109,32 +109,82 @@ function setupNavigationAndUI() {
   });
 }
 
-/* -------- War Center Init -------- */
+/* -------- War Center Init (mit „Kein Krieg“-Placeholder) -------- */
 async function initializeWarCenter() {
   const warCenterPage = document.getElementById('page-war-center');
   const notInWarMessage = document.getElementById('not-in-war-message');
-  if (!warCenterPage || !notInWarMessage) return;
+  const dashboard = document.getElementById('current-war-dashboard');
+  const warPlan = document.getElementById('war-plan-container');
+
+  if (!warCenterPage || !notInWarMessage || !dashboard || !warPlan) return;
+
+  // Standard-Leeren (um „alte“ Inhalte zu vermeiden)
+  dashboard.innerHTML = '';
+  warPlan.innerHTML = '';
 
   try {
-    const warData = await fetchCurrentWar();
-    if (!warData || warData.state === 'notInWar' || !warData?.clan) {
-      warCenterPage.classList.add('not-in-war');
-      warCenterPage.classList.remove('in-war');
-      notInWarMessage.textContent = "Aktuell findet kein Clankrieg statt.";
-    } else {
-      warCenterPage.classList.add('in-war');
-      warCenterPage.classList.remove('not-in-war');
-      renderCurrentWarDashboard(warData);
-      renderDetailedWarView(warData);
-      // KI-Plan (CW, 2 Angriffe)
-      generateAndRenderWarPlan(warData);
+    // Wir brauchen hier den HTTP-Status (404 erkennen) → direkt fetch
+    const response = await fetch(`${API_BASE_URL}/api/clan/currentwar`);
+    if (response.status === 404) {
+      // Kein Krieg aktiv
+      applyNotInWarState(warCenterPage, notInWarMessage, dashboard, warPlan);
+      return;
     }
+
+    if (!response.ok) {
+      throw new Error(`Serverfehler: ${response.status}`);
+    }
+
+    const warData = await response.json();
+    if (!warData || warData.state === 'notInWar' || !warData?.clan) {
+      applyNotInWarState(warCenterPage, notInWarMessage, dashboard, warPlan);
+      return;
+    }
+
+    // Krieg aktiv → anzeigen
+    warCenterPage.classList.add('in-war');
+    warCenterPage.classList.remove('not-in-war');
+    notInWarMessage.textContent = "";
+    renderCurrentWarDashboard(warData);
+    renderDetailedWarView(warData);
+    generateAndRenderWarPlan(warData);
+
   } catch (e) {
     console.error("Fehler beim Abrufen des aktuellen Kriegs:", e);
+    // Fehlerfall wie „kein Krieg“ behandeln, aber mit Fehlertext
     warCenterPage.classList.add('not-in-war');
     warCenterPage.classList.remove('in-war');
     notInWarMessage.textContent = "Fehler: Kriegsdaten konnten nicht geladen werden.";
+    dashboard.innerHTML = "";
+    warPlan.innerHTML = `
+      <div class="placeholder">
+        <div class="emoji">❗</div>
+        <div>
+          <div class="title">Kriegsdaten derzeit nicht verfügbar</div>
+          <div class="hint">Bitte später erneut versuchen.</div>
+        </div>
+      </div>`;
   }
+}
+
+// Helfer: „Kein Krieg aktiv“-UI befüllen
+function applyNotInWarState(warCenterPage, notInWarMessage, dashboard, warPlan) {
+  warCenterPage.classList.add('not-in-war');
+  warCenterPage.classList.remove('in-war');
+  notInWarMessage.textContent = "Wir sind aktuell in keinem Clankrieg.";
+
+  // Dashboard leer halten (kein Fake-Score)
+  dashboard.innerHTML = "";
+
+  // KI-Planer mit freundlichem Hinweis
+  warPlan.innerHTML = `
+    <div class="placeholder">
+      <div class="emoji">🛡️</div>
+      <div>
+        <div class="title">Kein aktiver Krieg</div>
+        <div class="hint">Der KI-Planer aktiviert sich automatisch, sobald der nächste Krieg startet.</div>
+      </div>
+    </div>`;
 }
 
 /* -------- Lab: alle Playerdaten sammeln -------- */
@@ -168,7 +218,7 @@ async function fetchPlayerDataForLab() {
       } catch (err) {
         console.error(`Fehler bei ${member.name} (${member.tag}):`, err);
       }
-      await new Promise(r => setTimeout(r, 100)); // kleine Pause
+      await new Promise(r => setTimeout(r, 100)); // kleine Pause für dein fragiles Backend
     }
 
     renderHeroTable(all);
