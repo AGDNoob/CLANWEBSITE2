@@ -172,6 +172,7 @@ function applyNotInWarState(warCenterPage, notInWarMessage, dashboard, warPlan) 
   warCenterPage.classList.add('not-in-war');
   warCenterPage.classList.remove('in-war');
   notInWarMessage.textContent = "Wir sind aktuell in keinem Clankrieg.";
+  notInWarMessage.classList.remove('hidden');
 
   // Dashboard leer halten (kein Fake-Score)
   dashboard.innerHTML = "";
