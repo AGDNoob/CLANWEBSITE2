@@ -1,224 +1,108 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clan Dashboard</title>
-
-    <!-- Chart.js für Diagramme -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- Styles -->
-    <link rel="stylesheet" href="style.css">
-
-    <!-- Frontend-Module -->
-    <script src="api.js" defer></script>
-    <script src="render.js" defer></script>
-    <script src="warplanner.js" defer></script>
-    <script src="bonus.js" defer></script>
-    <script src="main.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clan Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <button id="menu-toggle">☰</button>
+    <h1>Clan Dashboard</h1>
+  </header>
 
-    <!-- Mobile Header -->
-    <div class="mobile-header">
-        <button id="hamburger-btn">☰</button>
-        <h3>Clan Dashboard</h3>
-    </div>
-    <div id="mobile-overlay"></div>
+  <!-- Sidebar -->
+  <aside class="sidebar hidden" id="sidebar">
+    <nav>
+      <ul>
+        <li><a href="#page-home" class="nav-link">Home</a></li>
+        <li><a href="#page-clan-info" class="nav-link">Clan Info</a></li>
+        <li><a href="#page-analytics" class="nav-link">Analytics</a></li>
+        <li><a href="#page-war-center" class="nav-link">War Center</a></li>
+        <li><a href="#page-capital" class="nav-link">Clan Capital</a></li>
+        <li><a href="#page-bonus" class="nav-link">Bonus Rechner</a></li>
+        <li><a href="#page-heroes" class="nav-link">Helden</a></li>
+        <!-- Neue CWL-Seite -->
+        <li><a href="#page-cwl" class="nav-link">CWL Zentrale</a></li>
+        <li><a href="#page-credits" class="nav-link">Credits</a></li>
+      </ul>
+    </nav>
+  </aside>
 
-    <div class="app-container">
-        <!-- Sidebar Navigation -->
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h3>Clan Dashboard</h3>
-            </div>
-            <ul class="sidebar-nav">
-                <li><a href="#" class="nav-link active" data-target="page-home">🏠 Startseite</a></li>
-                <li><a href="#" class="nav-link" data-target="page-clan-info">🛡️ Clan-Infos</a></li>
-                <li><a href="#" class="nav-link" data-target="page-analytics">📊 Statistiken</a></li>
-                <li><a href="#" class="nav-link" data-target="page-war-center">⚔️ Kriegszentrale</a></li>
-                <li><a href="#" class="nav-link" data-target="page-capital">🏔️ Hauptstadt</a></li>
-                <li><a href="#" class="nav-link" data-target="page-cwl">🏆 CWL-Rechner</a></li>
-                <li><a href="#" class="nav-link" data-target="page-lab">🔬 Heldenlevel</a></li>
-                <li><a href="#" class="nav-link" data-target="page-credits">📜 Credits</a></li>
-            </ul>
-        </nav>
+  <!-- Overlay -->
+  <div class="overlay hidden" id="overlay"></div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            
-            <!-- Startseite -->
-            <section id="page-home" class="page active">
-                <h1>Willkommen!</h1>
-                <p>Wähle links ein Modul, um Live-Daten zu sehen.</p>
-            </section>
+  <!-- Main Content -->
+  <main id="main">
+    <!-- Home -->
+    <section id="page-home" class="page">
+      <h2>Willkommen im Clan Dashboard</h2>
+      <p>Hier findest du alle Infos zu Clan, Kriegen und CWL.</p>
+    </section>
 
-            <!-- Clan Infos -->
-            <section id="page-clan-info" class="page">
-                <div id="clan-info-master-view">
-                    <header id="clan-header">
-                        <h1 id="clan-name">Lädt...</h1>
-                        <p id="clan-description">...</p>
-                        <div id="clan-stats"></div>
-                    </header>
-                    <div id="member-list-container" class="card-grid"></div>
-                </div>
+    <!-- Clan Info -->
+    <section id="page-clan-info" class="page hidden">
+      <h2>Clan Informationen</h2>
+      <div id="clan-info"></div>
+    </section>
 
-                <!-- Spielerprofil -->
-                <div id="player-profile-view" class="hidden">
-                    <button id="profile-back-button">&larr; Zurück</button>
-                    <div class="profile-card">
-                        <div class="profile-header">
-                            <img id="profile-league-icon" src="" alt="Liga-Icon">
-                            <div>
-                                <h1 id="profile-player-name">Spielername</h1>
-                                <span id="profile-player-tag">#TAG</span>
-                            </div>
-                        </div>
-                        <div class="profile-stats">
-                            <div class="stat-item"><span>Level</span><span id="profile-level">0</span></div>
-                            <div class="stat-item"><span>Rathaus</span><span id="profile-th-level">0</span></div>
-                            <div class="stat-item"><span>Trophäen</span><span id="profile-trophies">0</span></div>
-                            <div class="stat-item"><span>Kriegssterne</span><span id="profile-war-stars">0</span></div>
-                            <div class="stat-item"><span>Rolle</span><span id="profile-role">Mitglied</span></div>
-                            <div class="stat-item"><span>Spenden</span><span id="profile-donations">0</span></div>
-                            <div class="stat-item"><span>Erhalten</span><span id="profile-donations-received">0</span></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+    <!-- Analytics -->
+    <section id="page-analytics" class="page hidden">
+      <h2>Statistiken</h2>
+      <canvas id="donation-chart"></canvas>
+      <canvas id="townhall-distribution"></canvas>
+      <canvas id="league-distribution"></canvas>
+    </section>
 
-            <!-- Statistiken -->
-            <section id="page-analytics" class="page">
-                <h1>Clan-Statistiken</h1>
-                <div class="analytics-grid">
-                    <div class="stats-box">
-                        <h3>Rathaus-Verteilung</h3>
-                        <div class="chart-container-half">
-                            <canvas id="th-distribution-chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="stats-box">
-                        <h3>Liga-Verteilung</h3>
-                        <div class="chart-container-half">
-                            <canvas id="league-distribution-chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="stats-box full-width">
-                        <h3>Top 10 Spender</h3>
-                        <table class="stats-table">
-                            <thead><tr><th>#</th><th>Spieler</th><th>Gespendet</th><th>Erhalten</th><th>Ratio</th></tr></thead>
-                            <tbody id="donation-stats-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
+    <!-- War Center -->
+    <section id="page-war-center" class="page hidden">
+      <h2>Kriegszentrale</h2>
+      <div id="war-overview"></div>
+      <canvas id="war-performance"></canvas>
+    </section>
 
-            <!-- Kriegszentrale -->
-            <section id="page-war-center" class="page">
-                <h1>Kriegszentrale</h1>
-                <div id="current-war-master-view">
-                    <div class="dashboard-box" id="current-war-box">
-                        <h2>Aktueller Krieg</h2>
-                        <p id="not-in-war-message" class="hidden">Aktuell kein Krieg.</p>
-                        <div id="current-war-dashboard"></div>
-                    </div>
-                </div>
-                <div id="current-war-detail-view" class="hidden">
-                    <button id="current-war-detail-back-button">&larr; Zurück</button>
-                    <div class="detailed-war-clans">
-                        <div id="detailed-war-our-clan"></div>
-                        <div id="detailed-war-opponent-clan"></div>
-                    </div>
-                </div>
-                <div class="dashboard-box accordion" id="warlog-accordion">
-                    <h2 class="accordion-header">Kriegsprotokoll <span class="accordion-arrow">▼</span></h2>
-                    <div id="warlog-accordion-content" class="accordion-content">
-                        <p>Kriegsprotokoll wird geladen...</p>
-                    </div>
-                </div>
-                <div class="dashboard-box" id="war-organizer-view">
-                    <h2>Automatischer Kriegsplan</h2>
-                    <div id="war-plan-container"></div>
-                </div>
-            </section>
+    <!-- Clan Capital -->
+    <section id="page-capital" class="page hidden">
+      <h2>Clan Hauptstadt</h2>
+      <div id="capital-info"></div>
+    </section>
 
-            <!-- Hauptstadt -->
-            <section id="page-capital" class="page">
-                <h1>Clan-Hauptstadt</h1>
-                <div class="dashboard-box">
-                    <h2>Beuteverlauf</h2>
-                    <div class="chart-container">
-                        <canvas id="capital-chart"></canvas>
-                    </div>
-                </div>
-                <div id="capital-raids-container" class="card-grid"></div>
-            </section>
+    <!-- Bonus Rechner -->
+    <section id="page-bonus" class="page hidden">
+      <h2>CWL Bonus Rechner</h2>
+      <div id="bonus-ui"></div>
+      <canvas id="bonus-chart"></canvas>
+    </section>
 
-            <!-- CWL Rechner -->
-            <section id="page-cwl" class="page">
-                <h1>CWL Bonus-Rechner</h1>
-                <div id="cwl-content">
-                    <div class="dashboard-box">
-                        <h2>Neuen Spieler hinzufügen</h2>
-                        <div class="add-player-form">
-                            <input type="text" id="new-player-name" placeholder="Spielername">
-                            <input type="number" id="new-player-th" placeholder="RH-Level">
-                            <input type="number" id="new-player-attacks" placeholder="Angriffe" min="1" max="7">
-                            <button id="add-player-btn" class="cta-button">Spieler hinzufügen</button>
-                        </div>
-                    </div>
-                    <div id="player-accordion-container"></div>
-                    <div class="dashboard-box" id="cwl-bonus-calculator-view">
-                        <h2>Einstellungen</h2>
-                        <div class="bonus-rechner-grid" id="bonus-settings"></div>
-                        <div style="margin-top: 1rem; display: flex; gap: 1rem;">
-                            <button id="calculate-bonus-btn" class="cta-button">Berechnen</button>
-                            <button id="clear-all-btn">Zurücksetzen</button>
-                        </div>
-                    </div>
-                    <div class="dashboard-box hidden" id="cwl-bonus-results-view">
-                        <button id="bonus-rechner-back-button">&larr; Zurück</button>
-                        <h2>🏆 Bonus-Rangliste</h2>
-                        <div class="bonus-results-grid">
-                            <table class="stats-table">
-                                <thead><tr><th>#</th><th>Spieler</th><th>Punkte</th></tr></thead>
-                                <tbody id="bonus-results-table-body"></tbody>
-                            </table>
-                            <div class="chart-container">
-                                <canvas id="bonus-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+    <!-- Helden -->
+    <section id="page-heroes" class="page hidden">
+      <h2>Helden Übersicht</h2>
+      <div id="heroes-info"></div>
+    </section>
 
-            <!-- Heldenlevel -->
-            <section id="page-lab" class="page">
-                <h1>🔬 Heldenlevel</h1>
-                <div id="lab-loading-state" class="loading-state">
-                    <div class="spinner"></div>
-                    <p>Lade Spielerdaten...</p>
-                </div>
-                <div id="lab-content-container" class="hidden">
-                    <div class="dashboard-box">
-                        <h2>Helden-Level</h2>
-                        <div id="hero-table-container" class="lab-table-container"></div>
-                    </div>
-                </div>
-            </section>
+    <!-- CWL Zentrale -->
+    <section id="page-cwl" class="page hidden">
+      <h2>CWL Zentrale</h2>
+      <div id="cwl-summary" class="card"></div>
+      <div id="cwl-rounds" class="card"></div>
+      <canvas id="cwl-player-stats"></canvas>
+      <div id="cwl-bonus"></div>
+    </section>
 
-            <!-- Credits -->
-            <section id="page-credits" class="page">
-                <div class="credits-content">
-                    <h1>Credits</h1>
-                    <p class="made-by">Code & Website von AGDNoob ❤️</p>
-                    <p>Projekt mit Python, Flask & der offiziellen Clash API.</p>
-                </div>
-            </section>
+    <!-- Credits -->
+    <section id="page-credits" class="page hidden">
+      <h2>Credits</h2>
+      <p>Erstellt von AGDNoob & Team</p>
+    </section>
+  </main>
 
-        </main>
-    </div>
+  <script src="api.js"></script>
+  <script src="bonus.js"></script>
+  <script src="render.js"></script>
+  <script src="warplanner.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
