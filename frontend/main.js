@@ -1,4 +1,4 @@
-// main.js – Init, Navigation, Polling, War-Center, Lab
+// main.js – Init, Navigation, Polling, War-Center, Lab, CWL
 const POLLING_INTERVAL_MS = 60000;
 let currentMemberList = [];
 let labDataLoaded = false;
@@ -32,6 +32,27 @@ async function fetchAllData() {
   // Warlog
   const log = await fetchWarlog();
   if (log?.items) renderWarlog(log.items);
+
+  // CWL (NEU)
+  await fetchCwlData();
+}
+
+/* -------- CWL Daten laden -------- */
+async function fetchCwlData() {
+  try {
+    const data = await fetchJson('/api/cwl/leaguegroup');
+    if (!data || !data.rounds) {
+      const summary = document.getElementById('cwl-summary');
+      if (summary) summary.textContent = 'Keine CWL-Daten verfügbar.';
+      return;
+    }
+    renderCwlSummary(data);
+    renderCwlRounds(data);
+    renderCwlPlayerStats(data);
+    initCwlBonus(data); // Bonusrechner mit Whitelist
+  } catch (err) {
+    console.error('Fehler beim Laden der CWL:', err);
+  }
 }
 
 /* -------- Navigation & UI -------- */
@@ -123,10 +144,8 @@ async function initializeWarCenter() {
   warPlan.innerHTML = '';
 
   try {
-    // Wir brauchen hier den HTTP-Status (404 erkennen) → direkt fetch
     const response = await fetch(`${API_BASE_URL}/api/clan/currentwar`);
     if (response.status === 404) {
-      // Kein Krieg aktiv
       applyNotInWarState(warCenterPage, notInWarMessage, dashboard, warPlan);
       return;
     }
@@ -141,7 +160,6 @@ async function initializeWarCenter() {
       return;
     }
 
-    // Krieg aktiv → anzeigen
     warCenterPage.classList.add('in-war');
     warCenterPage.classList.remove('not-in-war');
     notInWarMessage.textContent = "";
@@ -152,7 +170,6 @@ async function initializeWarCenter() {
 
   } catch (e) {
     console.error("Fehler beim Abrufen des aktuellen Kriegs:", e);
-    // Fehlerfall wie „kein Krieg“ behandeln, aber mit Fehlertext
     warCenterPage.classList.add('not-in-war');
     warCenterPage.classList.remove('in-war');
     notInWarMessage.textContent = "Fehler: Kriegsdaten konnten nicht geladen werden.";
@@ -168,17 +185,12 @@ async function initializeWarCenter() {
   }
 }
 
-// Helfer: „Kein Krieg aktiv“-UI befüllen
 function applyNotInWarState(warCenterPage, notInWarMessage, dashboard, warPlan) {
   warCenterPage.classList.add('not-in-war');
   warCenterPage.classList.remove('in-war');
   notInWarMessage.textContent = "Wir sind aktuell in keinem Clankrieg.";
   notInWarMessage.classList.remove('hidden');
-
-  // Dashboard leer halten (kein Fake-Score)
   dashboard.innerHTML = "";
-
-  // KI-Planer mit freundlichem Hinweis
   warPlan.innerHTML = `
     <div class="placeholder">
       <div class="emoji">🛡️</div>
@@ -189,7 +201,7 @@ function applyNotInWarState(warCenterPage, notInWarMessage, dashboard, warPlan) 
     </div>`;
 }
 
-/* -------- Lab: alle Playerdaten sammeln -------- */
+/* -------- Lab -------- */
 async function fetchPlayerDataForLab() {
   const loadingContainer = document.getElementById('lab-loading-state');
   const contentContainer = document.getElementById('lab-content-container');
@@ -220,7 +232,7 @@ async function fetchPlayerDataForLab() {
       } catch (err) {
         console.error(`Fehler bei ${member.name} (${member.tag}):`, err);
       }
-      await new Promise(r => setTimeout(r, 100)); // kleine Pause für dein fragiles Backend
+      await new Promise(r => setTimeout(r, 100));
     }
 
     renderHeroTable(all);
@@ -234,5 +246,5 @@ async function fetchPlayerDataForLab() {
   }
 }
 
-// global (falls gebraucht)
+// global
 window.fetchAllData = fetchAllData;
