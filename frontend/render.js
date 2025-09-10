@@ -333,8 +333,8 @@ function renderCwlRounds(rounds) {
     div.className = "cwl-round card";
     div.innerHTML = `
       <div><strong>Runde ${r.round}</strong></div>
-      <div>${r.our_stars}⭐ (${r.our_pct.toFixed(1)}%) 
-           – ${r.opp_stars}⭐ (${r.opp_pct.toFixed(1)}%)</div>
+      <div>${r.our_stars}⭐ (${(r.our_pct || 0).toFixed(1)}%) 
+     – ${r.opp_stars}⭐ (${(r.opp_pct || 0).toFixed(1)}%)</div>
       <div>${result}</div>
       <details>
         <summary>Angriffe anzeigen</summary>
