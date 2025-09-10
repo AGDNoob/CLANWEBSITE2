@@ -49,31 +49,29 @@
 
       <!-- Overlay -->
       <div id="mobile-overlay"></div>
+
       <!-- Home / Dashboard -->
-<section id="page-home" class="page active">
-  <h2>Dashboard Übersicht</h2>
-  <div class="card-grid">
-    <div class="card dash-link" data-target="page-clan-info">
-      <h3>Clan</h3>
-      <div id="clan-stats-summary"></div>
-    </div>
-    <div class="card dash-link" data-target="page-cwl">
-      <h3>CWL</h3>
-      <div id="cwl-summary-compact"></div>
-    </div>
-    <div class="card dash-link" data-target="page-war-center">
-      <h3>Krieg</h3>
-      <div id="last-war-summary"></div>
-    </div>
-    <div class="card dash-link" data-target="page-capital">
-      <h3>Clan Capital</h3>
-      <div id="last-capital-summary"></div>
-    </div>
-  </div>
-</section>
-
-
-  
+      <section id="page-home" class="page active">
+        <h2>Dashboard Übersicht</h2>
+        <div class="card-grid">
+          <div class="card dash-link" data-target="page-clan-info">
+            <h3>Clan</h3>
+            <div id="clan-stats-summary"></div>
+          </div>
+          <div class="card dash-link" data-target="page-cwl">
+            <h3>CWL</h3>
+            <div id="cwl-summary-compact"></div>
+          </div>
+          <div class="card dash-link" data-target="page-war-center">
+            <h3>Krieg</h3>
+            <div id="last-war-summary"></div>
+          </div>
+          <div class="card dash-link" data-target="page-capital">
+            <h3>Clan Capital</h3>
+            <div id="last-capital-summary"></div>
+          </div>
+        </div>
+      </section>
 
       <!-- Clan Info -->
       <section id="page-clan-info" class="page">
@@ -133,15 +131,29 @@
         <h2>Kriegszentrale</h2>
         <div id="not-in-war-message"></div>
         <div id="current-war-dashboard" class="card"></div>
-        <div id="war-plan-container" class="card"></div>
+
+        <!-- 🆕 Warplan Accordion -->
+        <div id="war-plan-accordion" class="accordion card">
+          <div class="accordion-header">
+            <h3>Kriegsplan</h3>
+            <span>▼</span>
+          </div>
+          <div id="war-plan-accordion-content" class="accordion-content">
+            <div id="war-plan-container"></div>
+          </div>
+        </div>
 
         <div id="detailed-war-view" class="card-grid">
           <div class="card" id="detailed-war-our-clan"></div>
           <div class="card" id="detailed-war-opponent-clan"></div>
         </div>
 
+        <!-- 🆕 Warlog Accordion -->
         <div id="warlog-accordion" class="accordion card">
-          <div class="accordion-header"><h3>Kriegshistorie</h3></div>
+          <div class="accordion-header">
+            <h3>Kriegshistorie</h3>
+            <span>▼</span>
+          </div>
           <div id="warlog-accordion-content" class="accordion-content"></div>
         </div>
       </section>
@@ -217,6 +229,3 @@
   </script>
 </body>
 </html>
-
-
-
