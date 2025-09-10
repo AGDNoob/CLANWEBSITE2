@@ -315,32 +315,41 @@ function renderCwlSummary(data) {
   `;
 }
 
-function renderCwlRounds(roundWars) {
+function renderCwlRounds(rounds) {
   const box = document.getElementById('cwl-rounds');
   if (!box) return;
-  box.innerHTML = "<h3>Runden</h3>";
+  box.innerHTML = "<h3>Rundenübersicht</h3>";
 
-  if (!roundWars?.length) {
-    box.innerHTML += "<p>Keine CWL-Kriege gefunden.</p>";
+  if (!rounds?.length) {
+    box.innerHTML += "<p>Keine CWL-Runden gefunden.</p>";
     return;
   }
 
-  roundWars.forEach((war, i) => {
-    const our = war.clan;
-    const opp = war.opponent;
-    const result = (our.stars > opp.stars) ? "✅ Sieg" :
-                   (our.stars < opp.stars) ? "❌ Niederlage" : "➖ Unentschieden";
+  rounds.forEach(r => {
+    const result = (r.our_stars > r.opp_stars) ? "✅ Sieg" :
+                   (r.our_stars < r.opp_stars) ? "❌ Niederlage" : "➖ Unentschieden";
 
     const div = document.createElement("div");
     div.className = "cwl-round card";
     div.innerHTML = `
-      <div><strong>Runde ${i+1}:</strong> ${our.name} 🆚 ${opp.name}</div>
-      <div>${our.stars}⭐ (${our.destructionPercentage.toFixed(1)}%) 
-           – ${opp.stars}⭐ (${opp.destructionPercentage.toFixed(1)}%)</div>
-      <div>${result}</div>`;
+      <div><strong>Runde ${r.round}</strong></div>
+      <div>${r.our_stars}⭐ (${r.our_pct.toFixed(1)}%) 
+           – ${r.opp_stars}⭐ (${r.opp_pct.toFixed(1)}%)</div>
+      <div>${result}</div>
+      <details>
+        <summary>Angriffe anzeigen</summary>
+        <ul>
+          ${r.attacks.map(a => `
+            <li>${a.attacker_name} (RH${a.attacker_th}) → ${a.defender_name} (RH${a.defender_th}): 
+                ${a.stars}⭐ ${a.destruction}%</li>
+          `).join("")}
+        </ul>
+      </details>
+    `;
     box.appendChild(div);
   });
 }
+
 
 function renderCwlPlayerStats(data) {
   const ctx = document.getElementById('cwl-player-stats');
