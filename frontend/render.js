@@ -351,24 +351,25 @@ function renderCwlRounds(rounds) {
   });
 }
 
-
-function renderCwlPlayerStats(data) {
+function renderCwlPlayerStats(rounds) {
   const ctx = document.getElementById('cwl-player-stats');
   if (!ctx) return;
 
-  // Aggregiere Spielerstatistiken
   const stats = {};
-  (data.clans || []).forEach(clan => {
-    (clan.members || []).forEach(m => {
-      if (!stats[m.tag]) stats[m.tag] = { name: m.name, attacks: 0, stars: 0 };
-      if (m.attacks) {
-        stats[m.tag].attacks += m.attacks.length;
-        stats[m.tag].stars += m.attacks.reduce((s,a)=>s+(a.stars||0),0);
-      }
+  (rounds || []).forEach(r => {
+    (r.attacks || []).forEach(a => {
+      if (!a.from_our_clan) return; // nur unsere Angriffe zählen
+      if (!stats[a.attacker_name]) stats[a.attacker_name] = { stars: 0, attacks: 0 };
+      stats[a.attacker_name].stars += a.stars || 0;
+      stats[a.attacker_name].attacks += 1;
     });
   });
 
-  const players = Object.values(stats).sort((a,b)=>b.stars-a.stars).slice(0,10);
+  const players = Object.entries(stats)
+    .map(([name, s]) => ({ name, stars: s.stars, attacks: s.attacks }))
+    .sort((a, b) => b.stars - a.stars)
+    .slice(0, 10);
+
   const labels = players.map(p => p.name);
   const stars = players.map(p => p.stars);
 
