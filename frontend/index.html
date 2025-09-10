@@ -49,29 +49,31 @@
 
       <!-- Overlay -->
       <div id="mobile-overlay"></div>
-
       <!-- Home / Dashboard -->
-      <section id="page-home" class="page active">
-        <h2>Dashboard Übersicht</h2>
-        <div class="card-grid">
-          <div class="card" id="dash-clan">
-            <h3>Clan</h3>
-            <div id="clan-stats-summary"></div>
-          </div>
-          <div class="card" id="dash-cwl">
-            <h3>CWL</h3>
-            <div id="cwl-summary-compact"></div>
-          </div>
-          <div class="card" id="dash-war">
-            <h3>Aktueller Krieg</h3>
-            <div id="last-war-summary"></div>
-          </div>
-          <div class="card" id="dash-capital">
-            <h3>Clan Capital</h3>
-            <div id="last-capital-summary"></div>
-          </div>
-        </div>
-      </section>
+<section id="page-home" class="page active">
+  <h2>Dashboard Übersicht</h2>
+  <div class="card-grid">
+    <div class="card dash-link" data-target="page-clan-info">
+      <h3>Clan</h3>
+      <div id="clan-stats-summary"></div>
+    </div>
+    <div class="card dash-link" data-target="page-cwl">
+      <h3>CWL</h3>
+      <div id="cwl-summary-compact"></div>
+    </div>
+    <div class="card dash-link" data-target="page-war-center">
+      <h3>Krieg</h3>
+      <div id="last-war-summary"></div>
+    </div>
+    <div class="card dash-link" data-target="page-capital">
+      <h3>Clan Capital</h3>
+      <div id="last-capital-summary"></div>
+    </div>
+  </div>
+</section>
+
+
+  
 
       <!-- Clan Info -->
       <section id="page-clan-info" class="page">
@@ -215,5 +217,6 @@
   </script>
 </body>
 </html>
+
 
 
