@@ -389,4 +389,11 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   border: 1px solid #3a3a3c;
 }
 #bonus-rechner-back-button:hover { background: #3a3a3c; }
+.card.dash-link {
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.card.dash-link:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+}
 
