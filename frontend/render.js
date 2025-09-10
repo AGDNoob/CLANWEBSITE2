@@ -351,6 +351,29 @@ function renderCwlRounds(rounds) {
   });
 }
 
+function renderCwlSummary(data) {
+  const box = document.getElementById('cwl-summary');
+  if (!box) return;
+
+  const state = data.state || "Unbekannt";
+  const season = data.season || "–";
+  const clanCount = (data.clans || []).length;
+
+  let league = "Unbekannt";
+  if (data.clans) {
+    const ourClan = data.clans.find(c => c.tag === CLAN_TAG);
+    if (ourClan?.warLeague?.name) league = ourClan.warLeague.name;
+  }
+
+  box.innerHTML = `
+    <h3>Übersicht</h3>
+    <p>Saison: <b>${season}</b></p>
+    <p>Status: <b>${state}</b></p>
+    <p>Teilnehmende Clans: <b>${clanCount}</b></p>
+    <p>Unsere Liga: <b>${league}</b></p>
+  `;
+}
+
 function renderCwlPlayerStats(rounds) {
   const ctx = document.getElementById('cwl-player-stats');
   if (!ctx) return;
