@@ -95,7 +95,7 @@ function setupNavigationAndUI() {
       if (sidebar && mobileOverlay) { sidebar.classList.remove('open'); mobileOverlay.classList.remove('open'); }
 
       // lazy-load lab
-      if (targetId === 'page-lab' && !labDataLoaded) {
+      if (targetId === 'page-heroes' && !labDataLoaded) {
         fetchPlayerDataForLab();
       }
     });
