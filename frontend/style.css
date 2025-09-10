@@ -521,4 +521,31 @@ button:hover, .btn:hover{ transform: translateY(-1px); box-shadow: var(--shadow-
   margin-top: var(--gap-lg);
   height: 420px;
 }
+/* ==========================================================================
+   Sticky Sidebar (Desktop)
+   ========================================================================== */
+@media (min-width: 1025px) {
+  .sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;   /* volle Höhe */
+    overflow-y: auto;
+  }
+  #mobile-overlay {
+    display: none !important;
+  }
+}
+
+/* Scrollbar dezenter machen */
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+}
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}
+
 
