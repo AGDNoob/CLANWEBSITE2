@@ -6,6 +6,8 @@
   <title>Clan Dashboard</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- optional: leeres Favicon gegen 404 -->
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 </head>
 <body>
   <!-- Mobile Header -->
@@ -45,7 +47,7 @@
     </section>
 
     <!-- Clan Info -->
-    <section id="page-clan-info" class="page hidden">
+    <section id="page-clan-info" class="page">
       <h2>Clan Informationen</h2>
       <div id="clan-header">
         <h1 id="clan-name">Clanname</h1>
@@ -70,7 +72,7 @@
     </section>
 
     <!-- Analytics -->
-    <section id="page-analytics" class="page hidden">
+    <section id="page-analytics" class="page">
       <h2>Statistiken</h2>
       <div class="analytics-grid">
         <div class="chart-container-half"><canvas id="th-distribution-chart"></canvas></div>
@@ -79,7 +81,7 @@
     </section>
 
     <!-- War Center -->
-    <section id="page-war-center" class="page hidden">
+    <section id="page-war-center" class="page">
       <h2>Kriegszentrale</h2>
       <div id="not-in-war-message"></div>
       <div id="current-war-dashboard"></div>
@@ -101,14 +103,14 @@
     </section>
 
     <!-- Clan Capital -->
-    <section id="page-capital" class="page hidden">
+    <section id="page-capital" class="page">
       <h2>Clan Hauptstadt</h2>
       <div id="capital-raids-container"></div>
       <div class="chart-container"><canvas id="capital-chart"></canvas></div>
     </section>
 
     <!-- Bonus Rechner -->
-    <section id="page-bonus" class="page hidden">
+    <section id="page-bonus" class="page">
       <h2>CWL Bonus Rechner</h2>
       <div id="bonus-settings"></div>
       <div class="bonus-rechner-grid">
@@ -135,7 +137,7 @@
     </section>
 
     <!-- Helden -->
-    <section id="page-heroes" class="page hidden">
+    <section id="page-heroes" class="page">
       <h2>Helden Übersicht</h2>
       <div id="lab-loading-state" class="hidden"></div>
       <div id="lab-content-container">
@@ -144,7 +146,7 @@
     </section>
 
     <!-- CWL Zentrale -->
-    <section id="page-cwl" class="page hidden">
+    <section id="page-cwl" class="page">
       <h2>CWL Zentrale</h2>
       <div id="cwl-summary" class="card"></div>
       <div id="cwl-rounds" class="card"></div>
@@ -153,7 +155,7 @@
     </section>
 
     <!-- Credits -->
-    <section id="page-credits" class="page hidden">
+    <section id="page-credits" class="page">
       <h2>Credits</h2>
       <p>Erstellt von AGDNoob & Team</p>
     </section>
