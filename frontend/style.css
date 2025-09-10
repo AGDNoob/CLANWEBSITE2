@@ -1,5 +1,5 @@
 /* ==========================================================================
-   0) Base – Apple Dark Mode
+   0) Base – Apple Dark Mode mit Smooth Animations
    ========================================================================== */
 :root {
   --bg: #1c1c1e;
@@ -34,13 +34,14 @@ body {
   color: var(--fg);
   font: 15.5px/1.6 var(--font);
   -webkit-font-smoothing: antialiased;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 /* ==========================================================================
    1) Layout
    ========================================================================== */
 .app-container { display: flex; min-height: 100vh; }
-.main-content { flex: 1; padding: var(--content-pad); }
+.main-content { flex: 1; padding: var(--content-pad); transition: padding 0.3s ease; }
 
 /* ==========================================================================
    2) Sidebar
@@ -54,6 +55,7 @@ body {
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  transition: transform 0.3s ease;
 }
 .sidebar-header { text-align: center; margin-bottom: 1.5rem; }
 .sidebar-header h3 { font-weight: 700; margin: 0; }
@@ -76,9 +78,9 @@ body {
   border-radius: 12px;
   color: var(--fg-dim);
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
 }
-.nav-link:hover { background: #3a3a3c; color: var(--fg); }
+.nav-link:hover { background: #3a3a3c; color: var(--fg); transform: translateX(4px); }
 .nav-link.active {
   background: var(--ac);
   color: #fff;
@@ -110,8 +112,11 @@ body {
   box-shadow: var(--shadow-1);
   padding: 1.2rem 1.4rem;
   margin-bottom: 1.2rem;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
 }
 .card h3 { margin-top: 0; font-size: 1.05rem; font-weight: 600; }
+
+.card:hover { box-shadow: var(--shadow-2); transform: translateY(-3px); }
 
 .card-grid {
   display: grid;
@@ -131,6 +136,7 @@ body {
   padding: .65rem .9rem;
   border-bottom: 1px solid #3a3a3c;
   text-align: left;
+  transition: background 0.3s ease;
 }
 .stats-table thead th {
   font-size: .8rem;
@@ -151,16 +157,16 @@ button, .btn {
   font-weight: 600;
   color: var(--fg);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
-button:hover { background: #48484a; }
+button:hover { background: #48484a; transform: translateY(-2px); }
 .cta-button { background: var(--ac); color: #fff; border: none; }
 .cta-button:hover { background: #0062d6; }
 
 /* ==========================================================================
    6) Charts
    ========================================================================== */
-.chart-container { height: 380px; }
+.chart-container { height: 380px; transition: height 0.3s ease; }
 .chart-container-half { height: 260px; }
 canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
 
@@ -170,20 +176,15 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
 .war-header {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 1rem;
+  transition: all 0.3s ease;
 }
 .war-scores {
   display: flex; justify-content: space-around;
   background: #3a3a3c; border-radius: 12px;
   padding: .6rem; font-weight: 600;
+  transition: background 0.3s ease;
 }
 .war-state { text-align: center; margin-top: .6rem; color: var(--fg-mute); }
-
-.cwl-round {
-  background: #2c2c2e; border: 1px solid #3a3a3c;
-  border-radius: 12px; padding: .8rem 1rem;
-  margin-bottom: .6rem; transition: transform .15s ease;
-}
-.cwl-round:hover { transform: translateX(3px); background: #3a3a3c; }
 
 /* ==========================================================================
    7b) Warplanner Styles
@@ -193,7 +194,6 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1rem;
 }
-
 .war-plan-matchup {
   background: var(--bg-card);
   border-radius: var(--radius);
@@ -202,18 +202,12 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   display: flex;
   flex-direction: column;
   gap: .6rem;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
+.war-plan-matchup:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); }
 
-.plan-player.our {
-  font-weight: 700;
-  margin-bottom: .5rem;
-}
-
-.plan-attacks {
-  display: flex;
-  flex-direction: column;
-  gap: .5rem;
-}
+.plan-player.our { font-weight: 700; margin-bottom: .5rem; }
+.plan-attacks { display: flex; flex-direction: column; gap: .5rem; }
 
 .attack-block {
   border-radius: 12px;
@@ -223,7 +217,9 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   display: flex;
   flex-direction: column;
   gap: .2rem;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
+.attack-block:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); }
 
 /* Farbcodes nach Strategie */
 .attack-block.mirror { background: var(--mirror); }
@@ -237,6 +233,29 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
 .plan-player.opponent { font-size: .9rem; font-weight: 500; }
 
 /* ==========================================================================
+   7c) Warlog Styles
+   ========================================================================== */
+.warlog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.warlog-entry {
+  border-radius: 14px;
+  padding: 1rem;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: var(--shadow-1);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+.warlog-entry:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); }
+.warlog-entry.win { background: var(--ok); }
+.warlog-entry.lose { background: var(--err); }
+.warlog-entry.tie { background: var(--warn); color: #000; }
+.warlog-entry .war-result { font-size: 1rem; margin-bottom: .4rem; }
+.warlog-entry .war-details { font-size: .9rem; opacity: 0.9; }
+
+/* ==========================================================================
    8) Profilkarten
    ========================================================================== */
 .profile-card {
@@ -246,7 +265,10 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   box-shadow: var(--shadow-1);
   max-width: 720px;
   margin: 1.5rem auto;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
+.profile-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); }
+
 .profile-header {
   display: flex; align-items: center; gap: 1rem;
   padding-bottom: 1rem; border-bottom: 1px solid #3a3a3c;
@@ -264,6 +286,7 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   background: #1c1c1e; border: 1px solid #3a3a3c;
   border-radius: 12px; padding: .7rem .9rem;
   display: flex; justify-content: space-between; align-items: center;
+  transition: background 0.3s ease;
 }
 .stat-item span:first-child { color: #a1a1a6; font-size: .9rem; }
 .stat-item span:last-child { font-weight: 600; }
@@ -280,34 +303,40 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   display: flex; flex-wrap: wrap; gap: .8rem;
   padding: 1rem; background: #2c2c2e;
   border-radius: 16px; box-shadow: var(--shadow-1);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
+.add-player-form:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); }
 .add-player-form input {
   flex: 1; min-width: 160px; padding: .55rem .7rem;
   border-radius: 12px; border: 1px solid #3a3a3c;
   background: #3a3a3c; color: #f5f5f7;
   font-size: .95rem;
+  transition: background 0.3s ease;
 }
 .add-player-form input::placeholder { color: #a1a1a6; }
 .add-player-form button {
   background: var(--ac); color: #fff; border: none;
   border-radius: 12px; padding: .55rem 1rem; font-weight: 600;
-  cursor: pointer; transition: background .2s ease;
+  cursor: pointer; transition: background .3s ease, transform 0.2s ease;
 }
-.add-player-form button:hover { background: #0062d6; }
+.add-player-form button:hover { background: #0062d6; transform: translateY(-2px); }
 
 .player-accordion-container { display: flex; flex-direction: column; gap: 1rem; }
 .player-section {
   background: #2c2c2e; border-radius: 16px;
   overflow: hidden; box-shadow: var(--shadow-1);
+  transition: box-shadow 0.3s ease;
 }
 .player-header {
   display: flex; justify-content: space-between; align-items: center;
   padding: .9rem 1.1rem; background: #1c1c1e;
   cursor: pointer; font-weight: 600; color: #f5f5f7;
+  transition: background 0.3s ease;
 }
+.player-header:hover { background: #2c2c2e; }
 .player-header .toggle-icon { transition: transform .25s ease; }
 .player-section.closed .toggle-icon { transform: rotate(-90deg); }
-.attacks-wrapper { padding: 1rem; background: #2c2c2e; border-top: 1px solid #3a3a3c; }
+.attacks-wrapper { padding: 1rem; background: #2c2c2e; border-top: 1px solid #3a3a3c; transition: background 0.3s ease; }
 
 .attack-row {
   display: grid; grid-template-columns: 60px 1fr 1fr 1fr;
@@ -319,6 +348,7 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   padding: .55rem .6rem; border-radius: 10px;
   border: 1px solid #3a3a3c; background: #3a3a3c;
   color: #f5f5f7; text-align: center; font-size: .9rem;
+  transition: background 0.3s ease;
 }
 
 #cwl-bonus-results-view { margin-top: 1.5rem; }
@@ -339,53 +369,25 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
 #calculate-bonus-btn, #clear-all-btn, #bonus-rechner-back-button {
   margin-top: .8rem; padding: .65rem 1.1rem; border-radius: 12px;
   font-weight: 600; cursor: pointer; border: none;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 #calculate-bonus-btn { background: var(--ac); color: #fff; }
-#calculate-bonus-btn:hover { background: #0062d6; }
+#calculate-bonus-btn:hover { background: #0062d6; transform: translateY(-2px); }
 #clear-all-btn { background: #3a3a3c; color: #f5f5f7; }
-#clear-all-btn:hover { background: #48484a; }
+#clear-all-btn:hover { background: #48484a; transform: translateY(-2px); }
 #bonus-rechner-back-button {
   background: #2c2c2e; color: #f5f5f7; border: 1px solid #3a3a3c;
 }
 #bonus-rechner-back-button:hover { background: #3a3a3c; }
 
 /* ==========================================================================
-   10) Responsive
+   10) Accordion Styles
    ========================================================================== */
-@media (max-width: 1024px) {
-  .sidebar { position: fixed; transform: translateX(-100%); z-index: 50; }
-  .sidebar.open { transform: translateX(0); }
-  .mobile-header { display: flex; }
-  #mobile-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; }
-  #mobile-overlay.open { display: block; }
-}
-/* Warlog Cards */
-.warlog-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1rem;
-}
-
-.warlog-entry {
-  border-radius: 14px;
-  padding: 1rem;
-  color: #fff;
-  font-weight: 600;
-  box-shadow: var(--shadow-1);
-}
-
-.warlog-entry.win { background: var(--ok); }
-.warlog-entry.lose { background: var(--err); }
-.warlog-entry.tie { background: var(--warn); color: #000; }
-
-.warlog-entry .war-result { font-size: 1rem; margin-bottom: .4rem; }
-.warlog-entry .war-details { font-size: .9rem; opacity: 0.9; }
-
-/* Accordion */
 .accordion {
   border-radius: 14px;
   overflow: hidden;
   box-shadow: var(--shadow-1);
+  transition: box-shadow 0.3s ease;
 }
 .accordion-header {
   background: #1c1c1e;
@@ -395,13 +397,31 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: background 0.3s ease;
 }
 .accordion-header:hover { background: #2c2c2e; }
+.accordion-header span { transition: transform 0.3s ease; }
+.accordion.open .accordion-header span { transform: rotate(180deg); }
 .accordion-content {
   max-height: 0;
   overflow: hidden;
-  transition: max-height .3s ease;
+  transition: max-height 0.4s ease;
 }
-.accordion.open .accordion-content {
-  max-height: 1000px; /* genug Platz */
+.accordion.open .accordion-content { max-height: 2000px; }
+
+/* ==========================================================================
+   11) Responsive
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .sidebar { position: fixed; transform: translateX(-100%); z-index: 50; }
+  .sidebar.open { transform: translateX(0); }
+  .mobile-header { display: flex; }
+  #mobile-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  #mobile-overlay.open { display: block; opacity: 1; }
 }
