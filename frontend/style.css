@@ -466,3 +466,59 @@ button:hover, .btn:hover{ transform: translateY(-1px); box-shadow: var(--shadow-
   border-radius: var(--border-radius-sm);
   border: 1px solid var(--color-current-line);
 }
+/* ==========================================================================
+   16) CWL Zentrale
+   ========================================================================== */
+#page-cwl .card {
+  margin-bottom: var(--gap-lg);
+}
+
+.cwl-round {
+  background: var(--bg-elev-2);
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius-md);
+  padding: .6rem .9rem;
+  margin-bottom: .5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--fg);
+  transition: background var(--t-fast), transform var(--t-fast);
+}
+
+.cwl-round:hover {
+  background: #1a1f2b;
+  transform: translateX(3px);
+}
+
+#cwl-summary h3,
+#cwl-rounds h3,
+#cwl-bonus h3 {
+  margin-top: 0;
+  margin-bottom: .5rem;
+  font-size: 1.1rem;
+  color: #cfe1ff;
+}
+
+#cwl-bonus button {
+  margin-top: .5rem;
+  background: var(--grad-cta);
+  color: #0b1020;
+  font-weight: 700;
+  border: 0;
+  border-radius: 12px;
+  padding: .6rem 1rem;
+  cursor: pointer;
+  transition: transform var(--t-fast), box-shadow var(--t-fast);
+}
+
+#cwl-bonus button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-1);
+}
+
+#cwl-player-stats {
+  margin-top: var(--gap-lg);
+  height: 420px;
+}
+
