@@ -41,14 +41,14 @@ async function fetchAllData() {
 async function fetchCwlData() {
   try {
     const data = await fetchCwlLeagueGroup();
-    if (data) {
-      renderCwlSummary(data);       // Clan/Season Info
-      renderCwlPlayerStats(data);   // Spieler Top 10 Chart
-      initCwlBonus(data);           // Bonus-Rechner
-    }
+    if (data) renderCwlSummary(data);
 
     const rounds = await fetchCwlSummary();
-    if (rounds) renderCwlRounds(rounds);
+    if (rounds) {
+      renderCwlRounds(rounds);
+      renderCwlPlayerStats(rounds); // <-- hierhin verschoben
+      initCwlBonus(data);
+    }
 
   } catch (err) {
     console.error('Fehler beim Laden der CWL:', err);
