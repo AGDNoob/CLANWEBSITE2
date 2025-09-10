@@ -270,18 +270,22 @@ function renderWarlog(wars) {
     container.innerHTML = "<p>Keine Kriege im öffentlichen Protokoll gefunden.</p>";
     return;
   }
-  wars.forEach(war => {
-    if (!war?.opponent) return;
-    const entry = document.createElement('div');
-    entry.className = `warlog-entry ${war.result || 'tie'}`;
-    entry.innerHTML = `
-      <div class="war-result">${warResultTranslations[war.result] || 'Unentschieden'} gegen "${war.opponent.name}"</div>
-      <div class="war-details">
-        <span>${war.clan?.stars ?? 0} ⭐ vs ${war.opponent?.stars ?? 0} ⭐</span> | 
-        <span>${(war.clan?.destructionPercentage ?? 0).toFixed(2)}% Zerstörung</span>
-      </div>`;
-    container.appendChild(entry);
-  });
+
+  wars
+    // ❌ CWL-Kriege rausfiltern
+    .filter(war => !(war?.isCwlWar || war?.teamSize > 50))
+    .forEach(war => {
+      if (!war?.opponent) return;
+      const entry = document.createElement('div');
+      entry.className = `warlog-entry ${war.result || 'tie'}`;
+      entry.innerHTML = `
+        <div class="war-result">${warResultTranslations[war.result] || 'Unentschieden'} gegen "${war.opponent.name}"</div>
+        <div class="war-details">
+          <span>${war.clan?.stars ?? 0} ⭐ vs ${war.opponent?.stars ?? 0} ⭐</span> | 
+          <span>${(war.clan?.destructionPercentage ?? 0).toFixed(2)}% Zerstörung</span>
+        </div>`;
+      container.appendChild(entry);
+    });
 }
 
 /* -------- Capital -------- */
