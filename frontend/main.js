@@ -139,6 +139,14 @@ function setupNavigationAndUI() {
       ? `${warLogContent.scrollHeight}px` 
       : null;
   });
+  // Accordion öffnen/schließen
+document.querySelectorAll(".accordion-header").forEach(header => {
+  header.addEventListener("click", () => {
+    const acc = header.parentElement;
+    acc.classList.toggle("open");
+  });
+});
+
 
   // Mobile Sidebar
   hamburgerBtn?.addEventListener('click', () => {
