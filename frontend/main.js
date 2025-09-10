@@ -40,21 +40,21 @@ async function fetchAllData() {
 /* -------- CWL Daten laden -------- */
 async function fetchCwlData() {
   try {
-    const data = await fetchCwlLeagueGroup();   // statt fetchJson('/api/...')
-
-    if (!data || !data.rounds) {
-      const summary = document.getElementById('cwl-summary');
-      if (summary) summary.textContent = 'Keine CWL-Daten verfügbar.';
-      return;
+    const data = await fetchCwlLeagueGroup();
+    if (data) {
+      renderCwlSummary(data);
+      renderCwlPlayerStats(data);
+      initCwlBonus(data);
     }
-    renderCwlSummary(data);
-    renderCwlRounds(data);
-    renderCwlPlayerStats(data);
-    initCwlBonus(data); // Bonusrechner mit Whitelist
+
+    const rounds = await fetchCwlRounds();
+    if (rounds) renderCwlRounds(rounds);
+
   } catch (err) {
     console.error('Fehler beim Laden der CWL:', err);
   }
 }
+
 
 /* -------- Navigation & UI -------- */
 function setupNavigationAndUI() {
