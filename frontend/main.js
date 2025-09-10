@@ -3,9 +3,6 @@ const POLLING_INTERVAL_MS = 60000;
 let currentMemberList = [];
 let labDataLoaded = false;
 
-// 🆕 Clan-Tag global definieren (anpassen!)
-const CLAN_TAG = "#DEINCLANTAG";
-
 document.addEventListener('DOMContentLoaded', () => {
   setupNavigationAndUI();
   setupManualBonusCalculator();
