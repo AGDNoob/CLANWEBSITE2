@@ -315,21 +315,29 @@ function renderCwlSummary(data) {
   `;
 }
 
-function renderCwlRounds(data) {
+function renderCwlRounds(roundWars) {
   const box = document.getElementById('cwl-rounds');
   if (!box) return;
   box.innerHTML = "<h3>Runden</h3>";
 
-  if (!data.rounds?.length) {
-    box.innerHTML += "<p>Keine Runden gefunden.</p>";
+  if (!roundWars?.length) {
+    box.innerHTML += "<p>Keine CWL-Kriege gefunden.</p>";
     return;
   }
 
-  data.rounds.forEach((round, i) => {
-    const clans = round.warTags?.length ? round.warTags.join(", ") : "–";
+  roundWars.forEach((war, i) => {
+    const our = war.clan;
+    const opp = war.opponent;
+    const result = (our.stars > opp.stars) ? "✅ Sieg" :
+                   (our.stars < opp.stars) ? "❌ Niederlage" : "➖ Unentschieden";
+
     const div = document.createElement("div");
-    div.className = "cwl-round";
-    div.innerHTML = `<strong>Runde ${i+1}:</strong> ${clans}`;
+    div.className = "cwl-round card";
+    div.innerHTML = `
+      <div><strong>Runde ${i+1}:</strong> ${our.name} 🆚 ${opp.name}</div>
+      <div>${our.stars}⭐ (${our.destructionPercentage.toFixed(1)}%) 
+           – ${opp.stars}⭐ (${opp.destructionPercentage.toFixed(1)}%)</div>
+      <div>${result}</div>`;
     box.appendChild(div);
   });
 }
