@@ -41,3 +41,8 @@ async function fetchCwlRounds() {
   return fetchJson(`${API_BASE_URL}/api/cwl/rounds`);
 }
 
+async function fetchCwlSummary() {
+  return fetchJson(`${API_BASE_URL}/api/cwl/summary`);
+}
+
+
