@@ -1,551 +1,219 @@
 /* ==========================================================================
-   0) PREMIUM UI – Variables, Base, Tokens
+   0) Base – Apple inspiriert
    ========================================================================== */
-:root{
-  /* Neutrals */
-  --bg: #0f1115;
-  --bg-elev-1:#151822;
-  --bg-elev-2:#191d28;
-  --bg-glass: rgba(22,26,36,.6);
-  --stroke: #232838;
-  --stroke-soft:#1b1f2b;
+:root {
+  --bg: #f5f5f7;           /* Apple-light background */
+  --bg-card: #ffffff;
+  --fg: #1c1c1e;
+  --fg-dim: #6e6e73;
+  --fg-mute: #a1a1a6;
 
-  /* Text */
-  --fg:#e8eaf0;
-  --fg-dim:#a7adbb;
-  --fg-mute:#81879a;
+  --ac: #007aff;           /* iOS blue */
+  --ok: #34c759;           /* iOS green */
+  --warn: #ffcc00;         /* iOS yellow */
+  --err: #ff3b30;          /* iOS red */
 
-  /* Accents (subtle neon) */
-  --ac:#7aa2f7;     /* primary */
-  --ac-2:#a78bfa;   /* secondary */
-  --ok:#86efac;
-  --warn:#f2c370;
-  --err:#f98f9c;
+  --radius: 16px;
+  --shadow-1: 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-2: 0 8px 24px rgba(0,0,0,0.08);
 
-  /* Elevation & Effects */
-  --radius-sm:8px;
-  --radius-md:12px;
-  --radius-lg:18px;
-  --ring: 0 0 0 1px rgba(122,162,247,.35), 0 0 0 6px rgba(122,162,247,.08);
-  --shadow-1: 0 10px 24px rgba(0,0,0,.35);
-  --shadow-2: 0 20px 40px rgba(0,0,0,.45);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  --content-pad: clamp(16px, 2vw, 24px);
+}
 
-  /* Layout */
-  --gap-xs:.375rem; /* 6px */
-  --gap-sm:.625rem; /* 10px */
-  --gap:.95rem;     /* 15px */
-  --gap-lg:1.5rem;  /* 24px */
-  --gap-xl:2.25rem; /* 36px */
-
-  /* Transitions */
-  --t-fast: 160ms cubic-bezier(.2,.7,.2,1);
-  --t-slow: 300ms cubic-bezier(.2,.7,.2,1);
-
-  /* Gradients */
-  --grad-cta: linear-gradient(135deg, #7aa2f7 0%, #a78bfa 50%, #86efac 100%);
-  --grad-card: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
-
-  /* Typography */
-  --font: Inter, ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-
-  /* Page width rhythm */
-  --content-pad: max(2.5vw, 18px);
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 15.5px/1.6 var(--font);
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ==========================================================================
-   1) Reset & Base
+   1) Layout
    ========================================================================== */
-*,*::before,*::after{ box-sizing:border-box; }
-html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
-body{
-  margin:0; background:radial-gradient(90rem 70rem at 10% -10%, #111423, transparent 40%),
-            radial-gradient(80rem 60rem at 110% 10%, #131622, transparent 45%),
-            var(--bg);
-  color:var(--fg); font: 15.8px/1.6 var(--font);
-  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-}
-img{display:block;max-width:100%;height:auto}
-a{color:var(--ac);text-decoration:none;transition:color var(--t-fast)}
-a:hover{color:#9ab8ff}
-
-/* Selection */
-::selection{ background:rgba(122,162,247,.25); color:var(--fg); }
+.app-container { display: flex; min-height: 100vh; }
+.main-content { flex: 1; padding: var(--content-pad); }
 
 /* ==========================================================================
-   2) Layout Shell (keine Änderungen im HTML nötig)
+   2) Sidebar
    ========================================================================== */
-.app-container{ display:flex; min-height:100vh; }
-.sidebar{
-  width:260px; flex:0 0 260px; background:linear-gradient(180deg, rgba(22,26,36,.75), rgba(22,26,36,.55)), var(--bg-elev-1);
-  backdrop-filter:saturate(1.1) blur(8px);
-  border-right:1px solid var(--stroke); padding: var(--gap-xl) var(--content-pad);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
-  position:relative; z-index:30; transition:transform var(--t-slow);
+.sidebar {
+  width: 240px;
+  background: #fafafa;
+  border-right: 1px solid #e5e5ea;
+  padding: var(--content-pad);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
 }
-.main-content{
-  flex:1; padding: var(--gap-xl) var(--content-pad);
-  max-width: 1600px; width:100%; margin:0 auto;
+.sidebar-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
+.sidebar-header h3 {
+  font-weight: 700;
+  margin: 0;
+}
+.sidebar-header small { color: var(--fg-dim); }
 
-/* Seitenwechsel (script.js setzt .active/.hidden) */
-.page{ display:none; opacity:0; transform: translateY(8px); }
-.page.active{ display:block; animation: fadeIn .36s var(--t-fast) forwards; }
-.hidden{ display:none !important; }
-
-@keyframes fadeIn{
-  to{ opacity:1; transform:none; }
+.sidebar-nav { list-style: none; padding: 0; margin: 0; }
+.nav-group {
+  margin: 1.5rem 0 .5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--fg-mute);
+  text-transform: uppercase;
+  letter-spacing: .05em;
 }
-
-/* ==========================================================================
-   3) Sidebar / Navigation
-   ========================================================================== */
-.sidebar-header{ text-align:center; margin-bottom: var(--gap-xl); }
-.sidebar-header h3{ margin:0; font-weight:700; letter-spacing:.2px; }
-.sidebar-header small{ color:var(--fg-mute); }
-
-.sidebar-nav{ list-style:none; margin:0; padding:0; }
-.nav-link{
-  display:block; padding:.72rem .8rem; margin-bottom:.35rem; border-radius:12px;
-  color:var(--fg-dim); font-weight:600; letter-spacing:.2px;
-  transition: background var(--t-fast), color var(--t-fast), transform var(--t-fast);
-  position:relative;
-}
-.nav-link::after{
-  content:""; position:absolute; inset:0; border-radius:12px;
-  background:linear-gradient(180deg, rgba(122,162,247,.12), transparent 60%);
-  opacity:0; transition:opacity var(--t-fast);
-}
-.nav-link:hover{ color:#cdd6e8; background:var(--bg-elev-2); transform:translateY(-1px); }
-.nav-link:hover::after{opacity:1}
-.nav-link.active{
-  color:#0b1020; background: var(--ac);
-  box-shadow: 0 10px 18px rgba(122,162,247,.28);
-}
-
-/* Mobile Sidebar Trigger */
-.mobile-header{
-  display:none; align-items:center; gap:.8rem; position:sticky; top:0; z-index:35;
-  padding:.6rem var(--content-pad); background:linear-gradient(180deg, rgba(21,25,34,.9), rgba(21,25,34,.75));
-  border-bottom:1px solid var(--stroke);
-  backdrop-filter: blur(8px);
-}
-#hamburger-btn{
-  font:600 20px/1 var(--font); color:var(--fg); background:transparent; border:0; cursor:pointer;
-}
-#mobile-overlay{ display:none; }
-
-/* ==========================================================================
-   4) Cards / Surfaces / Buttons
-   ========================================================================== */
-.card, .dashboard-box, .stats-box, .member-card, .raid-card, .profile-card{
-  background: var(--bg-elev-1);
-  border:1px solid var(--stroke-soft); border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-1);
-  padding: clamp(14px, 1.2vw, 18px);
-  position:relative; overflow:hidden;
-}
-.card::before, .dashboard-box::before, .stats-box::before, .member-card::before, .raid-card::before, .profile-card::before{
-  content:""; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
-  background: var(--grad-card);
-}
-
-button, .btn{
-  display:inline-flex; align-items:center; gap:.6rem;
-  padding:.68rem 1rem; border:1px solid var(--stroke); border-radius:12px;
-  background: var(--bg-elev-2); color:var(--fg); font-weight:700; cursor:pointer;
-  transition: transform var(--t-fast), box-shadow var(--t-fast), background var(--t-fast);
-}
-button:hover, .btn:hover{ transform: translateY(-1px); box-shadow: var(--shadow-1); background:#202533; }
-.cta-button{
-  border:0; background: var(--grad-cta); color:#0b1020; padding:.78rem 1.15rem;
-  box-shadow: 0 10px 28px rgba(122,162,247,.28);
-}
-.cta-button:hover{ box-shadow: var(--shadow-2); transform: translateY(-1px) scale(1.01); }
-
-/* ==========================================================================
-   5) Grids & Structure
-   ========================================================================== */
-.card-grid{ display:grid; gap: var(--gap-lg); grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); }
-.analytics-grid{ display:grid; gap: var(--gap-lg); grid-template-columns: 1fr 1fr; }
-.analytics-grid .full-width{ grid-column: 1 / -1; }
-
-@media (max-width: 900px){
-  .analytics-grid{ grid-template-columns: 1fr; }
-}
-
-/* ==========================================================================
-   6) Clan – Header & Members
-   ========================================================================== */
-#clan-header{ text-align:center; margin-bottom: var(--gap-xl); }
-#clan-header h1{ font-size: clamp(26px, 2.6vw, 34px); margin-bottom:.4rem; }
-#clan-description{ color:var(--fg-dim); max-width:70ch; margin:0 auto var(--gap); }
-#clan-stats span{ color:var(--ac); font-weight:700; margin:0 .5rem; }
-
-.member-card{
-  cursor:pointer; transition: transform var(--t-fast), border-color var(--t-fast), box-shadow var(--t-fast);
-}
-.member-card:hover{ transform:translateY(-3px); border-color: rgba(134,239,172,.35); box-shadow: 0 14px 24px rgba(134,239,172,.08); }
-.member-card-header{ display:flex; align-items:center; gap:.8rem; margin-bottom:.4rem; }
-.member-card-body{ display:flex; justify-content:space-between; color:var(--fg-mute); font-size:.95rem; }
-
-/* ==========================================================================
-   7) Profile
-   ========================================================================== */
-.profile-card{ max-width:720px; margin: var(--gap-lg) auto; }
-.profile-header{ display:flex; gap: var(--gap-lg); align-items:center; padding-bottom: var(--gap); border-bottom:1px solid var(--stroke); }
-.profile-header img{ width:80px; aspect-ratio:1/1; object-fit:contain; }
-.profile-stats{ display:grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap:.8rem; margin-top: var(--gap); }
-.stat-item{
-  background: var(--bg-elev-2); border:1px solid var(--stroke-soft); border-radius:12px;
-  padding:.6rem .8rem; display:flex; justify-content:space-between;
-}
-.stat-item span:first-child{ color:var(--fg-mute); }
-
-/* ==========================================================================
-   8) Tables
-   ========================================================================== */
-.stats-table{ width:100%; border-collapse:collapse; }
-.stats-table th, .stats-table td{ padding:.78rem 1rem; border-bottom:1px solid var(--stroke); }
-.stats-table thead th{
-  color:#cfe1ff; text-transform:uppercase; font-size:.82rem; letter-spacing:.35px;
-  position:sticky; top:0; background: linear-gradient(180deg, #171a24, #141824);
-}
-.stats-table tbody tr:nth-child(even){ background: rgba(255,255,255,.02); }
-.stats-table tbody tr:hover{ background:#1a1f2b; }
-.donation-ratio.good{ color:var(--ok); font-weight:700; }
-.donation-ratio.bad{ color:var(--err); font-weight:700; }
-
-/* ==========================================================================
-   9) Charts
-   ========================================================================== */
-.chart-container{ height:420px; position:relative; }
-.chart-container-half{ height:300px; }
-
-/* ==========================================================================
-   10) War Center
-   ========================================================================== */
-#current-war-box{ cursor:pointer; }
-.war-header{ display:flex; gap: var(--gap); align-items:center; justify-content:space-between; margin-bottom: var(--gap); }
-.clan-side,.opponent-side{ flex:1; text-align:center; }
-.vs-separator{ font-weight:800; color:var(--err); font-size: clamp(18px, 2vw, 24px); }
-.war-scores{
-  display:flex; gap:.6rem; align-items:center; justify-content:space-around;
-  background: var(--bg-elev-2); border:1px solid var(--stroke); border-radius:12px; padding:.7rem;
-}
-.war-scores span:nth-child(2), .war-scores span:nth-child(5){ color:var(--fg-mute); font-weight:700; }
-.war-state{ text-align:center; color:var(--warn); margin-top:.6rem; }
-
-.detailed-war-clans{ display:grid; gap: var(--gap-lg); grid-template-columns: 1fr 1fr; }
-.war-player-card{
-  background: var(--bg-elev-1); border:1px solid var(--stroke-soft); border-radius:12px; padding:.6rem .7rem; margin-bottom:.5rem;
-}
-.war-player-header{ display:flex; gap:.5rem; align-items:center; font-weight:700; margin-bottom:.3rem; }
-.player-map-pos{
-  width:24px; height:24px; border-radius:50%; background:#1f2433; display:inline-grid; place-items:center; color:#a9b3c9; font-size:.85rem;
-}
-.attacks-container{ padding-left:32px; }
-.attack-info{
-  display:flex; justify-content:space-between; background:#141824; border:1px solid #1f2535; border-radius:10px;
-  padding:.38rem .55rem; margin-top:.34rem;
-}
-.attack-result{ font-weight:800; }
-
-.warlog-entry{
-  display:flex; align-items:center; justify-content:space-between; padding:.6rem .8rem; border-radius:12px; margin-bottom:.5rem; border-left:5px solid transparent;
-}
-.warlog-entry.win{ background: rgba(134,239,172,.12); border-left-color: var(--ok); }
-.warlog-entry.lose{ background: rgba(249,143,156,.12); border-left-color: var(--err); }
-.warlog-entry.tie{  background: rgba(122,162,247,.12); border-left-color: var(--ac); }
-.war-result{ font-weight:800; }
-.war-details{ color:var(--fg-mute); font-size:.94rem; }
-
-/* Accordion */
-.accordion{ cursor:pointer; transition:border-color var(--t-fast); border:1px solid var(--stroke); border-radius:12px; padding: .8rem 1rem; background: var(--bg-elev-1); }
-.accordion:hover{ border-color:#2f3750; }
-.accordion-header{ display:flex; align-items:center; justify-content:space-between; }
-.accordion-content{ max-height:0; overflow:hidden; transition:max-height .32s ease; }
-.accordion.active .accordion-content{ max-height:1000px; }
-
-/* ==========================================================================
-   11) Bonus Rechner
-   ========================================================================== */
-.bonus-rechner-grid{
-  display:grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
-  gap: var(--gap-lg); margin-bottom: var(--gap-lg);
-}
-.settings-box{
-  background: var(--bg-elev-2); border:1px solid var(--stroke); border-radius:12px; padding: .8rem;
-}
-.setting-item{ display:flex; align-items:center; justify-content:space-between; gap:.8rem; margin-bottom:.6rem; }
-.setting-item label{ color:var(--fg-mute); }
-.setting-item input{
-  width:72px; padding:.4rem .5rem; text-align:center;
-  background:#111622; color:var(--fg); border:1px solid #2a3042; border-radius:10px;
-}
-.bonus-results-grid{ display:grid; grid-template-columns:1fr 1fr; gap: var(--gap-xl); align-items:flex-start; }
-
-/* Manuelle CWL Eingabe */
-.add-player-form{ display:flex; flex-wrap:wrap; gap:.7rem; }
-.add-player-form input{
-  flex:1; min-width:180px; padding:.58rem .7rem; border-radius:12px;
-  background:#111622; border:1px solid #2a3042; color:var(--fg);
-}
-
-/* Player Sections */
-.player-accordion-container{ display:flex; flex-direction:column; gap:.8rem; margin-top: var(--gap-xl); }
-.player-section{ background: var(--bg-elev-1); border:1px solid var(--stroke); border-radius:12px; overflow:hidden; }
-.player-header{
-  display:flex; justify-content:space-between; align-items:center; padding:.8rem 1rem;
-  background: linear-gradient(180deg, #181d2b, #151a26); cursor:pointer;
-}
-.player-header .toggle-icon{ transition: transform var(--t-fast); }
-.player-section.closed .toggle-icon{ transform: rotate(-90deg); }
-.attacks-wrapper{
-  max-height:1000px; overflow:hidden; transition:max-height .35s ease, padding .35s ease;
-  padding: .8rem 1rem;
-}
-.player-section.closed .attacks-wrapper{ max-height:0; padding:0 1rem; }
-.attack-row{
-  display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:.8rem; align-items:center;
-  margin-bottom:.55rem; padding-bottom:.55rem; border-bottom:1px solid var(--stroke);
-}
-.attack-row:last-child{ border-bottom:0; margin:0; padding:0; }
-.attack-row label{ font-weight:800; color:#cfe1ff; }
-.attack-row input{
-  width:100%; padding:.48rem .55rem; text-align:center; border-radius:10px;
-  background:#101523; color:var(--fg); border:1px solid #27304a;
-}
-
-/* ==========================================================================
-   12) Lab – Table (sticky heads + frozen first col)
-   ========================================================================== */
-.lab-table-container{
-  overflow:auto; -webkit-overflow-scrolling:touch;
-  border:1px solid var(--stroke); border-radius:16px; background: var(--bg-elev-1);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
-}
-.lab-table{ width:100%; min-width:660px; border-collapse:collapse; }
-.lab-table th,.lab-table td{ padding:.6rem .9rem; white-space:nowrap; text-align:center; border-bottom:1px solid var(--stroke); font-size:.95rem; }
-.lab-table thead th{
-  position:sticky; top:0; z-index:2; background:linear-gradient(180deg, #171a24, #141824); color:#caa9ff; font-weight:800;
-}
-.lab-table tbody tr:hover{ background:#171c28; }
-.lab-table th:first-child,.lab-table td:first-child{
-  position:sticky; left:0; z-index:3; text-align:left; background: var(--bg-elev-1);
-}
-.player-cell{ display:flex; flex-direction:column; }
-.player-th-sublabel{ font-size:.78rem; color:var(--fg-mute); }
-.lab-table .is-maxed{ color:#fde68a; font-weight:800; }
-
-/* ==========================================================================
-   13) State Control – War Center visibility (compat)
-   ========================================================================== */
-#page-war-center #current-war-box,
-#page-war-center #war-organizer-view{ display:none; }
-#page-war-center #not-in-war-message{ display:none; }
-#page-war-center.in-war #current-war-box,
-#page-war-center.in-war #war-organizer-view{ display:block; }
-#page-war-center.not-in-war #current-war-box{ display:block; }
-#page-war-center.not-in-war #current-war-dashboard{ display:none; }
-#page-war-center.not-in-war #not-in-war-message{ display:block; }
-
-/* ==========================================================================
-   14) Helpers, Alerts, Animations
-   ========================================================================== */
-.error-message{
-  color:var(--err);
-  background: rgba(249,143,156,.12);
-  border:1px solid rgba(249,143,156,.4);
-  padding:.8rem 1rem; border-radius:12px; text-align:center;
-}
-
-/* Smooth hover lifts for interactive cards */
-.member-card:hover, .raid-card:hover, .card:hover{ transform: translateY(-2px); }
-
-/* ==========================================================================
-   15) Responsive
-   ========================================================================== */
-@media (max-width: 1024px){
-  .mobile-header{ display:flex; }
-  .sidebar{
-    position:fixed; left:0; top:0; height:100vh; transform: translateX(-100%);
-    box-shadow: 0 30px 60px rgba(0,0,0,.5);
-  }
-  .sidebar.open{ transform: translateX(0); }
-  #mobile-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; }
-  #mobile-overlay.open{ display:block; }
-  .main-content{ padding: calc(var(--gap) + 48px) var(--content-pad) var(--gap-xl); }
-  .analytics-grid, .detailed-war-clans, .bonus-results-grid{ grid-template-columns:1fr; }
-  .war-header{ flex-direction:column; }
-  .vs-separator{ margin:.35rem 0; }
-}
-
-@media (max-width: 600px){
-  .nav-link{ padding:.6rem .7rem; }
-  .card, .dashboard-box, .stats-box{ padding:14px; }
-  .chart-container{ height:320px; }
-  .member-card-body{ font-size:.92rem; }
-}
-/* =========================
-   Placeholder & Smooth UX
-   ========================= */
-
-/* elegante Placeholder-Karte */
-.placeholder {
-  background: linear-gradient(180deg, rgba(68,71,90,0.35), rgba(68,71,90,0.15));
-  border: 1px solid var(--color-current-line);
-  border-radius: var(--border-radius-lg);
-  padding: var(--spacing-md);
-  color: var(--color-comment);
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--spacing-md);
-  align-items: center;
-  animation: fadeInUp 0.35s ease-out both;
-}
-
-.placeholder .emoji {
-  font-size: 1.4rem;
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,.2));
-}
-
-.placeholder .title {
-  color: var(--color-foreground);
-  font-weight: var(--font-weight-bold);
-  margin-bottom: .15rem;
-}
-
-.placeholder .hint {
-  font-size: var(--font-size-sm);
-  color: var(--color-comment);
-}
-
-/* dezente „disabled“-Anmutung, wenn kein Krieg aktiv */
-#page-war-center.not-in-war #war-organizer-view {
-  opacity: 0.9;
-  filter: saturate(.9);
-}
-
-/* sanfte Card-Hovers & Transitions */
-.dashboard-box,
-.member-card,
-.raid-card,
-.war-plan-matchup {
-  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background-color .18s ease, opacity .18s ease;
-}
-
-.war-plan-matchup:hover {
-  transform: translateX(4px);
-}
-
-/* flüssiger Accordion-Content */
-.accordion-content {
-  transition: max-height .35s ease, padding-top .25s ease, margin-top .25s ease;
-}
-
-/* zartes FadeIn von unten */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* optional: KI-Angriffsblöcke hübscher (falls noch nicht drin) */
-.plan-attacks {
+.nav-link {
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-.attack-block {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.25rem 0.5rem;
-  background-color: var(--color-background);
-  border-radius: var(--border-radius-sm);
-  border: 1px solid var(--color-current-line);
+  gap: .6rem;
+  padding: .55rem .9rem;
+  border-radius: 12px;
+  color: var(--fg-dim);
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
-/* ==========================================================================
-   16) CWL Zentrale
-   ========================================================================== */
-#page-cwl .card {
-  margin-bottom: var(--gap-lg);
+.nav-link:hover { background: #e5e5ea40; color: var(--fg); }
+.nav-link.active {
+  background: var(--ac);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: var(--shadow-1);
+}
+.nav-link i { width: 18px; height: 18px; }
+
+/* Mobile */
+.mobile-header {
+  display: none;
+  align-items: center;
+  padding: .6rem var(--content-pad);
+  border-bottom: 1px solid #e5e5ea;
+  background: #fff;
+}
+#hamburger-btn {
+  background: none;
+  border: 0;
+  font-size: 20px;
+  color: var(--fg);
 }
 
-.cwl-round {
-  background: var(--bg-elev-2);
-  border: 1px solid var(--stroke);
-  border-radius: var(--radius-md);
-  padding: .6rem .9rem;
-  margin-bottom: .5rem;
+/* ==========================================================================
+   3) Pages & Cards
+   ========================================================================== */
+.page { display: none; }
+.page.active { display: block; animation: fadeIn .25s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1.2rem;
+}
+.card h3 {
+  margin-top: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+/* Dashboard Grid */
+.card-grid {
+  display: grid;
+  gap: 1.2rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+/* ==========================================================================
+   4) Tables
+   ========================================================================== */
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.stats-table th, .stats-table td {
+  padding: .65rem .9rem;
+  border-bottom: 1px solid #e5e5ea;
+  text-align: left;
+}
+.stats-table thead th {
+  font-size: .8rem;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  font-weight: 600;
+}
+.stats-table tbody tr:hover {
+  background: #f2f2f7;
+}
+
+/* ==========================================================================
+   5) Buttons
+   ========================================================================== */
+button, .btn {
+  background: #f2f2f7;
+  border: 1px solid #e5e5ea;
+  border-radius: 12px;
+  padding: .55rem 1rem;
+  font-weight: 600;
+  color: var(--fg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+button:hover { background: #e5e5ea; }
+.cta-button {
+  background: var(--ac);
+  color: #fff;
+  border: none;
+}
+.cta-button:hover { background: #0062d6; }
+
+/* ==========================================================================
+   6) Charts
+   ========================================================================== */
+.chart-container { height: 380px; }
+.chart-container-half { height: 260px; }
+canvas { border-radius: 12px; background: #fff; padding: .5rem; }
+
+/* ==========================================================================
+   7) War & CWL Specific
+   ========================================================================== */
+.war-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: var(--fg);
-  transition: background var(--t-fast), transform var(--t-fast);
+  margin-bottom: 1rem;
 }
-
-.cwl-round:hover {
-  background: #1a1f2b;
-  transform: translateX(3px);
-}
-
-#cwl-summary h3,
-#cwl-rounds h3,
-#cwl-bonus h3 {
-  margin-top: 0;
-  margin-bottom: .5rem;
-  font-size: 1.1rem;
-  color: #cfe1ff;
-}
-
-#cwl-bonus button {
-  margin-top: .5rem;
-  background: var(--grad-cta);
-  color: #0b1020;
-  font-weight: 700;
-  border: 0;
+.war-scores {
+  display: flex;
+  justify-content: space-around;
+  background: #f2f2f7;
   border-radius: 12px;
-  padding: .6rem 1rem;
-  cursor: pointer;
-  transition: transform var(--t-fast), box-shadow var(--t-fast);
+  padding: .6rem;
+  font-weight: 600;
 }
+.war-state { text-align: center; margin-top: .6rem; color: var(--fg-dim); }
 
-#cwl-bonus button:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-1);
+.cwl-round {
+  background: #f9f9fb;
+  border: 1px solid #e5e5ea;
+  border-radius: 12px;
+  padding: .8rem 1rem;
+  margin-bottom: .6rem;
+  transition: transform .15s ease;
 }
+.cwl-round:hover { transform: translateX(3px); background: #f2f2f7; }
 
-#cwl-player-stats {
-  margin-top: var(--gap-lg);
-  height: 420px;
-}
 /* ==========================================================================
-   Sticky Sidebar (Desktop)
+   8) Responsive
    ========================================================================== */
-@media (min-width: 1025px) {
-  .sidebar {
-    position: sticky;
-    top: 0;
-    height: 100vh;   /* volle Höhe */
-    overflow-y: auto;
-  }
-  #mobile-overlay {
-    display: none !important;
-  }
+@media (max-width: 1024px) {
+  .sidebar { position: fixed; transform: translateX(-100%); z-index: 50; }
+  .sidebar.open { transform: translateX(0); }
+  .mobile-header { display: flex; }
+  #mobile-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; }
+  #mobile-overlay.open { display: block; }
 }
-
-/* Scrollbar dezenter machen */
-.sidebar::-webkit-scrollbar {
-  width: 8px;
-}
-.sidebar::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.1);
-  border-radius: 4px;
-}
-.sidebar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.2);
-}
-
-
