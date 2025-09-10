@@ -84,6 +84,7 @@ function setupNavigationAndUI() {
   const cwlBonusResultsView = document.getElementById('cwl-bonus-results-view');
   const bonusRechnerBackButton = document.getElementById('bonus-rechner-back-button');
 
+  // Navigation über Sidebar
   navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
@@ -114,6 +115,7 @@ function setupNavigationAndUI() {
     });
   });
 
+  // Zurück-Buttons
   profileBackButton?.addEventListener('click', () => {
     playerProfileView?.classList.add('hidden');
     clanInfoMasterView?.classList.remove('hidden');
@@ -129,10 +131,16 @@ function setupNavigationAndUI() {
   bonusRechnerBackButton?.addEventListener('click', () => {
     cwlBonusResultsView?.classList.add('hidden');
   });
+
+  // Accordion
   warLogAccordion?.addEventListener('click', () => {
     warLogAccordion.classList.toggle('active');
-    warLogContent.style.maxHeight = warLogAccordion.classList.contains('active') ? `${warLogContent.scrollHeight}px` : null;
+    warLogContent.style.maxHeight = warLogAccordion.classList.contains('active') 
+      ? `${warLogContent.scrollHeight}px` 
+      : null;
   });
+
+  // Mobile Sidebar
   hamburgerBtn?.addEventListener('click', () => {
     sidebar?.classList.toggle('open');
     mobileOverlay?.classList.toggle('open');
@@ -140,6 +148,20 @@ function setupNavigationAndUI() {
   mobileOverlay?.addEventListener('click', () => {
     sidebar?.classList.remove('open');
     mobileOverlay?.classList.remove('open');
+  });
+
+  // 🆕 Dashboard-Karten klickbar machen
+  document.querySelectorAll('.dash-link').forEach(card => {
+    card.style.cursor = "pointer";
+    card.addEventListener('click', () => {
+      const targetId = card.getAttribute('data-target');
+      if (targetId) {
+        pages.forEach(p => p.classList.remove('active'));
+        navLinks.forEach(l => l.classList.remove('active'));
+        document.getElementById(targetId)?.classList.add('active');
+        document.querySelector(`.nav-link[data-target="${targetId}"]`)?.classList.add('active');
+      }
+    });
   });
 }
 
