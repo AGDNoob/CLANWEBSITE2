@@ -359,3 +359,49 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   #mobile-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; }
   #mobile-overlay.open { display: block; }
 }
+/* Warlog Cards */
+.warlog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.warlog-entry {
+  border-radius: 14px;
+  padding: 1rem;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: var(--shadow-1);
+}
+
+.warlog-entry.win { background: var(--ok); }
+.warlog-entry.lose { background: var(--err); }
+.warlog-entry.tie { background: var(--warn); color: #000; }
+
+.warlog-entry .war-result { font-size: 1rem; margin-bottom: .4rem; }
+.warlog-entry .war-details { font-size: .9rem; opacity: 0.9; }
+
+/* Accordion */
+.accordion {
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-1);
+}
+.accordion-header {
+  background: #1c1c1e;
+  padding: .8rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.accordion-header:hover { background: #2c2c2e; }
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .3s ease;
+}
+.accordion.open .accordion-content {
+  max-height: 1000px; /* genug Platz */
+}
