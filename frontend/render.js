@@ -211,6 +211,68 @@ function renderCapitalChart(raids) {
   });
 }
 
+function renderThDistributionChart(members) {
+  const ctx = document.getElementById('th-distribution-chart');
+  if (!ctx) return;
+  const thMap = (members || []).reduce((acc, m) => {
+    const k = `RH ${m.townHallLevel}`;
+    acc[k] = (acc[k] || 0) + 1;
+    return acc;
+  }, {});
+  const sorted = Object.entries(thMap).sort((a, b) => parseInt(b[0].split(' ')[1]) - parseInt(a[0].split(' ')[1]));
+  if (thChartInstance) thChartInstance.destroy();
+  thChartInstance = new Chart(ctx.getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: sorted.map(e => e[0]),
+      datasets: [{ 
+        data: sorted.map(e => e[1]), 
+        backgroundColor: ['#ff3b30','#ff9500','#ffcc00','#34c759','#5ac8fa','#007aff','#5856d6']
+      }]
+    },
+    options: { 
+      responsive: true, 
+      maintainAspectRatio: false, 
+      plugins: { legend: { position: 'top', labels: { color: '#f5f5f7' } } } 
+    }
+  });
+}
+
+function renderLeagueDistributionChart(members) {
+  const ctx = document.getElementById('league-distribution-chart');
+  if (!ctx) return;
+  const leagueColorMap = { 
+    'Legend': '#ff2d55', 
+    'Titan': '#af52de', 
+    'Champion': '#007aff', 
+    'Master': '#5ac8fa', 
+    'Crystal': '#34c759', 
+    'Gold': '#ffcc00', 
+    'Silver': '#ff9500', 
+    'Bronze': '#ff3b30', 
+    'Unranked': '#8e8e93' 
+  };
+  const leagues = (members || []).reduce((acc, m) => {
+    const name = m.league ? m.league.name.replace(/ \w*$/, '') : 'Unranked';
+    acc[name] = (acc[name] || 0) + 1; return acc;
+  }, {});
+  const sorted = Object.entries(leagues).sort((a, b) => b[1] - a[1]);
+  const colors = sorted.map(([name]) => {
+    const key = Object.keys(leagueColorMap).find(k => name.includes(k));
+    return leagueColorMap[key] || '#ffffff';
+  });
+  if (leagueChartInstance) leagueChartInstance.destroy();
+  leagueChartInstance = new Chart(ctx.getContext('2d'), {
+    type: 'pie',
+    data: { labels: sorted.map(e => e[0]), datasets: [{ data: sorted.map(e => e[1]), backgroundColor: colors }] },
+    options: { 
+      responsive: true, 
+      maintainAspectRatio: false, 
+      plugins: { legend: { position: 'top', labels: { color: '#f5f5f7' } } } 
+    }
+  });
+}
+
 /* -------- Exports -------- */
 window.renderDashboardSummary = renderDashboardSummary;
 window.renderClanInfo = renderClanInfo;
@@ -220,3 +282,5 @@ window.renderDonationStats = renderDonationStats;
 window.renderWarlog = renderWarlog;
 window.renderCapitalRaids = renderCapitalRaids;
 window.formatApiDate = formatApiDate;
+window.renderThDistributionChart = renderThDistributionChart;
+window.renderLeagueDistributionChart = renderLeagueDistributionChart;
