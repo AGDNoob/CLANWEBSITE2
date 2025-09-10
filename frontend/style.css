@@ -1,21 +1,21 @@
 /* ==========================================================================
-   0) Base – Apple inspiriert
+   0) Base – Apple Dark Mode
    ========================================================================== */
 :root {
-  --bg: #f5f5f7;           /* Apple-light background */
-  --bg-card: #ffffff;
-  --fg: #1c1c1e;
-  --fg-dim: #6e6e73;
-  --fg-mute: #a1a1a6;
+  --bg: #1c1c1e;           /* Apple Dark BG */
+  --bg-card: #2c2c2e;
+  --fg: #f5f5f7;
+  --fg-dim: #a1a1a6;
+  --fg-mute: #6e6e73;
 
-  --ac: #007aff;           /* iOS blue */
-  --ok: #34c759;           /* iOS green */
-  --warn: #ffcc00;         /* iOS yellow */
-  --err: #ff3b30;          /* iOS red */
+  --ac: #0a84ff;           /* iOS blue */
+  --ok: #30d158;           /* iOS green */
+  --warn: #ffd60a;         /* iOS yellow */
+  --err: #ff453a;          /* iOS red */
 
   --radius: 16px;
-  --shadow-1: 0 4px 12px rgba(0,0,0,0.06);
-  --shadow-2: 0 8px 24px rgba(0,0,0,0.08);
+  --shadow-1: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-2: 0 8px 24px rgba(0,0,0,0.55);
 
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
   --content-pad: clamp(16px, 2vw, 24px);
@@ -40,8 +40,8 @@ body {
    ========================================================================== */
 .sidebar {
   width: 240px;
-  background: #fafafa;
-  border-right: 1px solid #e5e5ea;
+  background: #2c2c2e;
+  border-right: 1px solid #3a3a3c;
   padding: var(--content-pad);
   position: sticky;
   top: 0;
@@ -56,7 +56,7 @@ body {
   font-weight: 700;
   margin: 0;
 }
-.sidebar-header small { color: var(--fg-dim); }
+.sidebar-header small { color: var(--fg-mute); }
 
 .sidebar-nav { list-style: none; padding: 0; margin: 0; }
 .nav-group {
@@ -77,7 +77,7 @@ body {
   font-weight: 500;
   transition: all 0.2s ease;
 }
-.nav-link:hover { background: #e5e5ea40; color: var(--fg); }
+.nav-link:hover { background: #3a3a3c; color: var(--fg); }
 .nav-link.active {
   background: var(--ac);
   color: #fff;
@@ -91,8 +91,8 @@ body {
   display: none;
   align-items: center;
   padding: .6rem var(--content-pad);
-  border-bottom: 1px solid #e5e5ea;
-  background: #fff;
+  border-bottom: 1px solid #3a3a3c;
+  background: #1c1c1e;
 }
 #hamburger-btn {
   background: none;
@@ -137,25 +137,25 @@ body {
 }
 .stats-table th, .stats-table td {
   padding: .65rem .9rem;
-  border-bottom: 1px solid #e5e5ea;
+  border-bottom: 1px solid #3a3a3c;
   text-align: left;
 }
 .stats-table thead th {
   font-size: .8rem;
   text-transform: uppercase;
-  color: var(--fg-dim);
+  color: var(--fg-mute);
   font-weight: 600;
 }
 .stats-table tbody tr:hover {
-  background: #f2f2f7;
+  background: #3a3a3c;
 }
 
 /* ==========================================================================
    5) Buttons
    ========================================================================== */
 button, .btn {
-  background: #f2f2f7;
-  border: 1px solid #e5e5ea;
+  background: #3a3a3c;
+  border: 1px solid #48484a;
   border-radius: 12px;
   padding: .55rem 1rem;
   font-weight: 600;
@@ -163,7 +163,7 @@ button, .btn {
   cursor: pointer;
   transition: all 0.2s ease;
 }
-button:hover { background: #e5e5ea; }
+button:hover { background: #48484a; }
 .cta-button {
   background: var(--ac);
   color: #fff;
@@ -176,7 +176,7 @@ button:hover { background: #e5e5ea; }
    ========================================================================== */
 .chart-container { height: 380px; }
 .chart-container-half { height: 260px; }
-canvas { border-radius: 12px; background: #fff; padding: .5rem; }
+canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
 
 /* ==========================================================================
    7) War & CWL Specific
@@ -190,22 +190,22 @@ canvas { border-radius: 12px; background: #fff; padding: .5rem; }
 .war-scores {
   display: flex;
   justify-content: space-around;
-  background: #f2f2f7;
+  background: #3a3a3c;
   border-radius: 12px;
   padding: .6rem;
   font-weight: 600;
 }
-.war-state { text-align: center; margin-top: .6rem; color: var(--fg-dim); }
+.war-state { text-align: center; margin-top: .6rem; color: var(--fg-mute); }
 
 .cwl-round {
-  background: #f9f9fb;
-  border: 1px solid #e5e5ea;
+  background: #2c2c2e;
+  border: 1px solid #3a3a3c;
   border-radius: 12px;
   padding: .8rem 1rem;
   margin-bottom: .6rem;
   transition: transform .15s ease;
 }
-.cwl-round:hover { transform: translateX(3px); background: #f2f2f7; }
+.cwl-round:hover { transform: translateX(3px); background: #3a3a3c; }
 
 /* ==========================================================================
    8) Responsive
@@ -214,6 +214,6 @@ canvas { border-radius: 12px; background: #fff; padding: .5rem; }
   .sidebar { position: fixed; transform: translateX(-100%); z-index: 50; }
   .sidebar.open { transform: translateX(0); }
   .mobile-header { display: flex; }
-  #mobile-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; }
+  #mobile-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; }
   #mobile-overlay.open { display: block; }
 }
