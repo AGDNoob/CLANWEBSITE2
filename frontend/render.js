@@ -298,7 +298,116 @@ function renderHeroTable(allPlayersData) {
   container.innerHTML = html;
 }
 
-// Exporte in globalen Scope (wenn nötig)
+/* -------- CWL -------- */
+function renderCwlSummary(data) {
+  const box = document.getElementById('cwl-summary');
+  if (!box) return;
+
+  const state = data.state || "Unbekannt";
+  const season = data.season || "–";
+  const clanCount = (data.clans || []).length;
+
+  box.innerHTML = `
+    <h3>Übersicht</h3>
+    <p>Saison: <b>${season}</b></p>
+    <p>Status: <b>${state}</b></p>
+    <p>Teilnehmende Clans: <b>${clanCount}</b></p>
+  `;
+}
+
+function renderCwlRounds(data) {
+  const box = document.getElementById('cwl-rounds');
+  if (!box) return;
+  box.innerHTML = "<h3>Runden</h3>";
+
+  if (!data.rounds?.length) {
+    box.innerHTML += "<p>Keine Runden gefunden.</p>";
+    return;
+  }
+
+  data.rounds.forEach((round, i) => {
+    const clans = round.warTags?.length ? round.warTags.join(", ") : "–";
+    const div = document.createElement("div");
+    div.className = "cwl-round";
+    div.innerHTML = `<strong>Runde ${i+1}:</strong> ${clans}`;
+    box.appendChild(div);
+  });
+}
+
+function renderCwlPlayerStats(data) {
+  const ctx = document.getElementById('cwl-player-stats');
+  if (!ctx) return;
+
+  // Aggregiere Spielerstatistiken
+  const stats = {};
+  (data.clans || []).forEach(clan => {
+    (clan.members || []).forEach(m => {
+      if (!stats[m.tag]) stats[m.tag] = { name: m.name, attacks: 0, stars: 0 };
+      if (m.attacks) {
+        stats[m.tag].attacks += m.attacks.length;
+        stats[m.tag].stars += m.attacks.reduce((s,a)=>s+(a.stars||0),0);
+      }
+    });
+  });
+
+  const players = Object.values(stats).sort((a,b)=>b.stars-a.stars).slice(0,10);
+  const labels = players.map(p => p.name);
+  const stars = players.map(p => p.stars);
+
+  new Chart(ctx.getContext("2d"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Sterne (Top 10)",
+        data: stars,
+        backgroundColor: "rgba(122,162,247,0.6)",
+        borderColor: "rgba(122,162,247,1)",
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { x: { ticks: { color: '#f8f8f2' }}, y: { ticks: { color: '#f8f8f2' }} },
+      plugins: { legend: { labels: { color: '#f8f8f2' } } }
+    }
+  });
+}
+
+function initCwlBonus(data) {
+  const box = document.getElementById('cwl-bonus');
+  if (!box) return;
+
+  box.innerHTML = `
+    <h3>CWL Bonuspunkte</h3>
+    <p>Der Bonus-Rechner kann jetzt mit den echten CWL-Angriffsdaten befüllt werden.</p>
+    <button id="cwl-bonus-import">Angriffe importieren</button>
+  `;
+
+  document.getElementById('cwl-bonus-import').onclick = () => {
+    const attacks = [];
+    (data.clans || []).forEach(clan => {
+      (clan.members || []).forEach(m => {
+        (m.attacks || []).forEach(atk => {
+          attacks.push({
+            spieler: m.name,
+            eigenesRH: m.townHallLevel,
+            gegnerRH: atk.defenderTownHall || 0,
+            sterne: atk.stars || 0,
+            prozent: atk.destructionPercentage || 0
+          });
+        });
+      });
+    });
+    // Bonus.js nutzt calculateBonusPoints()
+    const points = readPointsConfig();
+    const result = calculateBonusPoints(attacks, points);
+    renderBonusResults(result);
+  };
+}
+
+// Exporte in globalen Scope
 window.renderClanInfo = renderClanInfo;
 window.renderMemberList = renderMemberList;
 window.renderDonationStats = renderDonationStats;
@@ -310,3 +419,9 @@ window.renderCurrentWarDashboard = renderCurrentWarDashboard;
 window.renderDetailedWarView = renderDetailedWarView;
 window.renderHeroTable = renderHeroTable;
 window.formatApiDate = formatApiDate;
+
+// CWL-Exports
+window.renderCwlSummary = renderCwlSummary;
+window.renderCwlRounds = renderCwlRounds;
+window.renderCwlPlayerStats = renderCwlPlayerStats;
+window.initCwlBonus = initCwlBonus;
