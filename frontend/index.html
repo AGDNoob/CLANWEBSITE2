@@ -6,7 +6,6 @@
   <title>Clan Dashboard</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Dummy-Favicon gegen 404 -->
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 </head>
 <body>
@@ -38,7 +37,7 @@
         <h1>Clan Dashboard</h1>
       </header>
 
-      <!-- Overlay für Mobile -->
+      <!-- Overlay -->
       <div id="mobile-overlay"></div>
 
       <!-- Home -->
@@ -71,6 +70,36 @@
           <tbody id="donation-stats-body"></tbody>
         </table>
       </section>
+
+      <!-- Spielerprofil -->
+      <section id="player-profile-view" class="page hidden">
+        <h2>Spielerprofil</h2>
+        <div class="profile-card card">
+          <img id="profile-league-icon" src="" alt="League Icon" width="80">
+          <h3 id="profile-player-name"></h3>
+          <p>Tag: <span id="profile-player-tag"></span></p>
+          <p>Level: <span id="profile-level"></span></p>
+          <p>Rolle: <span id="profile-role"></span></p>
+          <p>Trophäen: <span id="profile-trophies"></span></p>
+          <p>Spenden: <span id="profile-donations"></span> / Erhalten: <span id="profile-donations-received"></span></p>
+          <p>RH: <span id="profile-th-level"></span></p>
+          <p>War Stars: <span id="profile-war-stars"></span></p>
+        </div>
+        <button onclick="
+          document.getElementById('player-profile-view').classList.add('hidden');
+          document.getElementById('page-clan-info').classList.remove('hidden');
+        ">Zurück</button>
+      </section>
+
+      <!-- Analytics -->
+      <section id="page-analytics" class="page">
+        <h2>Statistiken</h2>
+        <div class="analytics-grid">
+          <div class="chart-container-half"><canvas id="th-distribution-chart"></canvas></div>
+          <div class="chart-container-half"><canvas id="league-distribution-chart"></canvas></div>
+        </div>
+      </section>
+
       <!-- War Center -->
       <section id="page-war-center" class="page">
         <h2>Kriegszentrale</h2>
@@ -160,6 +189,3 @@
   <script src="main.js"></script>
 </body>
 </html>
-
-
-
