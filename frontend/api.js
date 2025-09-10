@@ -15,15 +15,24 @@ async function fetchJson(url) {
 async function fetchClanInfo() {
   return fetchJson(`${API_BASE_URL}/api/clan/info`);
 }
+
 async function fetchWarlog() {
   return fetchJson(`${API_BASE_URL}/api/clan/warlog`);
 }
+
 async function fetchCapitalRaids() {
   return fetchJson(`${API_BASE_URL}/api/clan/capitalraidseasons`);
 }
+
 async function fetchCurrentWar() {
   return fetchJson(`${API_BASE_URL}/api/clan/currentwar`);
 }
+
 async function fetchPlayer(tag) {
   return fetchJson(`${API_BASE_URL}/api/player/${tag.replace('#', '')}`);
+}
+
+// 🔹 NEU: CWL LeagueGroup
+async function fetchCwlLeagueGroup() {
+  return fetchJson(`${API_BASE_URL}/api/cwl/leaguegroup`);
 }
