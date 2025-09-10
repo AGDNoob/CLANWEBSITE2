@@ -46,41 +46,100 @@
     <!-- Clan Info -->
     <section id="page-clan-info" class="page hidden">
       <h2>Clan Informationen</h2>
-      <div id="clan-info"></div>
+      <div id="clan-header">
+        <h1 id="clan-name">Clanname</h1>
+        <p id="clan-description"></p>
+        <div id="clan-stats"></div>
+      </div>
+      <div id="member-list-container"></div>
+
+      <h3>Spendenstatistik</h3>
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Spieler</th>
+            <th>Gespendet</th>
+            <th>Erhalten</th>
+            <th>Ratio</th>
+          </tr>
+        </thead>
+        <tbody id="donation-stats-body"></tbody>
+      </table>
     </section>
 
     <!-- Analytics -->
     <section id="page-analytics" class="page hidden">
       <h2>Statistiken</h2>
-      <canvas id="donation-chart"></canvas>
-      <canvas id="townhall-distribution"></canvas>
-      <canvas id="league-distribution"></canvas>
+      <div class="analytics-grid">
+        <div class="chart-container-half"><canvas id="th-distribution-chart"></canvas></div>
+        <div class="chart-container-half"><canvas id="league-distribution-chart"></canvas></div>
+      </div>
     </section>
 
     <!-- War Center -->
     <section id="page-war-center" class="page hidden">
       <h2>Kriegszentrale</h2>
-      <div id="war-overview"></div>
-      <canvas id="war-performance"></canvas>
+      <div id="not-in-war-message"></div>
+      <div id="current-war-dashboard"></div>
+      <div id="war-plan-container"></div>
+
+      <div id="detailed-war-view">
+        <div class="detailed-war-clans">
+          <div id="detailed-war-our-clan"></div>
+          <div id="detailed-war-opponent-clan"></div>
+        </div>
+      </div>
+
+      <div id="warlog-accordion" class="accordion">
+        <div class="accordion-header">
+          <h3>Kriegshistorie</h3>
+        </div>
+        <div id="warlog-accordion-content" class="accordion-content"></div>
+      </div>
     </section>
 
     <!-- Clan Capital -->
     <section id="page-capital" class="page hidden">
       <h2>Clan Hauptstadt</h2>
-      <div id="capital-info"></div>
+      <div id="capital-raids-container"></div>
+      <div class="chart-container"><canvas id="capital-chart"></canvas></div>
     </section>
 
     <!-- Bonus Rechner -->
     <section id="page-bonus" class="page hidden">
       <h2>CWL Bonus Rechner</h2>
-      <div id="bonus-ui"></div>
-      <canvas id="bonus-chart"></canvas>
+      <div id="bonus-settings"></div>
+      <div class="bonus-rechner-grid">
+        <div class="add-player-form">
+          <input type="text" id="new-player-name" placeholder="Spielername">
+          <input type="number" id="new-player-th" placeholder="RH">
+          <input type="number" id="new-player-attacks" placeholder="Angriffe">
+          <button id="add-player-btn">Hinzufügen</button>
+        </div>
+      </div>
+      <div id="player-accordion-container" class="player-accordion-container"></div>
+      <button id="calculate-bonus-btn">Berechnen</button>
+      <button id="clear-all-btn">Alles löschen</button>
+
+      <div id="cwl-bonus-results-view" class="hidden">
+        <h3>Ergebnisse</h3>
+        <table class="stats-table">
+          <thead><tr><th>#</th><th>Spieler</th><th>Punkte</th></tr></thead>
+          <tbody id="bonus-results-table-body"></tbody>
+        </table>
+        <div class="chart-container"><canvas id="bonus-chart"></canvas></div>
+        <button id="bonus-rechner-back-button">Zurück</button>
+      </div>
     </section>
 
     <!-- Helden -->
     <section id="page-heroes" class="page hidden">
       <h2>Helden Übersicht</h2>
-      <div id="heroes-info"></div>
+      <div id="lab-loading-state" class="hidden"></div>
+      <div id="lab-content-container">
+        <div id="hero-table-container" class="lab-table-container"></div>
+      </div>
     </section>
 
     <!-- CWL Zentrale -->
@@ -89,7 +148,7 @@
       <div id="cwl-summary" class="card"></div>
       <div id="cwl-rounds" class="card"></div>
       <canvas id="cwl-player-stats"></canvas>
-      <div id="cwl-bonus"></div>
+      <div id="cwl-bonus" class="card"></div>
     </section>
 
     <!-- Credits -->
