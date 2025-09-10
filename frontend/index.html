@@ -71,6 +71,22 @@
           <tbody id="donation-stats-body"></tbody>
         </table>
       </section>
+<!-- Player Profile View -->
+      <section id="player-profile-view" class="page hidden">
+        <h2>Spielerprofil</h2>
+        <img id="profile-league-icon" src="" alt="League Icon">
+         <p><strong id="profile-player-name"></strong> (<span id="profile-player-tag"></span>)</p>
+         <p>Level: <span id="profile-level"></span></p>
+        <p>Rolle: <span id="profile-role"></span></p>
+        <p>Trophäen: <span id="profile-trophies"></span></p>
+        <p>Spenden: <span id="profile-donations"></span> / erhalten: <span id="profile-donations-received"></span></p>
+        <p>RH: <span id="profile-th-level"></span></p>
+        <p>War Stars: <span id="profile-war-stars"></span></p>
+        <button onclick="document.getElementById('player-profile-view').classList.add('hidden');
+                   document.getElementById('page-clan-info').classList.remove('hidden');">
+    Zurück
+      </button>
+    </section>
 
       <!-- Analytics -->
       <section id="page-analytics" class="page">
@@ -170,3 +186,4 @@
   <script src="main.js"></script>
 </body>
 </html>
+
