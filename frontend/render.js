@@ -116,16 +116,27 @@ function renderMemberList(members) {
 }
 
 function renderPlayerProfile(player) {
-  document.getElementById('profile-league-icon').src = player?.league?.iconUrls?.small || '';
-  document.getElementById('profile-player-name').textContent = player?.name || '';
-  document.getElementById('profile-player-tag').textContent = player?.tag || '';
-  document.getElementById('profile-level').textContent = player?.expLevel ?? '–';
-  document.getElementById('profile-trophies').textContent = player?.trophies ?? '–';
-  document.getElementById('profile-role').textContent = roleTranslations[player?.role] || player?.role || '–';
-  document.getElementById('profile-donations').textContent = player?.donations ?? '–';
-  document.getElementById('profile-donations-received').textContent = player?.donationsReceived ?? '–';
-  document.getElementById('profile-th-level').textContent = player?.townHallLevel ?? '–';
-  document.getElementById('profile-war-stars').textContent = player?.warStars ?? 'N/A';
+  const container = document.querySelector(".profile-card");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="profile-header">
+      <img src="${player?.league?.iconUrls?.small || ''}" alt="Liga">
+      <div>
+        <h3>${player?.name || ''}</h3>
+        <p>${roleTranslations[player?.role] || player?.role || '–'}</p>
+      </div>
+    </div>
+
+    <div class="profile-stats">
+      <div class="stat-item"><span>Level</span><span>${player?.expLevel ?? '–'}</span></div>
+      <div class="stat-item"><span>Trophäen</span><span>${player?.trophies ?? '–'} 🏆</span></div>
+      <div class="stat-item"><span>RH</span><span>${player?.townHallLevel ?? '–'}</span></div>
+      <div class="stat-item"><span>War Stars</span><span>${player?.warStars ?? '–'}</span></div>
+      <div class="stat-item"><span>Spenden</span><span>${player?.donations ?? 0}</span></div>
+      <div class="stat-item"><span>Erhalten</span><span>${player?.donationsReceived ?? 0}</span></div>
+    </div>
+  `;
 }
 
 function renderDonationStats(members) {
@@ -153,13 +164,7 @@ function renderThDistributionChart(members) {
   if (thChartInstance) thChartInstance.destroy();
   thChartInstance = new Chart(ctx.getContext('2d'), {
     type: 'doughnut',
-    data: {
-      labels: sorted.map(e => e[0]),
-      datasets: [{ 
-        data: sorted.map(e => e[1]), 
-        backgroundColor: ['#ff3b30','#ff9500','#ffcc00','#34c759','#5ac8fa','#007aff','#5856d6']
-      }]
-    },
+    data: { labels: sorted.map(e => e[0]), datasets: [{ data: sorted.map(e => e[1]), backgroundColor: ['#ff3b30','#ff9500','#ffcc00','#34c759','#5ac8fa','#007aff','#5856d6'] }] },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: '#f5f5f7' } } } }
   });
 }
