@@ -40,7 +40,8 @@ async function fetchAllData() {
 /* -------- CWL Daten laden -------- */
 async function fetchCwlData() {
   try {
-    const data = await fetchJson('/api/cwl/leaguegroup');
+    const data = await fetchCwlLeagueGroup();   // statt fetchJson('/api/...')
+
     if (!data || !data.rounds) {
       const summary = document.getElementById('cwl-summary');
       if (summary) summary.textContent = 'Keine CWL-Daten verfügbar.';
