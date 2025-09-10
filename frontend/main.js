@@ -3,6 +3,9 @@ const POLLING_INTERVAL_MS = 60000;
 let currentMemberList = [];
 let labDataLoaded = false;
 
+// 🆕 Clan-Tag global definieren (anpassen!)
+const CLAN_TAG = "#DEINCLANTAG";
+
 document.addEventListener('DOMContentLoaded', () => {
   setupNavigationAndUI();
   setupManualBonusCalculator();
@@ -11,8 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function fetchAllData() {
+  let clan = null, raids = null, log = null, cwl = null;
+
   // Clan info
-  const clan = await fetchClanInfo();
+  clan = await fetchClanInfo();
   if (clan) {
     currentMemberList = clan.memberList || [];
     renderClanInfo(clan);
@@ -26,33 +31,30 @@ async function fetchAllData() {
   await initializeWarCenter();
 
   // Hauptstadt
-  const raids = await fetchCapitalRaids();
+  raids = await fetchCapitalRaids();
   if (raids?.items) renderCapitalRaids(raids.items);
 
-  // Warlog
-  const log = await fetchWarlog();
+  // Warlog (für Home letztes Spiel)
+  log = await fetchWarlog();
   if (log?.items) renderWarlog(log.items);
 
-  // CWL (NEU)
-  await fetchCwlData();
-}
-
-/* -------- CWL Daten laden -------- */
-async function fetchCwlData() {
+  // CWL
   try {
-    const data = await fetchCwlLeagueGroup();
-    if (data) renderCwlSummary(data);
+    cwl = await fetchCwlLeagueGroup();
+    if (cwl) renderCwlSummary(cwl);
 
     const rounds = await fetchCwlSummary();
     if (rounds) {
       renderCwlRounds(rounds);
-      renderCwlPlayerStats(rounds); // <-- hierhin verschoben
-      initCwlBonus(data);
+      renderCwlPlayerStats(rounds);
+      initCwlBonus(cwl);
     }
-
   } catch (err) {
-    console.error('Fehler beim Laden der CWL:', err);
+    console.error("Fehler beim Laden der CWL:", err);
   }
+
+  // 🆕 Home Dashboard befüllen
+  renderDashboardSummary(clan, log?.items?.[0], raids?.items, cwl);
 }
 
 /* -------- Navigation & UI -------- */
@@ -86,13 +88,16 @@ function setupNavigationAndUI() {
       // reset subviews
       clanInfoMasterView?.classList.remove('hidden');
       playerProfileView?.classList.add('hidden');
-      currentWarMasterView?.classList.remove('hidden');
-      currentWarDetailView?.classList.add('hidden');
-      cwlBonusCalculatorView?.classList.remove('hidden');
-      cwlBonusResultsView?.classList.add('hidden');
+      currentWarMasterView?.classList?.remove('hidden');
+      currentWarDetailView?.classList?.add('hidden');
+      cwlBonusCalculatorView?.classList?.remove('hidden');
+      cwlBonusResultsView?.classList?.add('hidden');
 
       // close mobile nav
-      if (sidebar && mobileOverlay) { sidebar.classList.remove('open'); mobileOverlay.classList.remove('open'); }
+      if (sidebar && mobileOverlay) { 
+        sidebar.classList.remove('open'); 
+        mobileOverlay.classList.remove('open'); 
+      }
 
       // lazy-load lab
       if (targetId === 'page-heroes' && !labDataLoaded) {
@@ -170,33 +175,24 @@ async function initializeWarCenter() {
 
   } catch (e) {
     console.error("Fehler beim Abrufen des aktuellen Kriegs:", e);
-    warCenterPage.classList.add('not-in-war');
-    warCenterPage.classList.remove('in-war');
-    notInWarMessage.textContent = "Fehler: Kriegsdaten konnten nicht geladen werden.";
-    dashboard.innerHTML = "";
-    warPlan.innerHTML = `
-      <div class="placeholder">
-        <div class="emoji">❗</div>
-        <div>
-          <div class="title">Kriegsdaten derzeit nicht verfügbar</div>
-          <div class="hint">Bitte später erneut versuchen.</div>
-        </div>
-      </div>`;
+    applyNotInWarState(warCenterPage, notInWarMessage, dashboard, warPlan, true);
   }
 }
 
-function applyNotInWarState(warCenterPage, notInWarMessage, dashboard, warPlan) {
+function applyNotInWarState(warCenterPage, notInWarMessage, dashboard, warPlan, isError = false) {
   warCenterPage.classList.add('not-in-war');
   warCenterPage.classList.remove('in-war');
-  notInWarMessage.textContent = "Wir sind aktuell in keinem Clankrieg.";
+  notInWarMessage.textContent = isError ? 
+    "Fehler: Kriegsdaten konnten nicht geladen werden." :
+    "Wir sind aktuell in keinem Clankrieg.";
   notInWarMessage.classList.remove('hidden');
   dashboard.innerHTML = "";
   warPlan.innerHTML = `
     <div class="placeholder">
-      <div class="emoji">🛡️</div>
+      <div class="emoji">${isError ? "❗" : "🛡️"}</div>
       <div>
-        <div class="title">Kein aktiver Krieg</div>
-        <div class="hint">Der KI-Planer aktiviert sich automatisch, sobald der nächste Krieg startet.</div>
+        <div class="title">${isError ? "Kriegsdaten derzeit nicht verfügbar" : "Kein aktiver Krieg"}</div>
+        <div class="hint">${isError ? "Bitte später erneut versuchen." : "Der KI-Planer aktiviert sich automatisch, sobald der nächste Krieg startet."}</div>
       </div>
     </div>`;
 }
