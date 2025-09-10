@@ -406,6 +406,45 @@ function initCwlBonus(data) {
     renderBonusResults(result);
   };
 }
+/* -------- Charts: Townhall & League Distribution -------- */
+function renderThDistributionChart(members) {
+  const ctx = document.getElementById('th-distribution-chart');
+  if (!ctx) return;
+
+  const counts = {};
+  (members || []).forEach(m => { counts[m.townHallLevel] = (counts[m.townHallLevel] || 0) + 1; });
+
+  const labels = Object.keys(counts).sort((a, b) => a - b);
+  const data = labels.map(l => counts[l]);
+
+  if (thChartInstance) thChartInstance.destroy();
+  thChartInstance = new Chart(ctx.getContext('2d'), {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'RH Verteilung', data, backgroundColor: 'rgba(10,132,255,0.6)', borderColor: 'rgba(10,132,255,1)', borderWidth: 1 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#f5f5f7' } } }, scales: { x: { ticks: { color: '#f5f5f7' }}, y: { ticks: { color: '#f5f5f7' } } } }
+  });
+}
+
+function renderLeagueDistributionChart(members) {
+  const ctx = document.getElementById('league-distribution-chart');
+  if (!ctx) return;
+
+  const counts = {};
+  (members || []).forEach(m => {
+    const league = m.league?.name || 'Unbekannt';
+    counts[league] = (counts[league] || 0) + 1;
+  });
+
+  const labels = Object.keys(counts);
+  const data = labels.map(l => counts[l]);
+
+  if (leagueChartInstance) leagueChartInstance.destroy();
+  leagueChartInstance = new Chart(ctx.getContext('2d'), {
+    type: 'pie',
+    data: { labels, datasets: [{ label: 'Liga Verteilung', data, backgroundColor: ['#0a84ff', '#30d158', '#ffd60a', '#ff453a', '#8e8e93'] }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#f5f5f7' } } } }
+  });
+}
 
 /* -------- Exports -------- */
 window.renderDashboardSummary = renderDashboardSummary;
