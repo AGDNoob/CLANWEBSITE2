@@ -1,5 +1,6 @@
 // api.js – nur Fetch Funktionen
 const API_BASE_URL = 'https://agdnoob1.pythonanywhere.com';
+const CLAN_TAG = "#2GJY8YPUP"; 
 
 async function fetchJson(url) {
   try {
