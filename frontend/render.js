@@ -299,20 +299,21 @@ function renderHeroTable(allPlayersData) {
 }
 
 /* -------- CWL -------- */
-function renderCwlSummary(data) {
-  const box = document.getElementById('cwl-summary');
-  if (!box) return;
+async function fetchCwlData() {
+  try {
+    const data = await fetchCwlLeagueGroup();
+    if (data) renderCwlSummary(data);
 
-  const state = data.state || "Unbekannt";
-  const season = data.season || "–";
-  const clanCount = (data.clans || []).length;
+    const rounds = await fetchCwlSummary();
+    if (rounds) {
+      renderCwlRounds(rounds);
+      renderCwlPlayerStats(rounds); // <-- hierhin verschoben
+      initCwlBonus(data);
+    }
 
-  box.innerHTML = `
-    <h3>Übersicht</h3>
-    <p>Saison: <b>${season}</b></p>
-    <p>Status: <b>${state}</b></p>
-    <p>Teilnehmende Clans: <b>${clanCount}</b></p>
-  `;
+  } catch (err) {
+    console.error('Fehler beim Laden der CWL:', err);
+  }
 }
 
 function renderCwlRounds(rounds) {
