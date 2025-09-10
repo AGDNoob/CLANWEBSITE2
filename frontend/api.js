@@ -36,3 +36,8 @@ async function fetchPlayer(tag) {
 async function fetchCwlLeagueGroup() {
   return fetchJson(`${API_BASE_URL}/api/cwl/leaguegroup`);
 }
+
+async function fetchCwlRounds() {
+  return fetchJson(`${API_BASE_URL}/api/cwl/rounds`);
+}
+
