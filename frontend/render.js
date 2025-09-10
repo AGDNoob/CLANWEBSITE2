@@ -19,7 +19,7 @@ function formatApiDate(apiDateString) {
 }
 
 /* -------- Dashboard / Home -------- */
-function renderDashboardSummary(clan, currentWar, raids, cwl) {
+function renderDashboardSummary(clan, warData, raids, cwl) {
   // Clan-Card
   const clanBox = document.getElementById("clan-stats-summary");
   if (clanBox) {
@@ -41,17 +41,21 @@ function renderDashboardSummary(clan, currentWar, raids, cwl) {
     `;
   }
 
-  // Aktueller Krieg
+  // Krieg-Card
   const warBox = document.getElementById("last-war-summary");
   if (warBox) {
-    if (!currentWar || !currentWar.opponent) {
-      warBox.innerHTML = "<p>Wir sind aktuell nicht im Krieg.</p>";
+    if (!warData) {
+      warBox.innerHTML = "<p>Keine Daten.</p>";
     } else {
+      const isCurrent = warData.hasOwnProperty("teamSize"); // currentWar hat Felder wie teamSize
+      const header = isCurrent ? "Aktueller Krieg" : "Letzter Krieg";
+
       warBox.innerHTML = `
-        <p>vs <b>${currentWar.opponent.name}</b></p>
-        <p>${currentWar.clan.stars ?? 0}⭐ ${(currentWar.clan.destructionPercentage ?? 0).toFixed(1)}% –
-           ${currentWar.opponent.stars ?? 0}⭐ ${(currentWar.opponent.destructionPercentage ?? 0).toFixed(1)}%</p>
-        <p>Status: <b>${warStateTranslations[currentWar.state] || currentWar.state}</b></p>
+        <p><strong>${header}</strong></p>
+        <p>vs <b>${warData.opponent?.name ?? "Unbekannt"}</b></p>
+        <p>${warData.clan?.stars ?? 0}⭐ ${(warData.clan?.destructionPercentage ?? 0).toFixed(1)}% –
+           ${warData.opponent?.stars ?? 0}⭐ ${(warData.opponent?.destructionPercentage ?? 0).toFixed(1)}%</p>
+        <p>Status: <b>${warStateTranslations[warData.state] || warResultTranslations[warData.result] || "?"}</b></p>
       `;
     }
   }
