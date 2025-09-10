@@ -396,4 +396,56 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   transform: translateY(-3px);
   box-shadow: 0 6px 14px rgba(0,0,0,0.35);
 }
+.profile-card {
+  background: #2c2c2e;
+  border-radius: 16px;
+  padding: 1.2rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+  max-width: 720px;
+  margin: 1.5rem auto;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #3a3a3c;
+}
+.profile-header img {
+  width: 70px;
+  height: 70px;
+}
+.profile-header h3 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+.profile-header p {
+  margin: .2rem 0 0;
+  color: #a1a1a6;
+}
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.stat-item {
+  background: #1c1c1e;
+  border: 1px solid #3a3a3c;
+  border-radius: 12px;
+  padding: .7rem .9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.stat-item span:first-child {
+  color: #a1a1a6;
+  font-size: .9rem;
+}
+.stat-item span:last-child {
+  font-weight: 600;
+}
+
 
