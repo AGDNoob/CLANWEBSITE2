@@ -515,7 +515,10 @@ window.renderCurrentWarDashboard = renderCurrentWarDashboard;
 window.renderDetailedWarView = renderDetailedWarView;
 window.renderHeroTable = renderHeroTable;
 window.formatApiDate = formatApiDate;
-
+window.renderDashboardSummary = renderDashboardSummary;
+window.renderClanInfo = renderClanInfo;
+window.renderMemberList = renderMemberList;
+window.renderPlayerProfile = renderPlayerProfile;
 // CWL-Exports
 window.renderCwlSummary = renderCwlSummary;
 window.renderCwlRounds = renderCwlRounds;
