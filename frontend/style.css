@@ -13,6 +13,13 @@
   --warn: #ffd60a;
   --err: #ff453a;
 
+  --mirror: #0a84ff;   /* Blau */
+  --dip: #30d158;      /* Grün */
+  --push: #ff9500;     /* Orange */
+  --cleanup: #ffd60a;  /* Gelb */
+  --flex: #8e8e93;     /* Grau */
+  --practice: #6e6e73; /* Dunkelgrau */
+
   --radius: 16px;
   --shadow-1: 0 4px 12px rgba(0,0,0,0.4);
   --shadow-2: 0 8px 24px rgba(0,0,0,0.55);
@@ -177,6 +184,57 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   margin-bottom: .6rem; transition: transform .15s ease;
 }
 .cwl-round:hover { transform: translateX(3px); background: #3a3a3c; }
+
+/* ==========================================================================
+   7b) Warplanner Styles
+   ========================================================================== */
+.war-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.war-plan-matchup {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: var(--shadow-1);
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+
+.plan-player.our {
+  font-weight: 700;
+  margin-bottom: .5rem;
+}
+
+.plan-attacks {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.attack-block {
+  border-radius: 12px;
+  padding: .6rem .8rem;
+  color: #fff;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+}
+
+/* Farbcodes nach Strategie */
+.attack-block.mirror { background: var(--mirror); }
+.attack-block.dip { background: var(--dip); }
+.attack-block.push { background: var(--push); }
+.attack-block.cleanup { background: var(--cleanup); color: #000; }
+.attack-block.flex { background: var(--flex); }
+.attack-block.practice { background: var(--practice); }
+
+.plan-vs { font-size: .85rem; opacity: 0.9; }
+.plan-player.opponent { font-size: .9rem; font-weight: 500; }
 
 /* ==========================================================================
    8) Profilkarten
