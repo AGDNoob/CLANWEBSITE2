@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Clan Dashboard</title>
@@ -11,35 +10,36 @@
 <body>
   <!-- Mobile Header -->
   <header class="mobile-header">
-    <button id="menu-toggle">☰</button>
+    <button id="hamburger-btn">☰</button>
     <h1>Clan Dashboard</h1>
   </header>
 
   <!-- Sidebar -->
-  <aside class="sidebar hidden" id="sidebar">
-    <nav>
-      <ul>
-        <li><a href="#page-home" class="nav-link">Home</a></li>
-        <li><a href="#page-clan-info" class="nav-link">Clan Info</a></li>
-        <li><a href="#page-analytics" class="nav-link">Analytics</a></li>
-        <li><a href="#page-war-center" class="nav-link">War Center</a></li>
-        <li><a href="#page-capital" class="nav-link">Clan Capital</a></li>
-        <li><a href="#page-bonus" class="nav-link">Bonus Rechner</a></li>
-        <li><a href="#page-heroes" class="nav-link">Helden</a></li>
-        <!-- Neue CWL-Seite -->
-        <li><a href="#page-cwl" class="nav-link">CWL Zentrale</a></li>
-        <li><a href="#page-credits" class="nav-link">Credits</a></li>
-      </ul>
-    </nav>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h3>Magic Dragons</h3>
+      <small>Clan Dashboard</small>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="#" data-target="page-home" class="nav-link active">Home</a></li>
+      <li><a href="#" data-target="page-clan-info" class="nav-link">Clan Info</a></li>
+      <li><a href="#" data-target="page-analytics" class="nav-link">Analytics</a></li>
+      <li><a href="#" data-target="page-war-center" class="nav-link">War Center</a></li>
+      <li><a href="#" data-target="page-capital" class="nav-link">Clan Capital</a></li>
+      <li><a href="#" data-target="page-bonus" class="nav-link">Bonus Rechner</a></li>
+      <li><a href="#" data-target="page-heroes" class="nav-link">Helden</a></li>
+      <li><a href="#" data-target="page-cwl" class="nav-link">CWL Zentrale</a></li>
+      <li><a href="#" data-target="page-credits" class="nav-link">Credits</a></li>
+    </ul>
   </aside>
 
   <!-- Overlay -->
-  <div class="overlay hidden" id="overlay"></div>
+  <div id="mobile-overlay"></div>
 
   <!-- Main Content -->
-  <main id="main">
+  <main class="main-content">
     <!-- Home -->
-    <section id="page-home" class="page">
+    <section id="page-home" class="page active">
       <h2>Willkommen im Clan Dashboard</h2>
       <p>Hier findest du alle Infos zu Clan, Kriegen und CWL.</p>
     </section>
@@ -166,4 +166,3 @@
   <script src="main.js"></script>
 </body>
 </html>
-
