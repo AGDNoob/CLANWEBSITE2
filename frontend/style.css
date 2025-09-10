@@ -381,14 +381,16 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
 #bonus-rechner-back-button:hover { background: #3a3a3c; }
 
 /* ==========================================================================
-   10) Accordion Styles
+   Accordions – Smooth + Fix gegen abgeschnittene Inhalte
    ========================================================================== */
 .accordion {
   border-radius: 14px;
   overflow: hidden;
   box-shadow: var(--shadow-1);
   transition: box-shadow 0.3s ease;
+  margin-bottom: 1rem;
 }
+
 .accordion-header {
   background: #1c1c1e;
   padding: .8rem 1rem;
@@ -399,15 +401,36 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   align-items: center;
   transition: background 0.3s ease;
 }
-.accordion-header:hover { background: #2c2c2e; }
-.accordion-header span { transition: transform 0.3s ease; }
-.accordion.open .accordion-header span { transform: rotate(180deg); }
+
+.accordion-header:hover {
+  background: #2c2c2e;
+}
+
+.accordion-header span {
+  transition: transform 0.3s ease;
+}
+
+.accordion.open .accordion-header span {
+  transform: rotate(180deg);
+}
+
 .accordion-content {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.4s ease;
+  transition: max-height 0.45s ease, padding 0.3s ease;
+  padding: 0;
 }
-.accordion.open .accordion-content { max-height: 2000px; }
+
+.accordion.open .accordion-content {
+  max-height: 3000px; /* hoch genug, damit nichts abgeschnitten wird */
+  padding: .8rem 0;
+}
+
+/* Extra Abstand, damit letzte Card nicht abgeschnitten wird */
+#war-plan-container,
+#warlog-accordion-content {
+  padding-bottom: 1rem;
+}
 
 /* ==========================================================================
    11) Responsive
@@ -425,3 +448,4 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   }
   #mobile-overlay.open { display: block; opacity: 1; }
 }
+
