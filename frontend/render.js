@@ -18,6 +18,60 @@ function formatApiDate(apiDateString) {
   return `${y}-${m}-${d}T${hh}:${mm}:${ss}.000Z`;
 }
 
+/* -------- Dashboard / Home -------- */
+function renderDashboardSummary(clan, lastWar, raids, cwl) {
+  // Clan-Card
+  const clanBox = document.getElementById("clan-stats-summary");
+  if (clanBox) {
+    clanBox.innerHTML = `
+      <p>Level: <b>${clan?.clanLevel ?? "-"}</b></p>
+      <p>Punkte: <b>${clan?.clanPoints ?? "-"}</b></p>
+      <p>Mitglieder: <b>${clan?.members ?? "-"}</b></p>
+    `;
+  }
+
+  // CWL-Card
+  const cwlBox = document.getElementById("cwl-summary-compact");
+  if (cwlBox && cwl) {
+    const league = (cwl.clans?.find(c => c.tag === CLAN_TAG)?.warLeague?.name) || "–";
+    cwlBox.innerHTML = `
+      <p>Saison: <b>${cwl.season ?? "-"}</b></p>
+      <p>Liga: <b>${league}</b></p>
+      <p>Status: <b>${cwl.state ?? "-"}</b></p>
+    `;
+  }
+
+  // Letzter Krieg
+  const warBox = document.getElementById("last-war-summary");
+  if (warBox) {
+    if (!lastWar?.opponent) {
+      warBox.innerHTML = "<p>Keine Daten.</p>";
+    } else {
+      warBox.innerHTML = `
+        <p>vs <b>${lastWar.opponent.name}</b></p>
+        <p>${lastWar.clan.stars}⭐ ${lastWar.clan.destructionPercentage.toFixed(1)}% – 
+           ${lastWar.opponent.stars}⭐ ${lastWar.opponent.destructionPercentage.toFixed(1)}%</p>
+        <p>Ergebnis: <b>${warResultTranslations[lastWar.result] || lastWar.result}</b></p>
+      `;
+    }
+  }
+
+  // Clan Capital
+  const capBox = document.getElementById("last-capital-summary");
+  if (capBox) {
+    if (!raids?.length) {
+      capBox.innerHTML = "<p>Noch keine Raids</p>";
+    } else {
+      const last = raids[0];
+      const date = new Date(formatApiDate(last.startTime)).toLocaleDateString("de-DE");
+      capBox.innerHTML = `
+        <p>Raid vom ${date}</p>
+        <p>Beute: <b>${last.capitalTotalLoot}</b> Stadtgold</p>
+      `;
+    }
+  }
+}
+
 /* -------- Clan Info -------- */
 function renderClanInfo(data) {
   document.getElementById('clan-name').textContent = data?.name || "Unbekannt";
