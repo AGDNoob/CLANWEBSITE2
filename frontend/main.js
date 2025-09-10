@@ -3,6 +3,9 @@ const POLLING_INTERVAL_MS = 60000;
 let currentMemberList = [];
 let labDataLoaded = false;
 
+// 🆕 Clan-Tag global definieren (deinen echten einsetzen!)
+const CLAN_TAG = "#DEINCLANTAG";
+
 document.addEventListener('DOMContentLoaded', () => {
   setupNavigationAndUI();
   setupManualBonusCalculator();
@@ -11,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function fetchAllData() {
-  let clan = null, raids = null, log = null, cwl = null;
+  let clan = null, raids = null, currentWar = null, lastWar = null, cwl = null;
 
   // Clan info
   clan = await fetchClanInfo();
@@ -31,9 +34,19 @@ async function fetchAllData() {
   raids = await fetchCapitalRaids();
   if (raids?.items) renderCapitalRaids(raids.items);
 
-  // Warlog (für Home letztes Spiel)
-  log = await fetchWarlog();
-  if (log?.items) renderWarlog(log.items);
+  // Warlog (für Fallback + Historie)
+  const log = await fetchWarlog();
+  if (log?.items) {
+    renderWarlog(log.items);
+    lastWar = log.items[0]; // letzter Krieg
+  }
+
+  // Aktueller Krieg für Home
+  try {
+    currentWar = await fetchCurrentWar();
+  } catch (err) {
+    console.error("Fehler beim Abrufen des aktuellen Kriegs:", err);
+  }
 
   // CWL
   try {
@@ -51,7 +64,8 @@ async function fetchAllData() {
   }
 
   // 🆕 Home Dashboard befüllen
-  renderDashboardSummary(clan, log?.items?.[0], raids?.items, cwl);
+  const warForHome = (currentWar && currentWar.state !== "notInWar") ? currentWar : lastWar;
+  renderDashboardSummary(clan, warForHome, raids?.items, cwl);
 }
 
 /* -------- Navigation & UI -------- */
@@ -132,7 +146,7 @@ function setupNavigationAndUI() {
   });
 }
 
-/* -------- War Center Init (mit „Kein Krieg“-Placeholder) -------- */
+/* -------- War Center Init -------- */
 async function initializeWarCenter() {
   const warCenterPage = document.getElementById('page-war-center');
   const notInWarMessage = document.getElementById('not-in-war-message');
@@ -141,7 +155,6 @@ async function initializeWarCenter() {
 
   if (!warCenterPage || !notInWarMessage || !dashboard || !warPlan) return;
 
-  // Standard-Leeren (um „alte“ Inhalte zu vermeiden)
   dashboard.innerHTML = '';
   warPlan.innerHTML = '';
 
