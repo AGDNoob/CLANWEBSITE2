@@ -44,27 +44,43 @@ function getThHeroCap(heroName, th, apiMaxLevel) {
 // Dashboard / Home
 // =====================================================
 function renderDashboardSummary({ clan = null, war = null, raids = null, cwl = null }) {
-  // Clan Level
+  // --- Clan Level ---
   if (clan) {
     const el = document.getElementById("clan-level");
     if (el) el.textContent = clan.clanLevel ?? "–";
   }
 
-  // CWL Liga
+  // --- CWL Liga ---
   if (cwl) {
-    const league = (cwl.clans?.find(c => c.tag === (window.CLAN_TAG || ""))?.warLeague?.name) || "–";
+    let league = "–";
+
+    // 1) Versuch: über Clanliste (LeagueGroup API)
+    const ourClan = (cwl.clans || []).find(c => c.tag === (window.CLAN_TAG || ""));
+    if (ourClan?.warLeague?.name) {
+      league = ourClan.warLeague.name;
+    }
+
+    // 2) Fallback: falls direkt im CWL-Objekt (Summary API)
+    if (league === "–" && cwl.warLeague?.name) {
+      league = cwl.warLeague.name;
+    }
+
     const el = document.getElementById("cwl-league");
     if (el) el.textContent = league;
+
+    // Debug-Ausgabe in Konsole
+    console.log("CWL DATA:", cwl);
+    console.log("Gefundene Liga:", league);
   }
 
-  // Krieg Status
+  // --- Krieg Status ---
   if (war) {
     const status = warStateTranslations[war.state] || warResultTranslations[war.result] || "?";
     const el = document.getElementById("war-status");
     if (el) el.textContent = status;
   }
 
-  // Hauptstadt Loot
+  // --- Hauptstadt Loot ---
   if (raids?.length) {
     const loot = raids[0].capitalTotalLoot?.toLocaleString() || "–";
     const el = document.getElementById("capital-loot");
