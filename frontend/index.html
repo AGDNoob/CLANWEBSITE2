@@ -100,23 +100,6 @@
         </div>
       </section>
 
-      <!-- Player Profile -->
-      <section id="player-profile-view" class="page hidden">
-        <h2>Spielerprofil</h2>
-        <div class="profile-card card">
-          <img id="profile-league-icon" src="" alt="League Icon" width="80">
-          <h3 id="profile-player-name"></h3>
-          <p>Tag: <span id="profile-player-tag"></span></p>
-          <p>Level: <span id="profile-level"></span></p>
-          <p>Rolle: <span id="profile-role"></span></p>
-          <p>Trophäen: <span id="profile-trophies"></span></p>
-          <p>Spenden: <span id="profile-donations"></span> / Erhalten: <span id="profile-donations-received"></span></p>
-          <p>RH: <span id="profile-th-level"></span></p>
-          <p>War Stars: <span id="profile-war-stars"></span></p>
-        </div>
-        <button id="profile-back-button">Zurück</button>
-      </section>
-
       <!-- Analytics -->
       <section id="page-analytics" class="page">
         <h2>Statistiken</h2>
@@ -219,6 +202,14 @@
     </main>
   </div>
 
+  <!-- 🆕 Player Profile Modal -->
+  <div id="player-modal" class="modal hidden">
+    <div class="modal-content">
+      <span id="modal-close" class="modal-close">&times;</span>
+      <div id="player-profile-view"></div>
+    </div>
+  </div>
+
   <script src="api.js"></script>
   <script src="bonus.js"></script>
   <script src="render.js"></script>
@@ -230,4 +221,3 @@
   </script>
 </body>
 </html>
-
