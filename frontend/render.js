@@ -333,20 +333,7 @@ window.renderDashboardSummary = renderDashboardSummary;
 window.renderClanInfo = renderClanInfo;
 window.renderMemberList = renderMemberList;
 window.renderPlayerProfile = renderPlayerProfile;
-
-/* -------- Exports 2 -------- */
-window.renderDashboardSummary = renderDashboardSummary;
-window.renderClanInfo = renderClanInfo;
-window.renderMemberList = renderMemberList;
-window.renderPlayerProfile = renderPlayerProfile;
-window.renderDonationStats = renderDonationStats;   // 🆕 dazu
-window.renderCurrentWarDashboard = renderCurrentWarDashboard;
-window.renderDetailedWarView = renderDetailedWarView;
-window.renderWarlog = renderWarlog;
-window.renderCapitalRaids = renderCapitalRaids;
-window.renderHeroTable = renderHeroTable;
-window.renderCwlSummary = renderCwlSummary;
-window.formatApiDate = formatApiDate;
+window.renderDonationStats = renderDonationStats;
 
 window.renderCurrentWarDashboard = renderCurrentWarDashboard;
 window.renderDetailedWarView = renderDetailedWarView;
@@ -356,5 +343,12 @@ window.renderCapitalRaids = renderCapitalRaids;
 window.renderHeroTable = renderHeroTable;
 
 window.renderCwlSummary = renderCwlSummary;
+window.renderCwlRounds = renderCwlRounds;
+window.renderCwlPlayerStats = renderCwlPlayerStats;
+window.initCwlBonus = initCwlBonus;
+
+window.renderThDistributionChart = renderThDistributionChart;
+window.renderLeagueDistributionChart = renderLeagueDistributionChart;
 
 window.formatApiDate = formatApiDate;
+
