@@ -115,7 +115,6 @@ body {
   transition: box-shadow 0.3s ease, transform 0.2s ease;
 }
 .card h3 { margin-top: 0; font-size: 1.05rem; font-weight: 600; }
-
 .card:hover { box-shadow: var(--shadow-2); transform: translateY(-3px); }
 
 .card-grid {
@@ -124,8 +123,7 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
-/* Dashboard klickbare Cards */
-.card.dash-link { transition: transform .2s ease, box-shadow .2s ease; cursor: pointer; }
+.card.dash-link { cursor: pointer; }
 .card.dash-link:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.35); }
 
 /* ==========================================================================
@@ -176,19 +174,15 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
 .war-header {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 1rem;
-  transition: all 0.3s ease;
 }
 .war-scores {
   display: flex; justify-content: space-around;
   background: #3a3a3c; border-radius: 12px;
   padding: .6rem; font-weight: 600;
-  transition: background 0.3s ease;
 }
 .war-state { text-align: center; margin-top: .6rem; color: var(--fg-mute); }
 
-/* ==========================================================================
-   7b) Warplanner Styles
-   ========================================================================== */
+/* -------- Warplanner -------- */
 .war-plan-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -221,7 +215,6 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
 }
 .attack-block:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); }
 
-/* Farbcodes nach Strategie */
 .attack-block.mirror { background: var(--mirror); }
 .attack-block.dip { background: var(--dip); }
 .attack-block.push { background: var(--push); }
@@ -229,12 +222,7 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
 .attack-block.flex { background: var(--flex); }
 .attack-block.practice { background: var(--practice); }
 
-.plan-vs { font-size: .85rem; opacity: 0.9; }
-.plan-player.opponent { font-size: .9rem; font-weight: 500; }
-
-/* ==========================================================================
-   7c) Warlog Styles
-   ========================================================================== */
+/* -------- Warlog -------- */
 .warlog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -255,244 +243,7 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
 .warlog-entry .war-result { font-size: 1rem; margin-bottom: .4rem; }
 .warlog-entry .war-details { font-size: .9rem; opacity: 0.9; }
 
-/* ==========================================================================
-   8) Profilkarten
-   ========================================================================== */
-.profile-card {
-  background: #2c2c2e;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: var(--shadow-1);
-  max-width: 720px;
-  margin: 1.5rem auto;
-  transition: transform 0.2s ease, box-shadow 0.3s ease;
-}
-.profile-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); }
-
-.profile-header {
-  display: flex; align-items: center; gap: 1rem;
-  padding-bottom: 1rem; border-bottom: 1px solid #3a3a3c;
-}
-.profile-header img { width: 70px; height: 70px; }
-.profile-header h3 { margin: 0; font-size: 1.4rem; font-weight: 600; }
-.profile-header p { margin: .2rem 0 0; color: #a1a1a6; }
-
-.profile-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
-  gap: 1rem; margin-top: 1rem;
-}
-.stat-item {
-  background: #1c1c1e; border: 1px solid #3a3a3c;
-  border-radius: 12px; padding: .7rem .9rem;
-  display: flex; justify-content: space-between; align-items: center;
-  transition: background 0.3s ease;
-}
-.stat-item span:first-child { color: #a1a1a6; font-size: .9rem; }
-.stat-item span:last-child { font-weight: 600; }
-
-/* ==========================================================================
-   9) Bonus Rechner
-   ========================================================================== */
-.bonus-rechner-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.2rem; margin-bottom: 1.5rem;
-}
-.add-player-form {
-  display: flex; flex-wrap: wrap; gap: .8rem;
-  padding: 1rem; background: #2c2c2e;
-  border-radius: 16px; box-shadow: var(--shadow-1);
-  transition: transform 0.2s ease, box-shadow 0.3s ease;
-}
-.add-player-form:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); }
-.add-player-form input {
-  flex: 1; min-width: 160px; padding: .55rem .7rem;
-  border-radius: 12px; border: 1px solid #3a3a3c;
-  background: #3a3a3c; color: #f5f5f7;
-  font-size: .95rem;
-  transition: background 0.3s ease;
-}
-.add-player-form input::placeholder { color: #a1a1a6; }
-.add-player-form button {
-  background: var(--ac); color: #fff; border: none;
-  border-radius: 12px; padding: .55rem 1rem; font-weight: 600;
-  cursor: pointer; transition: background .3s ease, transform 0.2s ease;
-}
-.add-player-form button:hover { background: #0062d6; transform: translateY(-2px); }
-
-.player-accordion-container { display: flex; flex-direction: column; gap: 1rem; }
-.player-section {
-  background: #2c2c2e; border-radius: 16px;
-  overflow: hidden; box-shadow: var(--shadow-1);
-  transition: box-shadow 0.3s ease;
-}
-.player-header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: .9rem 1.1rem; background: #1c1c1e;
-  cursor: pointer; font-weight: 600; color: #f5f5f7;
-  transition: background 0.3s ease;
-}
-.player-header:hover { background: #2c2c2e; }
-.player-header .toggle-icon { transition: transform .25s ease; }
-.player-section.closed .toggle-icon { transform: rotate(-90deg); }
-.attacks-wrapper { padding: 1rem; background: #2c2c2e; border-top: 1px solid #3a3a3c; transition: background 0.3s ease; }
-
-.attack-row {
-  display: grid; grid-template-columns: 60px 1fr 1fr 1fr;
-  gap: .7rem; align-items: center; margin-bottom: .7rem;
-}
-.attack-row:last-child { margin-bottom: 0; }
-.attack-row label { color: #a1a1a6; font-weight: 600; font-size: .85rem; }
-.attack-row input {
-  padding: .55rem .6rem; border-radius: 10px;
-  border: 1px solid #3a3a3c; background: #3a3a3c;
-  color: #f5f5f7; text-align: center; font-size: .9rem;
-  transition: background 0.3s ease;
-}
-
-#cwl-bonus-results-view { margin-top: 1.5rem; }
-#cwl-bonus-results-view table {
-  width: 100%; border-collapse: collapse; margin-bottom: 1rem;
-}
-#cwl-bonus-results-view th, #cwl-bonus-results-view td {
-  padding: .7rem 1rem; border-bottom: 1px solid #3a3a3c; text-align: left;
-}
-#cwl-bonus-results-view thead th {
-  color: #a1a1a6; font-size: .8rem; text-transform: uppercase;
-}
-#cwl-bonus-results-view tr:hover { background: #3a3a3c; }
-#bonus-chart {
-  background: #1c1c1e; border-radius: 12px; padding: .5rem;
-  box-shadow: inset 0 2px 6px rgba(0,0,0,0.35);
-}
-#calculate-bonus-btn, #clear-all-btn, #bonus-rechner-back-button {
-  margin-top: .8rem; padding: .65rem 1.1rem; border-radius: 12px;
-  font-weight: 600; cursor: pointer; border: none;
-  transition: background 0.3s ease, transform 0.2s ease;
-}
-#calculate-bonus-btn { background: var(--ac); color: #fff; }
-#calculate-bonus-btn:hover { background: #0062d6; transform: translateY(-2px); }
-#clear-all-btn { background: #3a3a3c; color: #f5f5f7; }
-#clear-all-btn:hover { background: #48484a; transform: translateY(-2px); }
-#bonus-rechner-back-button {
-  background: #2c2c2e; color: #f5f5f7; border: 1px solid #3a3a3c;
-}
-#bonus-rechner-back-button:hover { background: #3a3a3c; }
-
-/* ==========================================================================
-   Accordions – Smooth + Fix gegen abgeschnittene Inhalte
-   ========================================================================== */
-.accordion {
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: var(--shadow-1);
-  transition: box-shadow 0.3s ease;
-  margin-bottom: 1rem;
-}
-
-.accordion-header {
-  background: #1c1c1e;
-  padding: .8rem 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: background 0.3s ease;
-}
-
-.accordion-header:hover {
-  background: #2c2c2e;
-}
-
-.accordion-header span {
-  transition: transform 0.3s ease;
-}
-
-.accordion.open .accordion-header span {
-  transform: rotate(180deg);
-}
-
-.accordion-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.45s ease, padding 0.3s ease;
-  padding: 0;
-}
-
-.accordion.open .accordion-content {
-  max-height: 3000px; /* hoch genug, damit nichts abgeschnitten wird */
-  padding: .8rem 0;
-}
-
-/* Extra Abstand, damit letzte Card nicht abgeschnitten wird */
-#war-plan-container,
-#warlog-accordion-content {
-  padding-bottom: 1rem;
-}
-
-/* ==========================================================================
-   11) Responsive
-   ========================================================================== */
-@media (max-width: 1024px) {
-  .sidebar { position: fixed; transform: translateX(-100%); z-index: 50; }
-  .sidebar.open { transform: translateX(0); }
-  .mobile-header { display: flex; }
-  #mobile-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.5);
-    display: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  #mobile-overlay.open { display: block; opacity: 1; }
-}
-.war-player-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.war-player-card {
-  background: var(--bg-card);
-  border-radius: 12px;
-  padding: .9rem 1rem;
-  box-shadow: var(--shadow-1);
-  transition: transform 0.2s ease, box-shadow 0.3s ease;
-}
-.war-player-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-2);
-}
-
-.war-player-header {
-  display: flex;
-  justify-content: space-between;
-  font-weight: 600;
-  margin-bottom: .5rem;
-}
-
-.attacks-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .4rem;
-}
-
-.attack-badge {
-  padding: .3rem .5rem;
-  border-radius: 8px;
-  font-size: .85rem;
-  font-weight: 600;
-  color: #fff;
-}
-
-/* Farbcodierung nach Sternen */
-.attack-badge.zero { background: #555; }
-.attack-badge.one { background: #ffd60a; color: #000; }
-.attack-badge.two { background: #30d158; }
-.attack-badge.three { background: #0a84ff; }
+/* -------- War Detailed View -------- */
 .war-team-summary {
   display: flex;
   gap: 1rem;
@@ -508,6 +259,7 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
+  margin-top: 1rem;
 }
 
 .war-player-card {
@@ -539,3 +291,76 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
 .attack-badge.one { background: #ffd60a; color: #000; }
 .attack-badge.two { background: #30d158; }
 .attack-badge.three { background: #0a84ff; }
+
+/* ==========================================================================
+   8) Profilkarten
+   ========================================================================== */
+.profile-card {
+  background: #2c2c2e;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-1);
+  max-width: 720px;
+  margin: 1.5rem auto;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+.profile-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); }
+
+/* ==========================================================================
+   9) Bonus Rechner
+   ========================================================================== */
+.add-player-form input,
+.attack-row input { transition: background 0.3s ease; }
+
+/* ==========================================================================
+   10) Accordions
+   ========================================================================== */
+.accordion {
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-1);
+  transition: box-shadow 0.3s ease;
+  margin-bottom: 1rem;
+}
+.accordion-header {
+  background: #1c1c1e;
+  padding: .8rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.3s ease;
+}
+.accordion-header:hover { background: #2c2c2e; }
+.accordion-header span { transition: transform 0.3s ease; }
+.accordion.open .accordion-header span { transform: rotate(180deg); }
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.45s ease, padding 0.3s ease;
+  padding: 0;
+}
+.accordion.open .accordion-content {
+  max-height: 3000px;
+  padding: .8rem 0;
+}
+#war-plan-container,
+#warlog-accordion-content { padding-bottom: 1rem; }
+
+/* ==========================================================================
+   11) Responsive
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .sidebar { position: fixed; transform: translateX(-100%); z-index: 50; }
+  .sidebar.open { transform: translateX(0); }
+  .mobile-header { display: flex; }
+  #mobile-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  #mobile-overlay.open { display: block; opacity: 1; }
+}
