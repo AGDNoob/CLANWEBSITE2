@@ -190,14 +190,34 @@ function renderPlayerProfile(player) {
           <p>${roleTranslations[player?.role] || player?.role || '–'}</p>
         </div>
       </div>
-      <div class="profile-stats">
-        <div class="stat-item"><span>Level</span><span>${player?.expLevel ?? '–'}</span></div>
-        <div class="stat-item"><span>Trophäen</span><span>${player?.trophies ?? '–'} 🏆</span></div>
-        <div class="stat-item"><span>RH</span><span>${player?.townHallLevel ?? '–'}</span></div>
-        <div class="stat-item"><span>War Stars</span><span>${player?.warStars ?? '–'}</span></div>
-        <div class="stat-item"><span>Spenden</span><span>${player?.donations ?? 0}</span></div>
-        <div class="stat-item"><span>Erhalten</span><span>${player?.donationsReceived ?? 0}</span></div>
+
+      <div class="profile-stats-grid">
+        <div class="stat-box">
+          <span>🎖️ Level</span>
+          <strong>${player?.expLevel ?? '–'}</strong>
+        </div>
+        <div class="stat-box">
+          <span>🏆 Trophäen</span>
+          <strong>${player?.trophies ?? '–'}</strong>
+        </div>
+        <div class="stat-box">
+          <span>🏰 RH</span>
+          <strong>${player?.townHallLevel ?? '–'}</strong>
+        </div>
+        <div class="stat-box">
+          <span>⭐ War Stars</span>
+          <strong>${player?.warStars ?? '–'}</strong>
+        </div>
+        <div class="stat-box">
+          <span>📤 Spenden</span>
+          <strong>${player?.donations ?? 0}</strong>
+        </div>
+        <div class="stat-box">
+          <span>📥 Erhalten</span>
+          <strong>${player?.donationsReceived ?? 0}</strong>
+        </div>
       </div>
+
       ${heroHtml}
     </div>
   `;
