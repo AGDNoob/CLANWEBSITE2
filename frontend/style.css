@@ -448,4 +448,50 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   }
   #mobile-overlay.open { display: block; opacity: 1; }
 }
+.war-player-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.war-player-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: .9rem 1rem;
+  box-shadow: var(--shadow-1);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+.war-player-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-2);
+}
+
+.war-player-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  margin-bottom: .5rem;
+}
+
+.attacks-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+.attack-badge {
+  padding: .3rem .5rem;
+  border-radius: 8px;
+  font-size: .85rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Farbcodierung nach Sternen */
+.attack-badge.zero { background: #555; }
+.attack-badge.one { background: #ffd60a; color: #000; }
+.attack-badge.two { background: #30d158; }
+.attack-badge.three { background: #0a84ff; }
+
 
