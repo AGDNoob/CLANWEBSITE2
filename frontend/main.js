@@ -87,23 +87,22 @@ function setupPlayerModal() {
   }
 }
 
-// Ersetzt DEINE fetchPlayerProfile-Funktion komplett
+// 🆕 Spielerprofil aus Backend laden + ins Modal rendern
 async function fetchPlayerProfile(tag) {
   try {
     const cleanTag = String(tag).replace(/^#/, ""); // führendes # weg
-    const url = `${API_BASE_URL}/api/player/${cleanTag}`; // immer Backend-Basis nutzen!
+    const url = `${API_BASE_URL}/api/player/${cleanTag}`;
     const res = await fetch(url);
     if (!res.ok) {
       console.error("Player fetch failed", res.status, url);
       throw new Error(`Fehler beim Laden des Profils (HTTP ${res.status})`);
     }
     const player = await res.json();
-    renderPlayerProfile(player);
+    renderPlayerProfile(player); // Modal-Content
   } catch (err) {
     console.error("Fehler beim Laden des Spielerprofils:", err);
   }
 }
-
 
 /* -------- Navigation & UI -------- */
 function setupNavigationAndUI() {
