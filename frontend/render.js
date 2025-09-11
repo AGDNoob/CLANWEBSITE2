@@ -552,13 +552,26 @@ function renderHeroCards(players) {
 function renderCwlSummary(data) {
   const box = document.getElementById('cwl-summary');
   if (!box) return;
+
   const state = data?.state || "Unbekannt";
   const season = data?.season || "–";
   const clanCount = (data?.clans || []).length;
-  let league = "Unbekannt";
-  const ourClan = (data?.clans || []).find(c => c.tag === (window.CLAN_TAG || ""));
-  if (ourClan?.warLeague?.name) league = ourClan.warLeague.name;
 
+  // Liga herausfinden
+  let league = "–";
+
+  // 1) Versuch: Clanliste durchsuchen (LeagueGroup API)
+  const ourClan = (data?.clans || []).find(c => c.tag === (window.CLAN_TAG || ""));
+  if (ourClan?.warLeague?.name) {
+    league = ourClan.warLeague.name;
+  }
+
+  // 2) Fallback: falls direkt im CWL-Objekt (Summary API)
+  if (league === "–" && data?.warLeague?.name) {
+    league = data.warLeague.name;
+  }
+
+  // Rendern
   box.innerHTML = `
     <h3>Übersicht</h3>
     <p>Saison: <b>${season}</b></p>
@@ -566,6 +579,10 @@ function renderCwlSummary(data) {
     <p>Teilnehmende Clans: <b>${clanCount}</b></p>
     <p>Unsere Liga: <b>${league}</b></p>
   `;
+
+  // Debug-Ausgabe in Konsole
+  console.log("CWL Summary DATA:", data);
+  console.log("Gefundene Liga:", league);
 }
 
 function renderCwlRounds(rounds) {
