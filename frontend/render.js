@@ -395,34 +395,72 @@ function renderCapitalContributors(raids) {
 // =====================================================
 // Hero Table (Labor)
 // =====================================================
-function renderHeroTable(allPlayersData) {
+function renderHeroCards(players) {
   const container = document.getElementById('hero-table-container');
   if (!container) return;
-  const HERO_ORDER = ['Barbarian King', 'Archer Queen', 'Grand Warden', 'Royal Champion', 'Battle Machine', 'Battle Copter'];
-  let html = `<table class="lab-table"><thead><tr><th>Spieler</th>`;
-  HERO_ORDER.forEach(hero => { html += `<th>${hero.replace('Barbarian ', '').replace('Archer ', '')}</th>`; });
-  html += `</tr></thead><tbody>`;
-  (allPlayersData || [])
-    .sort((a, b) => (b?.townHallLevel ?? 0) - (a?.townHallLevel ?? 0))
-    .forEach(player => {
-      if (!player?.heroes) return;
-      html += `<tr><td><div class="player-cell">${player.name}<span class="player-th-sublabel">RH${player.townHallLevel}</span></div></td>`;
-      const map = new Map(player.heroes.map(h => [h.name, h]));
-      HERO_ORDER.forEach(name => {
-        const hero = map.get(name);
-        if (hero) {
-          let displayLevel = hero.level;
-          if (name.toLowerCase() === 'battle copter' && hero.level === 1) displayLevel = 15; // optische Korrektur
-          html += `<td class="${hero.level === hero.maxLevel ? 'is-maxed' : ''}">${displayLevel}</td>`;
-        } else {
-          html += `<td>-</td>`;
-        }
+
+  container.innerHTML = `
+    <div class="hero-grid"></div>
+  `;
+  const grid = container.querySelector('.hero-grid');
+
+  const ICON = {
+    "Barbarian King": "👑",
+    "Archer Queen": "👸",
+    "Grand Warden": "🧙",
+    "Royal Champion": "🛡️",
+    "Battle Machine": "🤖",
+    "Battle Copter": "🚁"
+  };
+
+  (players || [])
+    .filter(p => p?.heroes?.length)
+    .sort((a,b)=> (b.townHallLevel??0)-(a.townHallLevel??0) || (b.expLevel??0)-(a.expLevel??0))
+    .forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'hero-card';
+      card.innerHTML = `
+        <div class="hero-header">
+          <div class="hero-name">${p.name}</div>
+          <div class="hero-th">RH${p.townHallLevel ?? '-'}</div>
+        </div>
+        <div class="hero-levels"></div>
+      `;
+      const levels = card.querySelector('.hero-levels');
+
+      // Wir zeigen Heroes in definierter Reihenfolge
+      const ORDER = ["Barbarian King", "Archer Queen", "Grand Warden", "Royal Champion", "Battle Machine", "Battle Copter"];
+      const map = new Map(p.heroes.map(h => [h.name, h]));
+
+      ORDER.forEach(name => {
+        const h = map.get(name);
+        if (!h) return;
+        // Cap je nach RH bestimmen (oder API-Max)
+        const thCap = getThHeroCap(name, p.townHallLevel ?? 0, h.maxLevel);
+        const level  = h.level ?? 0;
+        const maxCap = Math.max(thCap || 0, level); // falls Cap kleiner als aktuelles Level (API special cases)
+        const progress = maxCap ? level / maxCap : 0;
+
+        let cls = 'low';
+        if (progress >= 1) cls = 'maxed';
+        else if (progress >= .7) cls = 'mid';
+
+        // Optional: Battle Copter Level 1 wird ingame oft als 15 angezeigt – dein alter Hack:
+        const displayLevel = (name.toLowerCase() === 'battle copter' && level === 1) ? 15 : level;
+
+        const title = `${name} – ${displayLevel}/${maxCap} (${Math.round(progress*100)}%)`;
+        levels.insertAdjacentHTML('beforeend', `
+          <div class="hero-level ${cls}" title="${title}">
+            <span class="hero-ico">${ICON[name] ?? ''}</span>
+            <span>${displayLevel}/${maxCap}</span>
+          </div>
+        `);
       });
-      html += `</tr>`;
+
+      grid.appendChild(card);
     });
-  html += `</tbody></table>`;
-  container.innerHTML = html;
 }
+
 
 // =====================================================
 // CWL (Summary, Rounds, Player Stats, Bonus Import)
