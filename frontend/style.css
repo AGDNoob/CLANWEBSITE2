@@ -366,7 +366,7 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
 }
 .raid-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
   margin-top: 1rem;
 }
@@ -374,7 +374,7 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
 .raid-card {
   background: var(--bg-card);
   border-radius: 12px;
-  padding: .8rem 1rem;
+  padding: 1rem;
   box-shadow: var(--shadow-1);
   transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
@@ -385,10 +385,13 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
 
 .raid-date {
   font-weight: 600;
-  margin-bottom: .4rem;
-}
-.raid-medals {
-  color: var(--warn);
+  margin-bottom: .5rem;
   font-size: .95rem;
+  color: var(--fg);
+}
+
+.raid-medals {
+  font-size: 1rem;
   font-weight: 600;
+  color: var(--warn);
 }
