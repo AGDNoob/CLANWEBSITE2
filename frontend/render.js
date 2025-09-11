@@ -635,7 +635,6 @@ window.renderWarlog = renderWarlog;
 
 window.renderCapitalContributors = renderCapitalContributors;
 window.renderCapitalRaids = renderCapitalRaids;
-window.renderHeroTable = renderHeroTable;
 
 window.renderCwlSummary = renderCwlSummary;
 window.renderCwlRounds = renderCwlRounds;
