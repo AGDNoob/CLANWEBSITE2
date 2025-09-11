@@ -637,3 +637,37 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
 .hero-progress-fill.warn { background: #ffd60a; }   /* gelb */
 .hero-progress-fill.mid { background: #30d158; }    /* grün */
 .hero-progress-fill.maxed { background: #0a84ff; }  /* blau */
+/* ======================
+   KPI Dashboard Cards
+   ====================== */
+.kpi-grid {
+  display: grid;
+  gap: 1.2rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.kpi-card {
+  text-align: center;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.kpi-icon {
+  font-size: 2rem;
+  margin-bottom: .6rem;
+}
+
+.kpi-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--ac);
+  margin-bottom: .3rem;
+}
+
+.kpi-label {
+  font-size: .9rem;
+  color: var(--fg-mute);
+}
