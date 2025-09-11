@@ -90,9 +90,13 @@ function setupPlayerModal() {
 // Holt Daten für Profil und rendert ins Modal
 async function fetchPlayerProfile(tag) {
   try {
-    const res = await fetch(`/api/player/${encodeURIComponent(tag)}`);
+    // führendes # entfernen, damit die URL nicht kaputt geht
+    const cleanTag = tag.replace(/^#/, "");
+    const res = await fetch(`/api/player/${cleanTag}`);
     if (!res.ok) throw new Error("Fehler beim Laden des Profils");
     const player = await res.json();
+
+    // ins Modal rendern
     renderPlayerProfile(player);
   } catch (err) {
     console.error("Fehler beim Laden des Spielerprofils:", err);
