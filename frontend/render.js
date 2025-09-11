@@ -174,53 +174,52 @@ function renderCurrentWarDashboard(war) {
     <div class="war-state">Status: ${translatedState} | Endet am: ${endTime}</div>`;
 }
 
+/* -------- Detailed War View (schöne Player-Cards) -------- */
 function renderDetailedWarView(war) {
   const our = document.getElementById('detailed-war-our-clan');
   const opp = document.getElementById('detailed-war-opponent-clan');
   if (!our || !opp) return;
+
   our.innerHTML = '<h3>Unser Clan</h3>';
   opp.innerHTML = `<h3>Gegner: ${war?.opponent?.name || ''}</h3>`;
 
-  if (Array.isArray(war?.clan?.members)) {
-    [...war.clan.members]
-      .sort((a, b) => a.mapPosition - b.mapPosition)
-      .forEach(member => {
-        let attacksHtml = '<div class="attack-info">Kein Angriff</div>';
-        if (member.attacks && Array.isArray(war?.opponent?.members)) {
-          attacksHtml = member.attacks.map(attack => {
-            const defender = war.opponent.members.find(def => def.tag === attack.defenderTag);
-            const defenderName = defender ? `${defender.mapPosition}. ${defender.name}` : 'Unbekannt';
-            return `<div class="attack-info"><span>⚔️ vs ${defenderName}</span><span class="attack-result">${attack.stars}⭐ ${attack.destructionPercentage}%</span></div>`;
-          }).join('');
-        }
-        const card = document.createElement('div');
-        card.className = 'war-player-card';
-        card.innerHTML = `
-          <div class="war-player-header">
-            <span class="player-map-pos">${member.mapPosition}.</span>
-            <span class="player-name">${member.name}</span>
-            <span class="player-th">RH${member.townhallLevel}</span>
-          </div>
-          <div class="attacks-container">${attacksHtml}</div>`;
-        our.appendChild(card);
-      });
-  }
+  const renderPlayerCard = (member, isOpponent = false) => {
+    let attacksHtml = "";
 
-  if (Array.isArray(war?.opponent?.members)) {
-    [...war.opponent.members]
-      .sort((a, b) => a.mapPosition - b.mapPosition)
-      .forEach(member => {
-        const card = document.createElement('div');
-        card.className = 'war-player-card opponent';
-        card.innerHTML = `
-          <div class="war-player-header">
-            <span class="player-map-pos">${member.mapPosition}.</span>
-            <span class="player-name">${member.name}</span>
-            <span class="player-th">RH${member.townhallLevel}</span>
-          </div>`;
-        opp.appendChild(card);
-      });
-  }
+    if (member.attacks?.length) {
+      attacksHtml = member.attacks.map(a => {
+        let stars = a.stars ?? 0;
+        let pct = a.destructionPercentage ?? 0;
+        let css = stars === 3 ? "three" : stars === 2 ? "two" : stars === 1 ? "one" : "zero";
+        return `<div class="attack-badge ${css}">${stars}⭐ – ${pct}%</div>`;
+      }).join("");
+    } else {
+      attacksHtml = `<div class="attack-badge zero">🚫 Kein Angriff</div>`;
+    }
+
+    return `
+      <div class="war-player-card ${isOpponent ? "opponent" : "our"}">
+        <div class="war-player-header">
+          <span class="player-map-pos">#${member.mapPosition}</span>
+          <span class="player-name">${member.name}</span>
+          <span class="player-th">RH${member.townhallLevel}</span>
+        </div>
+        <div class="attacks-container">${attacksHtml}</div>
+      </div>
+    `;
+  };
+
+  our.innerHTML += `
+    <div class="war-player-grid">
+      ${war.clan.members.sort((a, b) => a.mapPosition - b.mapPosition).map(m => renderPlayerCard(m, false)).join("")}
+    </div>
+  `;
+
+  opp.innerHTML += `
+    <div class="war-player-grid">
+      ${war.opponent.members.sort((a, b) => a.mapPosition - b.mapPosition).map(m => renderPlayerCard(m, true)).join("")}
+    </div>
+  `;
 }
 
 /* -------- Warlog (Accordion + hübsche Cards) -------- */
@@ -292,7 +291,7 @@ function renderCapitalChart(raids) {
   });
 }
 
-/* -------- Lab -------- */
+/* -------- Hero Table (Lab) -------- */
 function renderHeroTable(allPlayersData) {
   const container = document.getElementById('hero-table-container');
   if (!container) return;
@@ -328,139 +327,4 @@ function renderCwlSummary(data) {
   const state = data.state || "Unbekannt";
   const season = data.season || "–";
   const clanCount = (data.clans || []).length;
-  let league = "Unbekannt";
-  if (data.clans) {
-    const ourClan = data.clans.find(c => c.tag === CLAN_TAG);
-    if (ourClan?.warLeague?.name) league = ourClan.warLeague.name;
-  }
-  box.innerHTML = `
-    <h3>Übersicht</h3>
-    <p>Saison: <b>${season}</b></p>
-    <p>Status: <b>${state}</b></p>
-    <p>Teilnehmende Clans: <b>${clanCount}</b></p>
-    <p>Unsere Liga: <b>${league}</b></p>
-  `;
-}
-
-function renderCwlRounds(rounds) {
-  const box = document.getElementById('cwl-rounds');
-  if (!box) return;
-  box.innerHTML = "<h3>Rundenübersicht</h3>";
-  if (!rounds?.length) {
-    box.innerHTML += "<p>Keine CWL-Runden gefunden.</p>";
-    return;
-  }
-  rounds.forEach(r => {
-    const result = (r.our_stars > r.opp_stars) ? "✅ Sieg" :
-                   (r.our_stars < r.opp_stars) ? "❌ Niederlage" : "➖ Unentschieden";
-    const div = document.createElement("div");
-    div.className = "cwl-round card";
-    div.innerHTML = `
-      <div><strong>Runde ${r.round}</strong></div>
-      <div>${r.our_stars}⭐ (${(r.our_pct || 0).toFixed(1)}%) – ${r.opp_stars}⭐ (${(r.opp_pct || 0).toFixed(1)}%)</div>
-      <div>${result}</div>
-    `;
-    box.appendChild(div);
-  });
-}
-
-function renderCwlPlayerStats(rounds) {
-  const ctx = document.getElementById('cwl-player-stats');
-  if (!ctx) return;
-  const stats = {};
-  (rounds || []).forEach(r => {
-    (r.attacks || []).forEach(a => {
-      if (!a.from_our_clan) return;
-      if (!stats[a.attacker_name]) stats[a.attacker_name] = { stars: 0, attacks: 0 };
-      stats[a.attacker_name].stars += a.stars || 0;
-      stats[a.attacker_name].attacks += 1;
-    });
-  });
-  const players = Object.entries(stats).map(([name, s]) => ({ name, stars: s.stars, attacks: s.attacks })).sort((a, b) => b.stars - a.stars).slice(0, 10);
-  new Chart(ctx.getContext("2d"), {
-    type: "bar",
-    data: { labels: players.map(p => p.name), datasets: [{ label: "Sterne (Top 10)", data: players.map(p => p.stars), backgroundColor: "rgba(10,132,255,0.6)", borderColor: "rgba(10,132,255,1)", borderWidth: 1 }] },
-    options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: '#f5f5f7' }}, y: { ticks: { color: '#f5f5f7' }} }, plugins: { legend: { labels: { color: '#f5f5f7' } } } }
-  });
-}
-
-function initCwlBonus(data) {
-  const box = document.getElementById('cwl-bonus');
-  if (!box) return;
-  box.innerHTML = `
-    <h3>CWL Bonuspunkte</h3>
-    <p>Der Bonus-Rechner kann jetzt mit den echten CWL-Angriffsdaten befüllt werden.</p>
-    <button id="cwl-bonus-import">Angriffe importieren</button>
-  `;
-  document.getElementById('cwl-bonus-import').onclick = () => {
-    const attacks = [];
-    (data.clans || []).forEach(clan => {
-      (clan.members || []).forEach(m => {
-        (m.attacks || []).forEach(atk => {
-          attacks.push({ spieler: m.name, eigenesRH: m.townHallLevel, gegnerRH: atk.defenderTownHall || 0, sterne: atk.stars || 0, prozent: atk.destructionPercentage || 0 });
-        });
-      });
-    });
-    const points = readPointsConfig();
-    const result = calculateBonusPoints(attacks, points);
-    renderBonusResults(result);
-  };
-}
-/* -------- Charts: Townhall & League Distribution -------- */
-function renderThDistributionChart(members) {
-  const ctx = document.getElementById('th-distribution-chart');
-  if (!ctx) return;
-
-  const counts = {};
-  (members || []).forEach(m => { counts[m.townHallLevel] = (counts[m.townHallLevel] || 0) + 1; });
-
-  const labels = Object.keys(counts).sort((a, b) => a - b);
-  const data = labels.map(l => counts[l]);
-
-  if (thChartInstance) thChartInstance.destroy();
-  thChartInstance = new Chart(ctx.getContext('2d'), {
-    type: 'bar',
-    data: { labels, datasets: [{ label: 'RH Verteilung', data, backgroundColor: 'rgba(10,132,255,0.6)', borderColor: 'rgba(10,132,255,1)', borderWidth: 1 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#f5f5f7' } } }, scales: { x: { ticks: { color: '#f5f5f7' }}, y: { ticks: { color: '#f5f5f7' } } } }
-  });
-}
-
-function renderLeagueDistributionChart(members) {
-  const ctx = document.getElementById('league-distribution-chart');
-  if (!ctx) return;
-
-  const counts = {};
-  (members || []).forEach(m => {
-    const league = m.league?.name || 'Unbekannt';
-    counts[league] = (counts[league] || 0) + 1;
-  });
-
-  const labels = Object.keys(counts);
-  const data = labels.map(l => counts[l]);
-
-  if (leagueChartInstance) leagueChartInstance.destroy();
-  leagueChartInstance = new Chart(ctx.getContext('2d'), {
-    type: 'pie',
-    data: { labels, datasets: [{ label: 'Liga Verteilung', data, backgroundColor: ['#0a84ff', '#30d158', '#ffd60a', '#ff453a', '#8e8e93'] }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#f5f5f7' } } } }
-  });
-}
-
-/* -------- Exports -------- */
-window.renderDashboardSummary = renderDashboardSummary;
-window.renderClanInfo = renderClanInfo;
-window.renderMemberList = renderMemberList;
-window.renderPlayerProfile = renderPlayerProfile;
-window.renderDonationStats = renderDonationStats;
-window.renderThDistributionChart = renderThDistributionChart;
-window.renderLeagueDistributionChart = renderLeagueDistributionChart;
-window.renderCurrentWarDashboard = renderCurrentWarDashboard;
-window.renderDetailedWarView = renderDetailedWarView;
-window.renderWarlog = renderWarlog;
-window.renderCapitalRaids = renderCapitalRaids;
-window.renderHeroTable = renderHeroTable;
-window.renderCwlSummary = renderCwlSummary;
-window.renderCwlRounds = renderCwlRounds;
-window.renderCwlPlayerStats = renderCwlPlayerStats;
-window.initCwlBonus = initCwlBonus;
-window.formatApiDate = formatApiDate;
+  let league = "
