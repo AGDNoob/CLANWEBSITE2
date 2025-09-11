@@ -415,3 +415,52 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   font-size: .8rem;
   text-transform: uppercase;
 }
+/* Hero Cards */
+.hero-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.hero-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: var(--shadow-1);
+  transition: transform .2s ease, box-shadow .3s ease;
+}
+.hero-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); }
+
+.hero-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: .6rem;
+  font-weight: 700;
+}
+.hero-header .hero-name { font-size: 1rem; }
+.hero-header .hero-th   { font-size: .9rem; color: var(--fg-dim); }
+
+.hero-levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.hero-level {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .32rem .55rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: .9rem;
+  background: #3a3a3c;
+  color: #fff;
+}
+.hero-level .hero-ico { opacity: .95; }
+
+.hero-level.maxed { background: var(--ok); color: #000; }
+.hero-level.mid   { background: var(--warn); color: #000; }
+.hero-level.low   { background: var(--err); }
