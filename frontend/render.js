@@ -304,22 +304,33 @@ function renderCapitalRaids(raids) {
   const container = document.getElementById('capital-raids-container');
   if (!container) return;
   container.innerHTML = '';
+
   if (!raids?.length) {
     container.innerHTML = "<p>Keine abgeschlossenen Raids gefunden.</p>";
     return;
   }
+
+  const grid = document.createElement("div");
+  grid.className = "raid-list";
+
   raids.slice(0, 5).forEach(raid => {
-    const entry = document.createElement('div');
-    entry.className = 'raid-card';
+    const card = document.createElement("div");
+    card.className = "raid-card";
+
     const start = formatApiDate(raid.startTime);
-    const startTime = start ? new Date(start).toLocaleDateString('de-DE') : '–';
-    entry.innerHTML = `
-      <div class="raid-header">
-        <span class="raid-date">Raid vom ${startTime}</span>
-        <span class="raid-medals">⭐ ${raid.capitalTotalLoot} Stadtgold</span>
-      </div>`;
-    container.appendChild(entry);
+    const dateStr = start ? new Date(start).toLocaleDateString("de-DE") : "–";
+
+    card.innerHTML = `
+      <div class="raid-date">📅 ${dateStr}</div>
+      <div class="raid-medals">⭐ ${raid.capitalTotalLoot.toLocaleString()} Stadtgold</div>
+    `;
+
+    grid.appendChild(card);
   });
+
+  container.appendChild(grid);
+
+  // Chart wie gehabt
   renderCapitalChart(raids);
 }
 
