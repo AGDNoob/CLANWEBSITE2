@@ -30,6 +30,7 @@ async function fetchAllData() {
   // Hauptstadt
   raids = await fetchCapitalRaids();
   if (raids?.items) renderCapitalRaids(raids.items);
+  renderCapitalContributors(raids);
 
   // Warlog (für Fallback + Historie)
   const log = await fetchWarlog();
