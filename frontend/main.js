@@ -269,7 +269,7 @@ async function fetchPlayerDataForLab() {
       await new Promise(r => setTimeout(r, 100));
     }
 
-    renderHeroTable(all);
+    renderHeroCards(all);
     loadingContainer.classList.add('hidden');
     contentContainer.classList.remove('hidden');
 
