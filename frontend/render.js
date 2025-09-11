@@ -7,6 +7,7 @@ const roleTranslations = { member: 'Mitglied', admin: 'Ältester', coLeader: 'Vi
 const warResultTranslations = { win: 'Sieg', lose: 'Niederlage', tie: 'Unentschieden' };
 const warStateTranslations = { notInWar: 'Nicht im Krieg', preparation: 'Vorbereitungstag', inWar: 'Kampftag', warEnded: 'Krieg ist beendet' };
 
+// Helper
 function formatApiDate(apiDateString) {
   if (!apiDateString || apiDateString.length < 15) return null;
   const y = apiDateString.substring(0, 4);
@@ -101,24 +102,11 @@ function renderMemberList(members) {
       </div>`;
     container.appendChild(card);
   });
-
-  document.querySelectorAll('.member-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const playerTag = card.dataset.playerTag;
-      const player = (members || []).find(m => m.tag === playerTag);
-      if (player) {
-        renderPlayerProfile(player);
-        document.getElementById('clan-info-master-view')?.classList.add('hidden');
-        document.getElementById('player-profile-view')?.classList.remove('hidden');
-      }
-    });
-  });
 }
 
 function renderPlayerProfile(player) {
   const container = document.querySelector(".profile-card");
   if (!container) return;
-
   container.innerHTML = `
     <div class="profile-header">
       <img src="${player?.league?.iconUrls?.small || ''}" alt="Liga">
@@ -127,7 +115,6 @@ function renderPlayerProfile(player) {
         <p>${roleTranslations[player?.role] || player?.role || '–'}</p>
       </div>
     </div>
-
     <div class="profile-stats">
       <div class="stat-item"><span>Level</span><span>${player?.expLevel ?? '–'}</span></div>
       <div class="stat-item"><span>Trophäen</span><span>${player?.trophies ?? '–'} 🏆</span></div>
@@ -137,18 +124,6 @@ function renderPlayerProfile(player) {
       <div class="stat-item"><span>Erhalten</span><span>${player?.donationsReceived ?? 0}</span></div>
     </div>
   `;
-}
-
-function renderDonationStats(members) {
-  const tableBody = document.getElementById('donation-stats-body');
-  if (!tableBody) return;
-  tableBody.innerHTML = '';
-  const sorted = [...(members || [])].sort((a, b) => (b?.donations ?? 0) - (a?.donations ?? 0)).slice(0, 10);
-  sorted.forEach((m, i) => {
-    const ratio = (m.donationsReceived ?? 0) > 0 ? ((m.donations ?? 0) / m.donationsReceived).toFixed(2) : '∞';
-    const ratioClass = ratio === '∞' || parseFloat(ratio) >= 1 ? 'good' : 'bad';
-    tableBody.innerHTML += `<tr><td>${i + 1}</td><td>${m.name}</td><td>${m.donations}</td><td>${m.donationsReceived}</td><td class="donation-ratio ${ratioClass}">${ratio}</td></tr>`;
-  });
 }
 
 /* -------- War -------- */
@@ -174,18 +149,42 @@ function renderCurrentWarDashboard(war) {
     <div class="war-state">Status: ${translatedState} | Endet am: ${endTime}</div>`;
 }
 
-/* -------- Detailed War View (schöne Player-Cards) -------- */
+/* -------- Detailed War View -------- */
 function renderDetailedWarView(war) {
   const our = document.getElementById('detailed-war-our-clan');
   const opp = document.getElementById('detailed-war-opponent-clan');
   if (!our || !opp) return;
 
-  our.innerHTML = '<h3>Unser Clan</h3>';
-  opp.innerHTML = `<h3>Gegner: ${war?.opponent?.name || ''}</h3>`;
+  function calcStats(side) {
+    const clan = war[side];
+    return {
+      stars: clan.stars ?? 0,
+      attacks: (clan.attacks ?? []).length || clan.members.reduce((sum, m) => sum + (m.attacks?.length || 0), 0),
+      pct: (clan.destructionPercentage ?? 0).toFixed(1)
+    };
+  }
+  const ourStats = calcStats("clan");
+  const oppStats = calcStats("opponent");
+
+  our.innerHTML = `
+    <h3>Unser Clan</h3>
+    <div class="war-team-summary">
+      <span>⚔️ Angriffe: <b>${ourStats.attacks}</b></span>
+      <span>⭐ Sterne: <b>${ourStats.stars}</b></span>
+      <span>💥 Zerstörung: <b>${ourStats.pct}%</b></span>
+    </div>
+  `;
+  opp.innerHTML = `
+    <h3>${war?.opponent?.name || 'Gegner'}</h3>
+    <div class="war-team-summary">
+      <span>⚔️ Angriffe: <b>${oppStats.attacks}</b></span>
+      <span>⭐ Sterne: <b>${oppStats.stars}</b></span>
+      <span>💥 Zerstörung: <b>${oppStats.pct}%</b></span>
+    </div>
+  `;
 
   const renderPlayerCard = (member, isOpponent = false) => {
     let attacksHtml = "";
-
     if (member.attacks?.length) {
       attacksHtml = member.attacks.map(a => {
         let stars = a.stars ?? 0;
@@ -196,7 +195,6 @@ function renderDetailedWarView(war) {
     } else {
       attacksHtml = `<div class="attack-badge zero">🚫 Kein Angriff</div>`;
     }
-
     return `
       <div class="war-player-card ${isOpponent ? "opponent" : "our"}">
         <div class="war-player-header">
@@ -205,24 +203,18 @@ function renderDetailedWarView(war) {
           <span class="player-th">RH${member.townhallLevel}</span>
         </div>
         <div class="attacks-container">${attacksHtml}</div>
-      </div>
-    `;
+      </div>`;
   };
 
-  our.innerHTML += `
-    <div class="war-player-grid">
-      ${war.clan.members.sort((a, b) => a.mapPosition - b.mapPosition).map(m => renderPlayerCard(m, false)).join("")}
-    </div>
-  `;
-
-  opp.innerHTML += `
-    <div class="war-player-grid">
-      ${war.opponent.members.sort((a, b) => a.mapPosition - b.mapPosition).map(m => renderPlayerCard(m, true)).join("")}
-    </div>
-  `;
+  our.innerHTML += `<div class="war-player-grid">
+    ${war.clan.members.sort((a,b)=>a.mapPosition-b.mapPosition).map(m=>renderPlayerCard(m,false)).join("")}
+  </div>`;
+  opp.innerHTML += `<div class="war-player-grid">
+    ${war.opponent.members.sort((a,b)=>a.mapPosition-b.mapPosition).map(m=>renderPlayerCard(m,true)).join("")}
+  </div>`;
 }
 
-/* -------- Warlog (Accordion + hübsche Cards) -------- */
+/* -------- Warlog -------- */
 function renderWarlog(wars) {
   const container = document.getElementById('warlog-accordion-content');
   if (!container) return;
@@ -231,25 +223,20 @@ function renderWarlog(wars) {
     container.innerHTML = "<p>Keine Kriege im öffentlichen Protokoll gefunden.</p>";
     return;
   }
-
   const grid = document.createElement("div");
   grid.className = "warlog-grid";
-
-  wars
-    .filter(war => !(war?.isCwlWar || war?.teamSize > 50)) // CWL raus
-    .forEach(war => {
-      if (!war?.opponent) return;
-      const entry = document.createElement('div');
-      entry.className = `warlog-entry ${war.result || 'tie'}`;
-      entry.innerHTML = `
-        <div class="war-result">${warResultTranslations[war.result] || 'Unentschieden'} gegen "${war.opponent.name}"</div>
-        <div class="war-details">
-          <span>${war.clan?.stars ?? 0} ⭐ vs ${war.opponent?.stars ?? 0} ⭐</span><br>
-          <span>${(war.clan?.destructionPercentage ?? 0).toFixed(2)}% Zerstörung</span>
-        </div>`;
-      grid.appendChild(entry);
-    });
-
+  wars.filter(war => !(war?.isCwlWar || war?.teamSize > 50)).forEach(war => {
+    if (!war?.opponent) return;
+    const entry = document.createElement('div');
+    entry.className = `warlog-entry ${war.result || 'tie'}`;
+    entry.innerHTML = `
+      <div class="war-result">${warResultTranslations[war.result] || 'Unentschieden'} gegen "${war.opponent.name}"</div>
+      <div class="war-details">
+        <span>${war.clan?.stars ?? 0} ⭐ vs ${war.opponent?.stars ?? 0} ⭐</span><br>
+        <span>${(war.clan?.destructionPercentage ?? 0).toFixed(2)}% Zerstörung</span>
+      </div>`;
+    grid.appendChild(entry);
+  });
   container.appendChild(grid);
 }
 
@@ -291,7 +278,7 @@ function renderCapitalChart(raids) {
   });
 }
 
-/* -------- Hero Table (Lab) -------- */
+/* -------- Hero Table -------- */
 function renderHeroTable(allPlayersData) {
   const container = document.getElementById('hero-table-container');
   if (!container) return;
@@ -299,7 +286,7 @@ function renderHeroTable(allPlayersData) {
   let html = `<table class="lab-table"><thead><tr><th>Spieler</th>`;
   HERO_ORDER.forEach(hero => { html += `<th>${hero.replace('Barbarian ', '').replace('Archer ', '')}</th>`; });
   html += `</tr></thead><tbody>`;
-  allPlayersData.sort((a, b) => (b?.townHallLevel ?? 0) - (a?.townHallLevel ?? 0) || (b?.expLevel ?? 0) - (a?.expLevel ?? 0));
+  allPlayersData.sort((a, b) => (b?.townHallLevel ?? 0) - (a?.townHallLevel ?? 0));
   allPlayersData.forEach(player => {
     if (!player?.heroes) return;
     html += `<tr><td><div class="player-cell">${player.name}<span class="player-th-sublabel">RH${player.townHallLevel}</span></div></td>`;
@@ -327,4 +314,33 @@ function renderCwlSummary(data) {
   const state = data.state || "Unbekannt";
   const season = data.season || "–";
   const clanCount = (data.clans || []).length;
-  let league = "
+  let league = "Unbekannt";
+  if (data.clans) {
+    const ourClan = data.clans.find(c => c.tag === CLAN_TAG);
+    if (ourClan?.warLeague?.name) league = ourClan.warLeague.name;
+  }
+  box.innerHTML = `
+    <h3>Übersicht</h3>
+    <p>Saison: <b>${season}</b></p>
+    <p>Status: <b>${state}</b></p>
+    <p>Teilnehmende Clans: <b>${clanCount}</b></p>
+    <p>Unsere Liga: <b>${league}</b></p>
+  `;
+}
+
+/* -------- Exports -------- */
+window.renderDashboardSummary = renderDashboardSummary;
+window.renderClanInfo = renderClanInfo;
+window.renderMemberList = renderMemberList;
+window.renderPlayerProfile = renderPlayerProfile;
+
+window.renderCurrentWarDashboard = renderCurrentWarDashboard;
+window.renderDetailedWarView = renderDetailedWarView;
+window.renderWarlog = renderWarlog;
+
+window.renderCapitalRaids = renderCapitalRaids;
+window.renderHeroTable = renderHeroTable;
+
+window.renderCwlSummary = renderCwlSummary;
+
+window.formatApiDate = formatApiDate;
