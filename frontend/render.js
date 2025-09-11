@@ -641,6 +641,7 @@ window.renderCwlSummary = renderCwlSummary;
 window.renderCwlRounds = renderCwlRounds;
 window.renderCwlPlayerStats = renderCwlPlayerStats;
 window.initCwlBonus = initCwlBonus;
+window.renderHeroCards = renderHeroCards;
 
 window.renderThDistributionChart = renderThDistributionChart;
 window.renderLeagueDistributionChart = renderLeagueDistributionChart;
