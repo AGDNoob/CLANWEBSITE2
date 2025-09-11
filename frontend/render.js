@@ -692,20 +692,73 @@ function renderLeagueDistributionChart(members) {
   const ctx = document.getElementById('league-distribution-chart');
   if (!ctx) return;
 
+  // --- Gruppen-Definition ---
+  const groups = {
+    "Legend": ["Legend League"],
+    "Titan": ["Titan League I","Titan League II","Titan League III"],
+    "Champion": ["Champion League I","Champion League II","Champion League III"],
+    "Master": ["Master League I","Master League II","Master League III"],
+    "Crystal": ["Crystal League I","Crystal League II","Crystal League III"],
+    "Gold": ["Gold League I","Gold League II","Gold League III"],
+    "Silver": ["Silver League I","Silver League II","Silver League III"],
+    "Bronze": ["Bronze League I","Bronze League II","Bronze League III"],
+    "Unranked": ["Unranked"]
+  };
+
+  // --- Zählen ---
   const counts = {};
   (members || []).forEach(m => {
-    const league = m.league?.name || 'Unbekannt';
-    counts[league] = (counts[league] || 0) + 1;
+    const league = m.league?.name || "Unranked";
+    for (const [group, list] of Object.entries(groups)) {
+      if (list.includes(league)) {
+        counts[group] = (counts[group] || 0) + 1;
+      }
+    }
   });
 
-  const labels = Object.keys(counts);
+  // --- Labels & Daten sortieren ---
+  const order = ["Legend","Titan","Champion","Master","Crystal","Gold","Silver","Bronze","Unranked"];
+  const labels = order.filter(l => counts[l] > 0);
   const data = labels.map(l => counts[l]);
 
+  // --- Chart bauen ---
   if (leagueChartInstance) leagueChartInstance.destroy();
   leagueChartInstance = new Chart(ctx.getContext('2d'), {
-    type: 'pie',
-    data: { labels, datasets: [{ label: 'Liga Verteilung', data, backgroundColor: ['#0a84ff', '#30d158', '#ffd60a', '#ff453a', '#8e8e93', '#5e5ce6', '#64d2ff'] }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#f5f5f7' } } } }
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Spieler pro Liga',
+        data,
+        backgroundColor: [
+          "#0a84ff", // Legend = Blau
+          "#5e5ce6", // Titan = Violett
+          "#9d4edd", // Champion = Lila
+          "#ff9500", // Master = Orange
+          "#ff453a", // Crystal = Rot
+          "#ffd60a", // Gold = Gelb
+          "#30d158", // Silver = Grün
+          "#8e8e93", // Bronze = Grau
+          "#6e6e73"  // Unranked = Dunkelgrau
+        ].slice(0, labels.length)
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { ticks: { color: '#f5f5f7' } },
+        y: { ticks: { color: '#f5f5f7', stepSize: 1 } }
+      },
+      plugins: {
+        legend: { labels: { color: '#f5f5f7' } },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `${ctx.parsed.y} Spieler`
+          }
+        }
+      }
+    }
   });
 }
 
