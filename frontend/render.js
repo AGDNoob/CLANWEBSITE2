@@ -118,20 +118,30 @@ function renderMemberList(members) {
   const container = document.getElementById('member-list-container');
   if (!container) return;
   container.innerHTML = '';
+
   (members || []).forEach(m => {
     const card = document.createElement('div');
     card.className = 'member-card';
     card.dataset.playerTag = m.tag;
+
     card.innerHTML = `
       <div class="member-card-header">
         <img src="${m.league?.iconUrls?.tiny || ''}" alt="Liga">
-        <span class="member-name">${m.name}</span>
+        <span class="member-name clickable">${m.name}</span>
       </div>
       <div class="member-card-body">
         <span>${roleTranslations[m.role] || m.role}</span>
         <span>Level ${m.expLevel}</span>
         <span>${m.trophies} 🏆</span>
-      </div>`;
+      </div>
+    `;
+
+    // Spieler-Profil im Modal öffnen
+    card.addEventListener("click", () => {
+      fetchPlayerProfile(m.tag);
+      openPlayerModal();
+    });
+
     container.appendChild(card);
   });
 }
