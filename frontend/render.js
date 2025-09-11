@@ -22,6 +22,25 @@ function formatApiDate(apiDateString) {
   return `${y}-${m}-${d}T${hh}:${mm}:${ss}.000Z`;
 }
 function fmtPct(n) { return (n ?? 0).toFixed ? (n).toFixed(1) : (Number(n) || 0).toFixed(1); }
+// --- Hero Max-Level per Town Hall ---
+// Quelle: Clash Guides / Fandom (Stand 2024/2025)
+const HERO_MAX_BY_TH = {
+  "Barbarian King":  { 7:10, 8:20, 9:30, 10:40, 11:50, 12:65, 13:75, 14:80, 15:90, 16:95, 17:100 },
+  "Archer Queen":    { 9:5, 10:40, 11:50, 12:65, 13:75, 14:80, 15:90, 16:95, 17:100 },
+  "Grand Warden":    { 11:20, 12:40, 13:50, 14:55, 15:65, 16:70, 17:75 },
+  "Royal Champion":  { 13:20, 14:30, 15:40, 16:45, 17:50 },
+  "Battle Machine":  { 8:25, 9:30 }, // Builder Base → grobe Werte
+  "Battle Copter":   { 8:25, 9:30 }  // Builder Base → grobe Werte
+};
+
+// Hilfsfunktion: Cap für Held auf TH holen
+function getThHeroCap(heroName, th, apiMaxLevel) {
+  const map = HERO_MAX_BY_TH[heroName] || {};
+  const ths = Object.keys(map).map(Number).sort((a, b) => a - b);
+  let cap;
+  for (const t of ths) if (t <= th) cap = map[t];
+  return cap ?? apiMaxLevel ?? 0;
+}
 
 // =====================================================
 // Dashboard / Home
