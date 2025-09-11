@@ -395,3 +395,23 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   font-weight: 600;
   color: var(--warn);
 }
+#capital-contributors-container {
+  margin-top: 1.5rem;
+}
+
+#capital-contributors-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#capital-contributors-container th,
+#capital-contributors-container td {
+  padding: .6rem .8rem;
+  border-bottom: 1px solid #3a3a3c;
+}
+
+#capital-contributors-container thead th {
+  color: var(--fg-mute);
+  font-size: .8rem;
+  text-transform: uppercase;
+}
