@@ -161,7 +161,7 @@ function renderPlayerProfile(player) {
 
   let heroHtml = "";
   if (player?.heroes?.length) {
-    heroHtml = `<h4>Helden</h4><div class="hero-levels">`;
+    heroHtml = `<h4>Helden</h4><div class="hero-grid">`;
     const map = new Map(player.heroes.map(h => [h.name, h]));
     ["Barbarian King","Archer Queen","Grand Warden","Royal Champion","Battle Machine","Battle Copter"].forEach(name => {
       const h = map.get(name);
@@ -169,14 +169,26 @@ function renderPlayerProfile(player) {
       const thCap = getThHeroCap(name, player.townHallLevel ?? 0, h.maxLevel);
       const level = h.level ?? 0;
       const maxCap = Math.max(thCap || 0, level);
-      const progress = maxCap ? level / maxCap : 0;
-      let cls = "low"; if (progress >= 1) cls = "maxed"; else if (progress >= .7) cls = "mid";
+      const progress = maxCap ? (level / maxCap) * 100 : 0;
       const displayLevel = (name.toLowerCase()==="battle copter" && level===1)?15:level;
+
+      let color = "low";
+      if (progress >= 100) color = "maxed";
+      else if (progress >= 70) color = "mid";
+      else if (progress >= 40) color = "warn";
+
       heroHtml += `
-        <div class="hero-level ${cls}" title="${name} ${displayLevel}/${maxCap}">
-          <span>${HERO_ICONS[name] || ""}</span>
-          ${displayLevel}/${maxCap}
-        </div>`;
+        <div class="hero-card">
+          <div class="hero-card-header">
+            <span class="hero-icon">${HERO_ICONS[name] || ""}</span>
+            <span class="hero-name">${name}</span>
+          </div>
+          <div class="hero-level-display">${displayLevel}/${maxCap}</div>
+          <div class="hero-progress-bar">
+            <div class="hero-progress-fill ${color}" style="width:${progress}%;"></div>
+          </div>
+        </div>
+      `;
     });
     heroHtml += "</div>";
   }
@@ -192,30 +204,12 @@ function renderPlayerProfile(player) {
       </div>
 
       <div class="profile-stats-grid">
-        <div class="stat-box">
-          <span>🎖️ Level</span>
-          <strong>${player?.expLevel ?? '–'}</strong>
-        </div>
-        <div class="stat-box">
-          <span>🏆 Trophäen</span>
-          <strong>${player?.trophies ?? '–'}</strong>
-        </div>
-        <div class="stat-box">
-          <span>🏰 RH</span>
-          <strong>${player?.townHallLevel ?? '–'}</strong>
-        </div>
-        <div class="stat-box">
-          <span>⭐ War Stars</span>
-          <strong>${player?.warStars ?? '–'}</strong>
-        </div>
-        <div class="stat-box">
-          <span>📤 Spenden</span>
-          <strong>${player?.donations ?? 0}</strong>
-        </div>
-        <div class="stat-box">
-          <span>📥 Erhalten</span>
-          <strong>${player?.donationsReceived ?? 0}</strong>
-        </div>
+        <div class="stat-box"><span>🎖️ Level</span><strong>${player?.expLevel ?? '–'}</strong></div>
+        <div class="stat-box"><span>🏆 Trophäen</span><strong>${player?.trophies ?? '–'}</strong></div>
+        <div class="stat-box"><span>🏰 RH</span><strong>${player?.townHallLevel ?? '–'}</strong></div>
+        <div class="stat-box"><span>⭐ War Stars</span><strong>${player?.warStars ?? '–'}</strong></div>
+        <div class="stat-box"><span>📤 Spenden</span><strong>${player?.donations ?? 0}</strong></div>
+        <div class="stat-box"><span>📥 Erhalten</span><strong>${player?.donationsReceived ?? 0}</strong></div>
       </div>
 
       ${heroHtml}
