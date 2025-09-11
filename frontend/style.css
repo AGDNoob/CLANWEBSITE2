@@ -480,15 +480,16 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
 .war-stars {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--warn);
+  color: var(--warn); /* goldgelb für Sterne */
 }
 
 .war-destruction-bar {
-  margin-top: .5rem;
+  margin: .5rem auto;
   height: 10px;
   border-radius: 6px;
   background: #3a3a3c;
   overflow: hidden;
+  max-width: 200px;
 }
 
 .war-destruction-fill {
@@ -496,5 +497,12 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   transition: width .4s ease;
 }
 
-.war-destruction-fill.our { background: var(--ac); }
-.war-destruction-fill.opp { background: var(--err); }
+.war-destruction-fill.our { background: var(--ac); }  /* Blau für uns */
+.war-destruction-fill.opp { background: var(--err); } /* Rot für Gegner */
+
+.war-percent {
+  margin-top: .3rem;
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--fg-dim);
+}
