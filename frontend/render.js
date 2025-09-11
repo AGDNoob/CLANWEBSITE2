@@ -192,23 +192,48 @@ function renderDonationStats(members) {
 function renderCurrentWarDashboard(war) {
   const container = document.getElementById('current-war-dashboard');
   if (!container) return;
+
   if (!war?.clan || !war?.opponent) {
     container.innerHTML = `<p class="error-message">Kriegsdaten nicht verfügbar.</p>`;
     return;
   }
+
   const endTime = war?.endTime ? new Date(formatApiDate(war.endTime)).toLocaleString('de-DE') : '–';
   const translatedState = warStateTranslations[war.state] || war.state || '–';
+
   container.innerHTML = `
     <div class="war-header">
-      <div class="clan-side"><h2>${war.clan.name}</h2><img src="${war.clan.badgeUrls?.medium || ''}" alt="Clan-Wappen" width="80"></div>
+      <div class="clan-side">
+        <h2>${war.clan.name}</h2>
+        <img src="${war.clan.badgeUrls?.medium || ''}" alt="Clan-Wappen" width="80">
+      </div>
       <div class="vs-separator">VS</div>
-      <div class="opponent-side"><h2>${war.opponent.name}</h2><img src="${war.opponent.badgeUrls?.medium || ''}" alt="Gegner-Wappen" width="80"></div>
+      <div class="opponent-side">
+        <h2>${war.opponent.name}</h2>
+        <img src="${war.opponent.badgeUrls?.medium || ''}" alt="Gegner-Wappen" width="80">
+      </div>
     </div>
-    <div class="war-scores">
-      <span>${war.clan.stars ?? 0} ⭐</span><span>Scores</span><span>⭐ ${war.opponent.stars ?? 0}</span>
-      <span>${fmtPct(war.clan.destructionPercentage)} %</span><span>Zerstörung</span><span>${fmtPct(war.opponent.destructionPercentage)} %</span>
+
+    <div class="war-scoreboard">
+      <div class="war-side">
+        <div class="war-stars">${war.clan.stars ?? 0} ⭐</div>
+        <div class="war-destruction-bar">
+          <div class="war-destruction-fill our" style="width:${war.clan.destructionPercentage ?? 0}%"></div>
+        </div>
+        <div class="war-percent">${fmtPct(war.clan.destructionPercentage)}%</div>
+      </div>
+
+      <div class="war-side">
+        <div class="war-stars">${war.opponent.stars ?? 0} ⭐</div>
+        <div class="war-destruction-bar">
+          <div class="war-destruction-fill opp" style="width:${war.opponent.destructionPercentage ?? 0}%"></div>
+        </div>
+        <div class="war-percent">${fmtPct(war.opponent.destructionPercentage)}%</div>
+      </div>
     </div>
-    <div class="war-state">Status: ${translatedState} | Endet am: ${endTime}</div>`;
+
+    <div class="war-state">Status: ${translatedState} | Endet am: ${endTime}</div>
+  `;
 }
 
 // =====================================================
