@@ -12,59 +12,66 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function fetchAllData() {
-  let clan = null, raids = null, currentWar = null, lastWar = null, cwl = null;
+  // --- Clan Info sofort laden ---
+  fetchClanInfo().then(clan => {
+    if (clan) {
+      currentMemberList = clan.memberList || [];
+      renderClanInfo(clan);
+      renderMemberList(currentMemberList);
+      renderDonationStats(currentMemberList);
+      renderThDistributionChart(currentMemberList);
+      renderLeagueDistributionChart(currentMemberList);
 
-  // Clan info
-  clan = await fetchClanInfo();
-  if (clan) {
-    currentMemberList = clan.memberList || [];
-    renderClanInfo(clan);
-    renderMemberList(currentMemberList);
-    renderDonationStats(currentMemberList);
-    renderThDistributionChart(currentMemberList);
-    renderLeagueDistributionChart(currentMemberList);
-  }
-
-  // War center
-  await initializeWarCenter();
-
-  // Hauptstadt
-  raids = await fetchCapitalRaids();
-  if (raids?.items) renderCapitalRaids(raids.items);
-  renderCapitalContributors(raids);
-
-  // Warlog (für Fallback + Historie)
-  const log = await fetchWarlog();
-  if (log?.items) {
-    renderWarlog(log.items);
-    lastWar = log.items[0]; // letzter Krieg
-  }
-
-  // Aktueller Krieg für Home
-  try {
-    currentWar = await fetchCurrentWar();
-  } catch (err) {
-    console.error("Fehler beim Abrufen des aktuellen Kriegs:", err);
-  }
-
-  // CWL
-  try {
-    cwl = await fetchCwlLeagueGroup();
-    if (cwl) renderCwlSummary(cwl);
-
-    const rounds = await fetchCwlSummary();
-    if (rounds) {
-      renderCwlRounds(rounds);
-      renderCwlPlayerStats(rounds);
-      initCwlBonus(cwl);
+      // Clan-Karte direkt updaten
+      renderDashboardSummary({ clan });
     }
-  } catch (err) {
-    console.error("Fehler beim Laden der CWL:", err);
-  }
+  });
 
-  // 🆕 Home Dashboard befüllen
-  const warForHome = (currentWar && currentWar.state !== "notInWar") ? currentWar : lastWar;
-  renderDashboardSummary(clan, warForHome, raids?.items, cwl);
+  // --- CWL parallel ---
+  fetchCwlLeagueGroup().then(cwl => {
+    if (cwl) {
+      renderCwlSummary(cwl);
+      renderDashboardSummary({ cwl });
+
+      // Runden + Bonus laden
+      fetchCwlSummary().then(rounds => {
+        if (rounds) {
+          renderCwlRounds(rounds);
+          renderCwlPlayerStats(rounds);
+          initCwlBonus(cwl);
+        }
+      });
+    }
+  });
+
+  // --- Hauptstadt parallel ---
+  fetchCapitalRaids().then(raids => {
+    if (raids?.items) {
+      renderCapitalRaids(raids.items);
+      renderCapitalContributors(raids);
+      renderDashboardSummary({ raids: raids.items });
+    }
+  });
+
+  // --- Krieg parallel ---
+  fetchCurrentWar().then(currentWar => {
+    if (currentWar && currentWar.state !== "notInWar") {
+      renderCurrentWarDashboard(currentWar);
+      renderDetailedWarView(currentWar);
+      generateAndRenderWarPlan(currentWar);
+      renderDashboardSummary({ war: currentWar });
+    } else {
+      // Fallback: letzten Krieg aus Warlog ziehen
+      fetchWarlog().then(log => {
+        if (log?.items?.length) {
+          renderWarlog(log.items);
+          renderDashboardSummary({ war: log.items[0] });
+        }
+      });
+    }
+  }).catch(err => {
+    console.error("Fehler beim Abrufen des Kriegs:", err);
+  });
 }
 
 /* -------- Player Modal -------- */
