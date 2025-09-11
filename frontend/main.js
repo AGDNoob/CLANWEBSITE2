@@ -6,6 +6,7 @@ let labDataLoaded = false;
 document.addEventListener('DOMContentLoaded', () => {
   setupNavigationAndUI();
   setupManualBonusCalculator();
+  setupPlayerModal();
   fetchAllData();
   setInterval(fetchAllData, POLLING_INTERVAL_MS);
 });
@@ -23,24 +24,6 @@ async function fetchAllData() {
     renderThDistributionChart(currentMemberList);
     renderLeagueDistributionChart(currentMemberList);
   }
-function openPlayerModal() {
-  document.getElementById("player-modal").classList.remove("hidden");
-}
-function closePlayerModal() {
-  document.getElementById("player-modal").classList.add("hidden");
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  const closeBtn = document.getElementById("modal-close");
-  if (closeBtn) {
-    closeBtn.addEventListener("click", closePlayerModal);
-  }
-  // Optional: Klick außerhalb schließt Modal
-  const modal = document.getElementById("player-modal");
-  modal.addEventListener("click", e => {
-    if (e.target === modal) closePlayerModal();
-  });
-});
 
   // War center
   await initializeWarCenter();
@@ -84,22 +67,47 @@ document.addEventListener("DOMContentLoaded", () => {
   renderDashboardSummary(clan, warForHome, raids?.items, cwl);
 }
 
+/* -------- Player Modal -------- */
+function openPlayerModal() {
+  document.getElementById("player-modal")?.classList.remove("hidden");
+}
+function closePlayerModal() {
+  document.getElementById("player-modal")?.classList.add("hidden");
+}
+function setupPlayerModal() {
+  const closeBtn = document.getElementById("modal-close");
+  const modal = document.getElementById("player-modal");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", closePlayerModal);
+  }
+  if (modal) {
+    modal.addEventListener("click", e => {
+      if (e.target === modal) closePlayerModal();
+    });
+  }
+}
+
+// Holt Daten für Profil und rendert ins Modal
+async function fetchPlayerProfile(tag) {
+  try {
+    const res = await fetch(`/api/player/${encodeURIComponent(tag)}`);
+    if (!res.ok) throw new Error("Fehler beim Laden des Profils");
+    const player = await res.json();
+    renderPlayerProfile(player);
+  } catch (err) {
+    console.error("Fehler beim Laden des Spielerprofils:", err);
+  }
+}
+
 /* -------- Navigation & UI -------- */
 function setupNavigationAndUI() {
   const navLinks = document.querySelectorAll('.nav-link');
   const pages = document.querySelectorAll('.page');
-  const clanInfoMasterView = document.getElementById('clan-info-master-view');
-  const playerProfileView = document.getElementById('player-profile-view');
-  const profileBackButton = document.getElementById('profile-back-button');
-  const currentWarMasterView = document.getElementById('current-war-master-view');
-  const currentWarDetailView = document.getElementById('current-war-detail-view');
-  const currentWarDetailBackButton = document.getElementById('current-war-detail-back-button');
   const warLogAccordion = document.getElementById('warlog-accordion');
   const warLogContent = document.getElementById('warlog-accordion-content');
   const hamburgerBtn = document.getElementById('hamburger-btn');
   const sidebar = document.querySelector('.sidebar');
   const mobileOverlay = document.getElementById('mobile-overlay');
-  const cwlBonusCalculatorView = document.getElementById('cwl-bonus-calculator-view');
   const cwlBonusResultsView = document.getElementById('cwl-bonus-results-view');
   const bonusRechnerBackButton = document.getElementById('bonus-rechner-back-button');
 
@@ -112,14 +120,6 @@ function setupNavigationAndUI() {
       navLinks.forEach(l => l.classList.remove('active'));
       document.getElementById(targetId)?.classList.add('active');
       link.classList.add('active');
-
-      // reset subviews
-      clanInfoMasterView?.classList.remove('hidden');
-      playerProfileView?.classList.add('hidden');
-      currentWarMasterView?.classList?.remove('hidden');
-      currentWarDetailView?.classList?.add('hidden');
-      cwlBonusCalculatorView?.classList?.remove('hidden');
-      cwlBonusResultsView?.classList?.add('hidden');
 
       // close mobile nav
       if (sidebar && mobileOverlay) { 
@@ -134,38 +134,18 @@ function setupNavigationAndUI() {
     });
   });
 
-  // Zurück-Buttons
-  profileBackButton?.addEventListener('click', () => {
-    playerProfileView?.classList.add('hidden');
-    clanInfoMasterView?.classList.remove('hidden');
-  });
-  currentWarMasterView?.addEventListener('click', () => {
-    currentWarMasterView?.classList.add('hidden');
-    currentWarDetailView?.classList.remove('hidden');
-  });
-  currentWarDetailBackButton?.addEventListener('click', () => {
-    currentWarDetailView?.classList.add('hidden');
-    currentWarMasterView?.classList.remove('hidden');
-  });
+  // Zurück-Button Bonus Rechner
   bonusRechnerBackButton?.addEventListener('click', () => {
     cwlBonusResultsView?.classList.add('hidden');
   });
 
-  // Accordion
-  warLogAccordion?.addEventListener('click', () => {
-    warLogAccordion.classList.toggle('active');
-    warLogContent.style.maxHeight = warLogAccordion.classList.contains('active') 
-      ? `${warLogContent.scrollHeight}px` 
-      : null;
-  });
   // Accordion öffnen/schließen
-document.querySelectorAll(".accordion-header").forEach(header => {
-  header.addEventListener("click", () => {
-    const acc = header.parentElement;
-    acc.classList.toggle("open");
+  document.querySelectorAll(".accordion-header").forEach(header => {
+    header.addEventListener("click", () => {
+      const acc = header.parentElement;
+      acc.classList.toggle("open");
+    });
   });
-});
-
 
   // Mobile Sidebar
   hamburgerBtn?.addEventListener('click', () => {
@@ -211,9 +191,7 @@ async function initializeWarCenter() {
       return;
     }
 
-    if (!response.ok) {
-      throw new Error(`Serverfehler: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`Serverfehler: ${response.status}`);
 
     const warData = await response.json();
     if (!warData || warData.state === 'notInWar' || !warData?.clan) {
