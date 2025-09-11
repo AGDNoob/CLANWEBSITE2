@@ -45,5 +45,4 @@ async function fetchCwlRounds() {
 async function fetchCwlSummary() {
   return fetchJson(`${API_BASE_URL}/api/cwl/summary`);
 }
-
-
+window.CLAN_TAG = "#2GJY8YPUP";
