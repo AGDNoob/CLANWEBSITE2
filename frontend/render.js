@@ -1,4 +1,4 @@
-// render.js – Rendering & Charts (vollständig)
+// render.js – Rendering & Charts (Premium Full)
 
 // ---- Chart handles ----
 let capitalChartInstance = null;
@@ -22,18 +22,16 @@ function formatApiDate(apiDateString) {
   return `${y}-${m}-${d}T${hh}:${mm}:${ss}.000Z`;
 }
 function fmtPct(n) { return (n ?? 0).toFixed ? (n).toFixed(1) : (Number(n) || 0).toFixed(1); }
+
 // --- Hero Max-Level per Town Hall ---
-// Quelle: Clash Guides / Fandom (Stand 2024/2025)
 const HERO_MAX_BY_TH = {
   "Barbarian King":  { 7:10, 8:20, 9:30, 10:40, 11:50, 12:65, 13:75, 14:80, 15:90, 16:95, 17:100 },
   "Archer Queen":    { 9:5, 10:40, 11:50, 12:65, 13:75, 14:80, 15:90, 16:95, 17:100 },
   "Grand Warden":    { 11:20, 12:40, 13:50, 14:55, 15:65, 16:70, 17:75 },
   "Royal Champion":  { 13:20, 14:30, 15:40, 16:45, 17:50 },
-  "Battle Machine":  { 8:25, 9:30 }, // Builder Base → grobe Werte
-  "Battle Copter":   { 8:25, 9:30 }  // Builder Base → grobe Werte
+  "Battle Machine":  { 8:25, 9:30 },
+  "Battle Copter":   { 8:25, 9:30 }
 };
-
-// Hilfsfunktion: Cap für Held auf TH holen
 function getThHeroCap(heroName, th, apiMaxLevel) {
   const map = HERO_MAX_BY_TH[heroName] || {};
   const ths = Object.keys(map).map(Number).sort((a, b) => a - b);
@@ -136,7 +134,6 @@ function renderMemberList(members) {
       </div>
     `;
 
-    // Spieler-Profil im Modal öffnen
     card.addEventListener("click", () => {
       fetchPlayerProfile(m.tag);
       openPlayerModal();
@@ -146,30 +143,68 @@ function renderMemberList(members) {
   });
 }
 
+// =====================================================
+// Premium Player Profile (Modal)
+// =====================================================
 function renderPlayerProfile(player) {
-  const container = document.querySelector(".profile-card");
+  const container = document.getElementById("player-profile-view");
   if (!container) return;
+
+  const HERO_ICONS = {
+    "Barbarian King": "👑",
+    "Archer Queen": "👸",
+    "Grand Warden": "🧙",
+    "Royal Champion": "🛡️",
+    "Battle Machine": "🤖",
+    "Battle Copter": "🚁"
+  };
+
+  let heroHtml = "";
+  if (player?.heroes?.length) {
+    heroHtml = `<h4>Helden</h4><div class="hero-levels">`;
+    const map = new Map(player.heroes.map(h => [h.name, h]));
+    ["Barbarian King","Archer Queen","Grand Warden","Royal Champion","Battle Machine","Battle Copter"].forEach(name => {
+      const h = map.get(name);
+      if (!h) return;
+      const thCap = getThHeroCap(name, player.townHallLevel ?? 0, h.maxLevel);
+      const level = h.level ?? 0;
+      const maxCap = Math.max(thCap || 0, level);
+      const progress = maxCap ? level / maxCap : 0;
+      let cls = "low"; if (progress >= 1) cls = "maxed"; else if (progress >= .7) cls = "mid";
+      const displayLevel = (name.toLowerCase()==="battle copter" && level===1)?15:level;
+      heroHtml += `
+        <div class="hero-level ${cls}" title="${name} ${displayLevel}/${maxCap}">
+          <span>${HERO_ICONS[name] || ""}</span>
+          ${displayLevel}/${maxCap}
+        </div>`;
+    });
+    heroHtml += "</div>";
+  }
+
   container.innerHTML = `
-    <div class="profile-header">
-      <img src="${player?.league?.iconUrls?.small || ''}" alt="Liga">
-      <div>
-        <h3>${player?.name || ''}</h3>
-        <p>${roleTranslations[player?.role] || player?.role || '–'}</p>
+    <div class="profile-card">
+      <div class="profile-header">
+        <img src="${player?.league?.iconUrls?.small || ''}" alt="Liga">
+        <div>
+          <h3>${player?.name || ''}</h3>
+          <p>${roleTranslations[player?.role] || player?.role || '–'}</p>
+        </div>
       </div>
-    </div>
-    <div class="profile-stats">
-      <div class="stat-item"><span>Level</span><span>${player?.expLevel ?? '–'}</span></div>
-      <div class="stat-item"><span>Trophäen</span><span>${player?.trophies ?? '–'} 🏆</span></div>
-      <div class="stat-item"><span>RH</span><span>${player?.townHallLevel ?? '–'}</span></div>
-      <div class="stat-item"><span>War Stars</span><span>${player?.warStars ?? '–'}</span></div>
-      <div class="stat-item"><span>Spenden</span><span>${player?.donations ?? 0}</span></div>
-      <div class="stat-item"><span>Erhalten</span><span>${player?.donationsReceived ?? 0}</span></div>
+      <div class="profile-stats">
+        <div class="stat-item"><span>Level</span><span>${player?.expLevel ?? '–'}</span></div>
+        <div class="stat-item"><span>Trophäen</span><span>${player?.trophies ?? '–'} 🏆</span></div>
+        <div class="stat-item"><span>RH</span><span>${player?.townHallLevel ?? '–'}</span></div>
+        <div class="stat-item"><span>War Stars</span><span>${player?.warStars ?? '–'}</span></div>
+        <div class="stat-item"><span>Spenden</span><span>${player?.donations ?? 0}</span></div>
+        <div class="stat-item"><span>Erhalten</span><span>${player?.donationsReceived ?? 0}</span></div>
+      </div>
+      ${heroHtml}
     </div>
   `;
 }
 
 // =====================================================
-// Donation Stats (Top 10 + Ratio)
+// Donation Stats
 // =====================================================
 function renderDonationStats(members) {
   const tableBody = document.getElementById('donation-stats-body');
@@ -202,52 +237,41 @@ function renderDonationStats(members) {
 function renderCurrentWarDashboard(war) {
   const container = document.getElementById('current-war-dashboard');
   if (!container) return;
-
   if (!war?.clan || !war?.opponent) {
-    container.innerHTML = `<p class="error-message">Kriegsdaten nicht verfügbar.</p>`;
-    return;
+    container.innerHTML = `<p class="error-message">Kriegsdaten nicht verfügbar.</p>`; return;
   }
-
   const endTime = war?.endTime ? new Date(formatApiDate(war.endTime)).toLocaleString('de-DE') : '–';
   const translatedState = warStateTranslations[war.state] || war.state || '–';
-
   container.innerHTML = `
     <div class="war-header">
       <div class="clan-side">
         <h2>${war.clan.name}</h2>
-        <img src="${war.clan.badgeUrls?.medium || ''}" alt="Clan-Wappen" width="80">
+        <img src="${war.clan.badgeUrls?.medium || ''}" width="80">
       </div>
       <div class="vs-separator">VS</div>
       <div class="opponent-side">
         <h2>${war.opponent.name}</h2>
-        <img src="${war.opponent.badgeUrls?.medium || ''}" alt="Gegner-Wappen" width="80">
+        <img src="${war.opponent.badgeUrls?.medium || ''}" width="80">
       </div>
     </div>
-
     <div class="war-scoreboard">
       <div class="war-side">
         <div class="war-stars">${war.clan.stars ?? 0} ⭐</div>
-        <div class="war-destruction-bar">
-          <div class="war-destruction-fill our" style="width:${war.clan.destructionPercentage ?? 0}%"></div>
-        </div>
+        <div class="war-destruction-bar"><div class="war-destruction-fill our" style="width:${war.clan.destructionPercentage ?? 0}%"></div></div>
         <div class="war-percent">${fmtPct(war.clan.destructionPercentage)}%</div>
       </div>
-
       <div class="war-side">
         <div class="war-stars">${war.opponent.stars ?? 0} ⭐</div>
-        <div class="war-destruction-bar">
-          <div class="war-destruction-fill opp" style="width:${war.opponent.destructionPercentage ?? 0}%"></div>
-        </div>
+        <div class="war-destruction-bar"><div class="war-destruction-fill opp" style="width:${war.opponent.destructionPercentage ?? 0}%"></div></div>
         <div class="war-percent">${fmtPct(war.opponent.destructionPercentage)}%</div>
       </div>
     </div>
-
     <div class="war-state">Status: ${translatedState} | Endet am: ${endTime}</div>
   `;
 }
 
 // =====================================================
-// Detailed War View (Team-Stats + Player-Cards)
+// Detailed War View
 // =====================================================
 function renderDetailedWarView(war) {
   const our = document.getElementById('detailed-war-our-clan');
@@ -317,7 +341,6 @@ function renderDetailedWarView(war) {
       ${(war.opponent.members || []).sort((a,b)=>a.mapPosition-b.mapPosition).map(m => renderPlayerCard(m, true)).join("")}
     </div>`;
 }
-
 // =====================================================
 // Warlog (CWL automatisch herausfiltern)
 // =====================================================
