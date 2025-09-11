@@ -543,3 +543,36 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   transition: color 0.2s ease;
 }
 .modal-close:hover { color: var(--err); }
+.profile-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.stat-box {
+  background: #2c2c2e;
+  border-radius: 12px;
+  padding: .8rem 1rem;
+  text-align: center;
+  box-shadow: var(--shadow-1);
+  transition: transform .2s ease, box-shadow .3s ease;
+}
+
+.stat-box:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-2);
+}
+
+.stat-box span {
+  display: block;
+  color: var(--fg-mute);
+  font-size: .85rem;
+  margin-bottom: .3rem;
+}
+
+.stat-box strong {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--fg);
+}
