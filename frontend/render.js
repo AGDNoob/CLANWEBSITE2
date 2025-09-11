@@ -44,52 +44,31 @@ function getThHeroCap(heroName, th, apiMaxLevel) {
 // Dashboard / Home
 // =====================================================
 function renderDashboardSummary({ clan = null, war = null, raids = null, cwl = null }) {
-  // Clan
-  const clanBox = document.getElementById("clan-stats-summary");
-  if (clan && clanBox) {
-    clanBox.innerHTML = `
-      <p>Level: <b>${clan?.clanLevel ?? "-"}</b></p>
-      <p>Punkte: <b>${clan?.clanPoints ?? "-"}</b></p>
-      <p>Mitglieder: <b>${clan?.members ?? "-"}</b></p>
-    `;
+  // Clan Level
+  if (clan) {
+    const el = document.getElementById("clan-level");
+    if (el) el.textContent = clan.clanLevel ?? "–";
   }
 
-  // CWL
-  const cwlBox = document.getElementById("cwl-summary-compact");
-  if (cwl && cwlBox) {
+  // CWL Liga
+  if (cwl) {
     const league = (cwl.clans?.find(c => c.tag === (window.CLAN_TAG || ""))?.warLeague?.name) || "–";
-    cwlBox.innerHTML = `
-      <p>Saison: <b>${cwl.season ?? "-"}</b></p>
-      <p>Liga: <b>${league}</b></p>
-      <p>Status: <b>${cwl.state ?? "-"}</b></p>
-    `;
+    const el = document.getElementById("cwl-league");
+    if (el) el.textContent = league;
   }
 
-  // Krieg
-  const warBox = document.getElementById("last-war-summary");
-  if (war && warBox) {
-    const isCurrent = war.hasOwnProperty("teamSize");
-    const header = isCurrent ? "Aktueller Krieg" : "Letzter Krieg";
-    warBox.innerHTML = `
-      <p><strong>${header}</strong></p>
-      <p>vs <b>${war.opponent?.name ?? "Unbekannt"}</b></p>
-      <p>${war.clan?.stars ?? 0}⭐ ${fmtPct(war.clan?.destructionPercentage)}% – 
-         ${war.opponent?.stars ?? 0}⭐ ${fmtPct(war.opponent?.destructionPercentage)}%</p>
-      <p>Status: <b>${warStateTranslations[war.state] || warResultTranslations[war.result] || "?"}</b></p>
-    `;
+  // Krieg Status
+  if (war) {
+    const status = warStateTranslations[war.state] || warResultTranslations[war.result] || "?";
+    const el = document.getElementById("war-status");
+    if (el) el.textContent = status;
   }
 
-  // Hauptstadt
-  const capBox = document.getElementById("last-capital-summary");
-  if (raids && capBox) {
-    const last = raids[0];
-    if (last) {
-      const dateStr = new Date(formatApiDate(last.startTime)).toLocaleDateString("de-DE");
-      capBox.innerHTML = `
-        <p>Raid vom ${dateStr}</p>
-        <p>Beute: <b>${last.capitalTotalLoot.toLocaleString()}</b> Stadtgold</p>
-      `;
-    }
+  // Hauptstadt Loot
+  if (raids?.length) {
+    const loot = raids[0].capitalTotalLoot?.toLocaleString() || "–";
+    const el = document.getElementById("capital-loot");
+    if (el) el.textContent = loot;
   }
 }
 
