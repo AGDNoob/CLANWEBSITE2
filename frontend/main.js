@@ -23,6 +23,24 @@ async function fetchAllData() {
     renderThDistributionChart(currentMemberList);
     renderLeagueDistributionChart(currentMemberList);
   }
+function openPlayerModal() {
+  document.getElementById("player-modal").classList.remove("hidden");
+}
+function closePlayerModal() {
+  document.getElementById("player-modal").classList.add("hidden");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const closeBtn = document.getElementById("modal-close");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", closePlayerModal);
+  }
+  // Optional: Klick außerhalb schließt Modal
+  const modal = document.getElementById("player-modal");
+  modal.addEventListener("click", e => {
+    if (e.target === modal) closePlayerModal();
+  });
+});
 
   // War center
   await initializeWarCenter();
