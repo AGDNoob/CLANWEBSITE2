@@ -464,3 +464,37 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
 .hero-level.maxed { background: var(--ok); color: #000; }
 .hero-level.mid   { background: var(--warn); color: #000; }
 .hero-level.low   { background: var(--err); }
+.war-scoreboard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.war-side {
+  flex: 1;
+  text-align: center;
+}
+
+.war-stars {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--warn);
+}
+
+.war-destruction-bar {
+  margin-top: .5rem;
+  height: 10px;
+  border-radius: 6px;
+  background: #3a3a3c;
+  overflow: hidden;
+}
+
+.war-destruction-fill {
+  height: 100%;
+  transition: width .4s ease;
+}
+
+.war-destruction-fill.our { background: var(--ac); }
+.war-destruction-fill.opp { background: var(--err); }
