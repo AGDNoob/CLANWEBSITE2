@@ -51,27 +51,32 @@
       <div id="mobile-overlay"></div>
 
       <!-- Home / Dashboard -->
-      <section id="page-home" class="page active">
-        <h2>Dashboard Übersicht</h2>
-        <div class="card-grid">
-          <div class="card dash-link" data-target="page-clan-info">
-            <h3>Clan</h3>
-            <div id="clan-stats-summary"></div>
-          </div>
-          <div class="card dash-link" data-target="page-cwl">
-            <h3>CWL</h3>
-            <div id="cwl-summary-compact"></div>
-          </div>
-          <div class="card dash-link" data-target="page-war-center">
-            <h3>Krieg</h3>
-            <div id="last-war-summary"></div>
-          </div>
-          <div class="card dash-link" data-target="page-capital">
-            <h3>Clan Capital</h3>
-            <div id="last-capital-summary"></div>
-          </div>
-        </div>
-      </section>
+<section id="page-home" class="page active">
+  <h2>Dashboard Übersicht</h2>
+  <div class="card-grid kpi-grid">
+    <div class="card dash-link kpi-card" data-target="page-clan-info">
+      <div class="kpi-icon">🏰</div>
+      <div class="kpi-value" id="clan-level">–</div>
+      <div class="kpi-label">Clan Level</div>
+    </div>
+    <div class="card dash-link kpi-card" data-target="page-cwl">
+      <div class="kpi-icon">🛡️</div>
+      <div class="kpi-value" id="cwl-league">–</div>
+      <div class="kpi-label">CWL Liga</div>
+    </div>
+    <div class="card dash-link kpi-card" data-target="page-war-center">
+      <div class="kpi-icon">⚔️</div>
+      <div class="kpi-value" id="war-status">–</div>
+      <div class="kpi-label">Krieg</div>
+    </div>
+    <div class="card dash-link kpi-card" data-target="page-capital">
+      <div class="kpi-icon">⭐</div>
+      <div class="kpi-value" id="capital-loot">–</div>
+      <div class="kpi-label">Stadtgold</div>
+    </div>
+  </div>
+</section>
+
 
       <!-- Clan Info -->
       <section id="page-clan-info" class="page">
@@ -221,3 +226,4 @@
   </script>
 </body>
 </html>
+
