@@ -576,3 +576,64 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   font-weight: 700;
   color: var(--fg);
 }
+/* Hero Grid */
+.hero-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.hero-card {
+  background: #2c2c2e;
+  border-radius: 12px;
+  padding: .8rem;
+  text-align: center;
+  box-shadow: var(--shadow-1);
+  transition: transform .2s ease, box-shadow .3s ease;
+}
+
+.hero-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-2);
+}
+
+.hero-card-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: .4rem;
+  margin-bottom: .5rem;
+}
+
+.hero-icon {
+  font-size: 1.2rem;
+}
+
+.hero-name {
+  font-size: .9rem;
+  color: var(--fg-mute);
+}
+
+.hero-level-display {
+  font-weight: 700;
+  margin-bottom: .4rem;
+}
+
+.hero-progress-bar {
+  background: #3a3a3c;
+  border-radius: 8px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.hero-progress-fill {
+  height: 100%;
+  border-radius: 8px;
+  transition: width .3s ease;
+}
+
+.hero-progress-fill.low { background: #ff453a; }     /* rot */
+.hero-progress-fill.warn { background: #ffd60a; }   /* gelb */
+.hero-progress-fill.mid { background: #30d158; }    /* grün */
+.hero-progress-fill.maxed { background: #0a84ff; }  /* blau */
