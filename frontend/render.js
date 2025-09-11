@@ -43,9 +43,10 @@ function getThHeroCap(heroName, th, apiMaxLevel) {
 // =====================================================
 // Dashboard / Home
 // =====================================================
-function renderDashboardSummary(clan, warData, raids, cwl) {
+function renderDashboardSummary({ clan = null, war = null, raids = null, cwl = null }) {
+  // Clan
   const clanBox = document.getElementById("clan-stats-summary");
-  if (clanBox) {
+  if (clan && clanBox) {
     clanBox.innerHTML = `
       <p>Level: <b>${clan?.clanLevel ?? "-"}</b></p>
       <p>Punkte: <b>${clan?.clanPoints ?? "-"}</b></p>
@@ -53,8 +54,9 @@ function renderDashboardSummary(clan, warData, raids, cwl) {
     `;
   }
 
+  // CWL
   const cwlBox = document.getElementById("cwl-summary-compact");
-  if (cwlBox && cwl) {
+  if (cwl && cwlBox) {
     const league = (cwl.clans?.find(c => c.tag === (window.CLAN_TAG || ""))?.warLeague?.name) || "–";
     cwlBox.innerHTML = `
       <p>Saison: <b>${cwl.season ?? "-"}</b></p>
@@ -63,33 +65,29 @@ function renderDashboardSummary(clan, warData, raids, cwl) {
     `;
   }
 
+  // Krieg
   const warBox = document.getElementById("last-war-summary");
-  if (warBox) {
-    if (!warData) {
-      warBox.innerHTML = "<p>Keine Daten.</p>";
-    } else {
-      const isCurrent = warData.hasOwnProperty("teamSize");
-      const header = isCurrent ? "Aktueller Krieg" : "Letzter Krieg";
-      warBox.innerHTML = `
-        <p><strong>${header}</strong></p>
-        <p>vs <b>${warData.opponent?.name ?? "Unbekannt"}</b></p>
-        <p>${warData.clan?.stars ?? 0}⭐ ${fmtPct(warData.clan?.destructionPercentage)}% –
-           ${warData.opponent?.stars ?? 0}⭐ ${fmtPct(warData.opponent?.destructionPercentage)}%</p>
-        <p>Status: <b>${warStateTranslations[warData.state] || warResultTranslations[warData.result] || "?"}</b></p>
-      `;
-    }
+  if (war && warBox) {
+    const isCurrent = war.hasOwnProperty("teamSize");
+    const header = isCurrent ? "Aktueller Krieg" : "Letzter Krieg";
+    warBox.innerHTML = `
+      <p><strong>${header}</strong></p>
+      <p>vs <b>${war.opponent?.name ?? "Unbekannt"}</b></p>
+      <p>${war.clan?.stars ?? 0}⭐ ${fmtPct(war.clan?.destructionPercentage)}% – 
+         ${war.opponent?.stars ?? 0}⭐ ${fmtPct(war.opponent?.destructionPercentage)}%</p>
+      <p>Status: <b>${warStateTranslations[war.state] || warResultTranslations[war.result] || "?"}</b></p>
+    `;
   }
 
+  // Hauptstadt
   const capBox = document.getElementById("last-capital-summary");
-  if (capBox) {
-    if (!raids?.length) {
-      capBox.innerHTML = "<p>Noch keine Raids</p>";
-    } else {
-      const last = raids[0];
+  if (raids && capBox) {
+    const last = raids[0];
+    if (last) {
       const dateStr = new Date(formatApiDate(last.startTime)).toLocaleDateString("de-DE");
       capBox.innerHTML = `
         <p>Raid vom ${dateStr}</p>
-        <p>Beute: <b>${last.capitalTotalLoot}</b> Stadtgold</p>
+        <p>Beute: <b>${last.capitalTotalLoot.toLocaleString()}</b> Stadtgold</p>
       `;
     }
   }
