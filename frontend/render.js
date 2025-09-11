@@ -352,6 +352,46 @@ function renderCapitalChart(raids) {
   });
 }
 
+function renderCapitalContributors(raids) {
+  const container = document.getElementById('capital-contributors-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (!raids?.length) {
+    container.innerHTML = "<p>Keine Raids gefunden.</p>";
+    return;
+  }
+
+  // Nur den letzten Raid nehmen
+  const lastRaid = raids[0];
+  const contributions = lastRaid?.members || [];
+
+  // Sortieren nach Beute
+  const sorted = [...contributions].sort((a, b) => (b?.capitalResourcesLooted ?? 0) - (a?.capitalResourcesLooted ?? 0));
+
+  // Tabelle bauen
+  let html = `
+    <h3>Top-Beute im letzten Raid</h3>
+    <table class="stats-table">
+      <thead>
+        <tr><th>#</th><th>Spieler</th><th>Beute</th></tr>
+      </thead>
+      <tbody>
+  `;
+  sorted.slice(0, 10).forEach((m, i) => {
+    html += `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${m.name}</td>
+        <td>⭐ ${m.capitalResourcesLooted.toLocaleString()}</td>
+      </tr>
+    `;
+  });
+  html += "</tbody></table>";
+
+  container.innerHTML = html;
+}
+
 // =====================================================
 // Hero Table (Labor)
 // =====================================================
@@ -555,6 +595,7 @@ window.renderCurrentWarDashboard = renderCurrentWarDashboard;
 window.renderDetailedWarView = renderDetailedWarView;
 window.renderWarlog = renderWarlog;
 
+window.renderCapitalContributors = renderCapitalContributors;
 window.renderCapitalRaids = renderCapitalRaids;
 window.renderHeroTable = renderHeroTable;
 
