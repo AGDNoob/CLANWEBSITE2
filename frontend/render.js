@@ -334,6 +334,20 @@ window.renderClanInfo = renderClanInfo;
 window.renderMemberList = renderMemberList;
 window.renderPlayerProfile = renderPlayerProfile;
 
+/* -------- Exports 2 -------- */
+window.renderDashboardSummary = renderDashboardSummary;
+window.renderClanInfo = renderClanInfo;
+window.renderMemberList = renderMemberList;
+window.renderPlayerProfile = renderPlayerProfile;
+window.renderDonationStats = renderDonationStats;   // 🆕 dazu
+window.renderCurrentWarDashboard = renderCurrentWarDashboard;
+window.renderDetailedWarView = renderDetailedWarView;
+window.renderWarlog = renderWarlog;
+window.renderCapitalRaids = renderCapitalRaids;
+window.renderHeroTable = renderHeroTable;
+window.renderCwlSummary = renderCwlSummary;
+window.formatApiDate = formatApiDate;
+
 window.renderCurrentWarDashboard = renderCurrentWarDashboard;
 window.renderDetailedWarView = renderDetailedWarView;
 window.renderWarlog = renderWarlog;
