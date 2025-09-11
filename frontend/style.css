@@ -364,3 +364,31 @@ canvas { border-radius: 12px; background: #1c1c1e; padding: .5rem; }
   }
   #mobile-overlay.open { display: block; opacity: 1; }
 }
+.raid-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.raid-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: .8rem 1rem;
+  box-shadow: var(--shadow-1);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+.raid-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-2);
+}
+
+.raid-date {
+  font-weight: 600;
+  margin-bottom: .4rem;
+}
+.raid-medals {
+  color: var(--warn);
+  font-size: .95rem;
+  font-weight: 600;
+}
